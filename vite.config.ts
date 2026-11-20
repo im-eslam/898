@@ -4,6 +4,13 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import oxlintPlugin from "vite-plugin-oxlint";
 
+const proxy = {
+  "/api": {
+    target: "http://localhost:3000",
+    changeOrigin: true,
+  },
+};
+
 const FONTS_TO_PRELOAD = [/montserrat-latin-wght-normal.*\.woff2$/];
 
 function preloadFonts(): Plugin {
@@ -39,6 +46,8 @@ function preloadFonts(): Plugin {
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), oxlintPlugin(), preloadFonts()],
+  server: { proxy },
+  preview: { proxy },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
