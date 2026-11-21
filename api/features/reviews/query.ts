@@ -11,19 +11,30 @@ class ReviewQueries {
   }
 
   async countMatching(search?: string): Promise<number> {
-    const [{ total }] = await db.select({ total: count() }).from(reviews).where(this.searchFilter(search));
+    const [{ total }] = await db
+      .select({ total: count() })
+      .from(reviews)
+      .where(this.searchFilter(search));
     return total;
   }
 
-  async findPage(search: string | undefined, limit: number, offset: number): Promise<ReviewRow[]> {
-    return db.select().from(reviews).where(this.searchFilter(search))
+  async findPage(
+    search: string | undefined,
+    limit: number,
+    offset: number
+  ): Promise<ReviewRow[]> {
+    return db
+      .select()
+      .from(reviews)
+      .where(this.searchFilter(search))
       .orderBy(desc(reviews.createdAt), desc(reviews.id))
       .limit(limit)
       .offset(offset);
   }
 
   async deleteByIds(ids: number[]): Promise<number> {
-    const deleted = await db.delete(reviews)
+    const deleted = await db
+      .delete(reviews)
       .where(inArray(reviews.id, ids))
       .returning({ id: reviews.id });
 
@@ -38,7 +49,7 @@ class ReviewQueries {
     return or(
       ilike(reviews.name, pattern),
       ilike(reviews.contact, pattern),
-      ilike(reviews.message, pattern),
+      ilike(reviews.message, pattern)
     );
   }
 }

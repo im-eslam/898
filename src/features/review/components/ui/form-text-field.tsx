@@ -1,82 +1,59 @@
-import { Input, Label, Text, TextArea, TextField } from "react-aria-components";
 import {
-  useController,
-  type Control,
-  type FieldPath,
-  type FieldValues,
-  type RegisterOptions,
-} from "react-hook-form";
+  FieldError,
+  Input,
+  Label,
+  TextArea,
+  TextField,
+  type TextFieldProps,
+} from "react-aria-components";
 
-interface FormTextFieldProps<T extends FieldValues> {
-  control: Control<T>;
-  name: FieldPath<T>;
-  rules?: RegisterOptions<T, FieldPath<T>>;
+interface FormTextFieldProps {
+  name: string;
   kind: "input" | "textarea";
   label: string;
   hint?: string;
-  maxLength: number;
-  required?: boolean;
   autoComplete?: string;
+  maxLength: number;
+  validate?: TextFieldProps["validate"];
 }
 
 const STYLES = {
-  wrapper: "group flex flex-col gap-1.5",
+  wrapper: "flex flex-col gap-1.5",
   label: "text-small font-bold text-navy",
   control:
-    "w-full rounded-md border border-navy/15 bg-white px-4 py-3 text-body text-navy placeholder:text-navy/40 outline-none transition-colors duration-interactive ease-smooth data-focused:border-brand data-invalid:border-error data-invalid:bg-error/5 motion-reduce:transition-none",
+    "w-full rounded-md border border-navy/15 bg-white px-4 py-3 text-body text-navy placeholder:text-navy/40 outline-none transition-colors duration-interactive ease-smooth focus:border-brand data-[invalid]:border-error data-[invalid]:bg-error/5 motion-reduce:transition-none",
   textarea: "min-h-32 resize-y",
   hint: "text-caption text-navy/65",
   error: "text-caption text-error",
 } as const;
 
-export function FormTextField<T extends FieldValues>(
-  props: FormTextFieldProps<T>
-) {
-  const { kind, maxLength, autoComplete } = props;
-  const { field, fieldState } = useController({
-    control: props.control,
-    name: props.name,
-    rules: props.rules,
-  });
-  const error = fieldState.error?.message;
-
+export function FormTextField({
+  name,
+  kind,
+  label,
+  hint,
+  autoComplete,
+  maxLength,
+  validate,
+}: FormTextFieldProps) {
   return (
     <TextField
-      value={String(field.value ?? "")}
-      onChange={field.onChange}
-      onBlur={field.onBlur}
-      isRequired={props.required}
-      isInvalid={Boolean(error)}
+      name={name}
+      maxLength={maxLength}
+      validate={validate}
       className={STYLES.wrapper}
+      dir="auto"
     >
-      <Label className={STYLES.label}>{props.label}</Label>
+      <Label className={STYLES.label}>{label}</Label>
 
       {kind === "textarea" ? (
-        <TextArea
-          maxLength={maxLength}
-          rows={5}
-          dir="auto"
-          className={`${STYLES.control} ${STYLES.textarea}`}
-        />
+        <TextArea rows={5} className={`${STYLES.control} ${STYLES.textarea}`} />
       ) : (
-        <Input
-          maxLength={maxLength}
-          autoComplete={autoComplete}
-          dir="auto"
-          className={STYLES.control}
-        />
+        <Input autoComplete={autoComplete} className={STYLES.control} />
       )}
 
-      {props.hint && !error && (
-        <Text slot="description" className={STYLES.hint}>
-          {props.hint}
-        </Text>
-      )}
-      {error && (
-        <Text slot="errorMessage" className={STYLES.error}>
-          {error}
-        </Text>
-      )}
+      {hint ? <span className={STYLES.hint}>{hint}</span> : null}
+      <FieldError className={STYLES.error} />
     </TextField>
   );
 }

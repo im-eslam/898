@@ -25,15 +25,15 @@ const en = {
       contact: { label: "Phone or email (optional)" },
     },
     validation: {
-      tooShort: "Please tell us a bit more.",
-      tooLong: "Please keep your message shorter.",
+      required: "Please write your review.",
+      tooShort: "Your review must be at least 3 characters.",
     },
     actions: {
       send: "Send Feedback",
       sending: "Sending…",
     },
     errors: {
-      unknown: "Something went wrong. Check your connection and try again.",
+      unknown: "Something went wrong. Please try again.",
       "invalid-input": "Please check your message and try again.",
       timeout: "The request took too long. Please try again.",
       server:
@@ -72,20 +72,19 @@ const ar: typeof en = {
       contact: { label: "الهاتف أو البريد (اختياري)" },
     },
     validation: {
-      tooShort: "من فضلك اكتب تفاصيل أكثر قليلاً.",
-      tooLong: "من فضلك اختصر رسالتك قليلاً.",
+      required: "يرجى كتابة تقييمك.",
+      tooShort: "يجب أن يتكون تقييمك من 3 أحرف على الأقل.",
     },
     actions: {
       send: "إرسال الملاحظات",
       sending: "جارٍ الإرسال…",
     },
     errors: {
-      unknown: "حدث خطأ ما. تحقق من اتصالك بالإنترنت وحاول مرة أخرى.",
-      "invalid-input":
-        "يرجى مراجعة الرسالة والبيانات المدخلة ثم المحاولة مرة أخرى.",
-      timeout: "استغرق الطلب وقتًا أطول من المتوقع. حاول مرة أخرى.",
+      unknown: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+      "invalid-input": "يرجى مراجعة رسالتك والمحاولة مرة أخرى.",
+      timeout: "استغرق الطلب وقتًا أطول من المتوقع. يرجى المحاولة مرة أخرى.",
       server: "تعذر إرسال ملاحظاتك الآن. يرجى المحاولة لاحقًا.",
-      "rate-limited": "أرسلت عدة رسائل بالفعل. حاول مرة أخرى بعد دقائق.",
+      "rate-limited": "أرسلت عدة رسائل بالفعل. يرجى المحاولة بعد بضع دقائق.",
     },
   },
   success: {

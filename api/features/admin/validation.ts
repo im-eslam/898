@@ -8,13 +8,20 @@ const loginSchema = z.object({
 
 function assertValidNewAdmin(username: string, password: string): void {
   if (!/^[a-zA-Z0-9._-]{3,50}$/.test(username)) {
-    throw new Error("Username must be 3-50 characters: letters, digits, dot, underscore, dash.");
+    throw new Error(
+      "Username must be 3-50 characters: letters, digits, dot, underscore, dash."
+    );
   }
 
-  const passwordMatchesUsername = password.toLowerCase() === username.toLowerCase();
-  if (password.length < 10 || password.length > adminLimits.password.max || passwordMatchesUsername) {
+  const passwordMatchesUsername =
+    password.toLowerCase() === username.toLowerCase();
+  if (
+    password.length < 10 ||
+    password.length > adminLimits.password.max ||
+    passwordMatchesUsername
+  ) {
     throw new Error(
-      `Password must be 10-${adminLimits.password.max} characters and must not equal the username.`,
+      `Password must be 10-${adminLimits.password.max} characters and must not equal the username.`
     );
   }
 }

@@ -15,7 +15,9 @@ const users = pgTable("admin_users", {
 
 const sessions = pgTable("admin_sessions", {
   tokenHash: varchar("token_hash", { length: 64 }).primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   expiresAt: timestamp("expires_at").notNull(),
 });
 

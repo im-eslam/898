@@ -16,11 +16,12 @@ export type ApiErrorBody = { ok: false; error: string; code: ErrorCode };
 export type Ok = { ok: true };
 
 export class AppError extends Error {
+  readonly code: ErrorCode;
   readonly status: ContentfulStatusCode;
   readonly headers: Record<string, string>;
 
   constructor(
-    readonly code: ErrorCode,
+    code: ErrorCode,
     message: string,
     options: {
       status?: ContentfulStatusCode;
@@ -29,6 +30,7 @@ export class AppError extends Error {
   ) {
     super(message);
     this.name = "AppError";
+    this.code = code;
     this.status = options.status ?? ERROR_STATUS[code];
     this.headers = options.headers ?? {};
   }

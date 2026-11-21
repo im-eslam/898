@@ -1,11 +1,10 @@
 import { LandingPage } from "@/features/landing/";
 import { ReviewPage } from "@/features/review/";
-import { ROUTES, Route, ScrollToTop, Switch } from "@/shared/router";
+import { ROUTES, Route, Switch } from "@/shared/router";
 
 export default function App() {
   return (
     <>
-      <ScrollToTop />
       <Switch>
         <Route path={ROUTES.landing}>
           <LandingPage />

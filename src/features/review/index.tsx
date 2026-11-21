@@ -1,8 +1,8 @@
-import { Button } from "react-aria-components";
+import { Button, Form } from "react-aria-components";
 import { useStrings } from "@/shared/i18n";
 import { Icon } from "@/shared/icons";
 import { REVIEW_LIMITS } from "./data";
-import { Drawer } from "./components/shell/drawer";
+import { ReviewDrawer } from "./components/shell/review-drawer";
 import { ChoiceCard } from "./components/ui/choice-card";
 import { FormTextField } from "./components/ui/form-text-field";
 import { strings } from "./strings";
@@ -31,7 +31,7 @@ export function ReviewPage() {
   const review = useReview();
 
   return (
-    <Drawer
+    <ReviewDrawer
       strings={{
         closeLabel: s.common.close,
         title: review.step === "note" ? s.choices.note.title : s.drawer.title,
@@ -62,42 +62,39 @@ export function ReviewPage() {
       )}
 
       {review.step === "note" && (
-        <form noValidate className={STYLES.form} onSubmit={review.submit}>
+        <Form
+          validationBehavior="native"
+          action={review.submit}
+          className={STYLES.form}
+        >
           <FormTextField
-            control={review.control}
             name="message"
             kind="textarea"
             label={s.form.fields.message.label}
-            rules={{
-              validate: (value) =>
-                review.messageRules.validate(value ?? ""),
-            }}
-            maxLength={REVIEW_LIMITS.message}
-            required
+            maxLength={REVIEW_LIMITS.message.max}
+            validate={review.validateMessage}
           />
           <FormTextField
-            control={review.control}
             name="name"
             kind="input"
             label={s.form.fields.name.label}
-            maxLength={REVIEW_LIMITS.name}
+            maxLength={REVIEW_LIMITS.name.max}
             autoComplete="name"
           />
           <FormTextField
-            control={review.control}
             name="contact"
             kind="input"
             label={s.form.fields.contact.label}
-            maxLength={REVIEW_LIMITS.contact}
+            maxLength={REVIEW_LIMITS.contact.max}
           />
 
           <input
             type="text"
+            name="website"
             tabIndex={-1}
             autoComplete="off"
             aria-hidden="true"
             className={STYLES.honeypot}
-            {...review.register("website")}
           />
 
           {review.submitError && (
@@ -108,12 +105,12 @@ export function ReviewPage() {
 
           <Button
             type="submit"
-            isDisabled={!review.canSubmit}
+            isDisabled={review.sending}
             className={STYLES.submit}
           >
             {review.sending ? s.form.actions.sending : s.form.actions.send}
           </Button>
-        </form>
+        </Form>
       )}
 
       {review.step === "success" && (
@@ -127,6 +124,6 @@ export function ReviewPage() {
           </Button>
         </section>
       )}
-    </Drawer>
+    </ReviewDrawer>
   );
 }

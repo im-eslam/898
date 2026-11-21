@@ -1,3 +1,5 @@
+import type { ErrorCode } from "@api/contracts";
+
 export const API_BASE = "/api";
 export const TIMEOUT_MS = 25_000;
 export const UNKNOWN_CODE = "UNKNOWN";
@@ -13,3 +15,5 @@ export class ApiError extends Error {
     this.code = code;
   }
 }
+
+export type ErrorKey = ErrorCode | "TIMEOUT" | "NETWORK" | "UNKNOWN";

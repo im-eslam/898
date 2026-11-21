@@ -35,7 +35,7 @@ const STYLES = {
   description: "sr-only",
 } as const;
 
-export function Drawer(props: DrawerProps) {
+export function ReviewDrawer(props: DrawerProps) {
   return (
     <VaulDrawer.Root
       open={props.isOpen}
