@@ -10,6 +10,7 @@ import { http } from "./base/http.js";
 import { createLogger } from "./base/logger.js";
 import { adminApi } from "./features/admin/index.js";
 import { healthApi } from "./features/health/index.js";
+import { menuApi } from "./features/menu/index.js";
 import { reviewsApi } from "./features/reviews/index.js";
 
 const log = createLogger("api");
@@ -37,6 +38,7 @@ app.use(
 app.route("/api", healthApi.routes);
 app.route("/api", adminApi.routes);
 app.route("/api", reviewsApi.routes);
+app.route("/api", menuApi.routes);
 app.notFound((c) =>
   http.respondWithError(c, new AppError("NOT_FOUND", "Not found"))
 );

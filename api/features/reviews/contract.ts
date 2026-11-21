@@ -40,7 +40,6 @@ export type ReviewsApiContract = {
     response: CreateReviewResponse;
     errors:
       | "INVALID_INPUT"
-      | "RATE_LIMITED"
       | "PAYLOAD_TOO_LARGE"
       | "HTTP_ERROR"
       | "INTERNAL_ERROR";

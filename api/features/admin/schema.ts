@@ -5,7 +5,7 @@ export const adminLimits = {
   password: { max: 72 },
 } as const;
 
-const users = pgTable("admin_users", {
+export const users = pgTable("admin_users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   username: varchar({ length: adminLimits.username.max }).notNull().unique(),
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
@@ -13,7 +13,7 @@ const users = pgTable("admin_users", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-const sessions = pgTable("admin_sessions", {
+export const sessions = pgTable("admin_sessions", {
   tokenHash: varchar("token_hash", { length: 64 }).primaryKey(),
   userId: integer("user_id")
     .notNull()

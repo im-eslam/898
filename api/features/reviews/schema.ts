@@ -15,7 +15,7 @@ export const reviewLimits = {
   paging: { defaultPerPage: 20, maxPerPage: 100, maxPage: 100_000 },
 } as const;
 
-const reviews = pgTable(
+export const reviews = pgTable(
   "reviews",
   {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -24,16 +24,14 @@ const reviews = pgTable(
       .notNull()
       .default(""),
     message: varchar({ length: reviewLimits.message.max }).notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    created_at: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => [
     index("idx_reviews_created_at_id").on(
-      table.createdAt.desc(),
+      table.created_at.desc(),
       table.id.desc()
     ),
   ]
 );
 
 export const reviewsSchema = { reviews } as const;
-
-export type ReviewRow = typeof reviews.$inferSelect;

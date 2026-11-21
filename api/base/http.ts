@@ -23,7 +23,10 @@ class HttpHelpers {
   clientIp(c: Context): string {
     if (env.TRUST_PROXY) {
       const forwarded = c.req.header("x-forwarded-for");
-      if (forwarded) return forwarded.split(",")[0].trim();
+      if (forwarded) {
+        const hops = forwarded.split(",");
+        return hops[hops.length - 1].trim();
+      }
     }
 
     const hasSocket = Boolean(

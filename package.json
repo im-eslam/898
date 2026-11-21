@@ -12,8 +12,11 @@
     "typecheck": "tsc -p tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.api.json",
     "api:dev": "tsx watch api/index.ts",
     "api:build": "tsx api/index.ts",
-    "db:push": "drizzle-kit push",
-    "api:admin": "tsx api/scripts/create-admin.ts"
+    "db:studio": "drizzle-kit studio",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx api/scripts/migrate.ts",
+    "db:admin": "tsx api/scripts/create-admin.ts",
+    "db:seed-menu": "tsx api/scripts/seed-menu.ts"
   },
   "dependencies": {
     "@fontsource-variable/cairo": "^5.3.0",

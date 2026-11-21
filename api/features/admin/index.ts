@@ -1,126 +1,29 @@
 import { zValidator } from "@hono/zod-validator";
-import bcrypt from "bcryptjs";
 import { Hono } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
-import { createHash, randomBytes } from "node:crypto";
 import { env } from "../../base/config.js";
 import { AppError, type Ok } from "../../base/errors.js";
 import { http } from "../../base/http.js";
 import { createLogger } from "../../base/logger.js";
 import { createRateLimiter } from "../../base/rate-limiter.js";
-import type { AdminProfile, LoginResponse, MeResponse } from "./contract.js";
-import { adminQueries } from "./query.js";
+import type { LoginResponse, MeResponse } from "./contract.js";
+import { type Admin, adminService, SESSION_TTL_MS } from "./service.js";
 import { adminValidation } from "./validation.js";
 
 export type * from "./contract.js";
 
-type Admin = { id: number; username: string; language: string };
-
 export type AdminEnv = { Variables: { admin: Admin } };
 
-const SESSION_TTL_MS = 2 * 60 * 60 * 1000;
-const SESSION_LOOKUP_RETRIES = 2;
-const RETRY_DELAY_MS = 100;
-
-const sleep = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
 const SESSION_COOKIE = "admin_session";
 const loginLimiter = createRateLimiter({ max: 5, windowMs: 15 * 60 * 1000 });
 const cookieOptions = {
   path: "/",
   httpOnly: true,
-  secure: env.NODE_ENV === "production",
+  secure: true,
   sameSite: "Strict" as const,
 };
 const log = createLogger("admin");
-
-class AdminService {
-  private readonly dummyHash = bcrypt.hashSync("not-a-real-password", 12);
-
-  async authenticate(
-    username: string,
-    password: string
-  ): Promise<Admin | null> {
-    const user = await adminQueries.findUserByUsername(username.toLowerCase());
-
-    const valid = await bcrypt
-      .compare(password, user?.passwordHash ?? this.dummyHash)
-      .catch(() => false);
-    if (!user || !valid) return null;
-
-    return { id: user.id, username: user.username, language: user.language };
-  }
-
-  async createSession(userId: number): Promise<string> {
-    const token = randomBytes(32).toString("base64url");
-    const now = new Date();
-
-    await adminQueries.deleteExpiredSessions(now);
-    await adminQueries.insertSession(
-      this.hashToken(token),
-      userId,
-      new Date(now.getTime() + SESSION_TTL_MS)
-    );
-
-    return token;
-  }
-
-  async findBySession(token: string): Promise<Admin | null> {
-    const tokenHash = this.hashToken(token);
-
-    for (let attempt = 0; ; attempt++) {
-      try {
-        return await adminQueries.findActiveSession(tokenHash, new Date());
-      } catch (error) {
-        if (attempt >= SESSION_LOOKUP_RETRIES) throw error;
-
-        log.warn("Session lookup failed, retrying", {
-          attempt: attempt + 1,
-          reason: error instanceof Error ? error.message : String(error),
-        });
-        await sleep(RETRY_DELAY_MS * (attempt + 1));
-      }
-    }
-  }
-
-  async deleteSession(token: string): Promise<void> {
-    await adminQueries.deleteSession(this.hashToken(token));
-  }
-
-  async createOrUpdateAdmin(username: string, password: string): Promise<void> {
-    adminValidation.assertNewAdmin(username, password);
-
-    const passwordHash = await bcrypt.hash(password, 12);
-    const id = await adminQueries.upsertUser(
-      username.toLowerCase(),
-      passwordHash
-    );
-
-    await adminQueries.deleteSessionsForUser(id);
-  }
-
-  toProfile(admin: Admin): AdminProfile {
-    return { username: admin.username, language: admin.language };
-  }
-
-  private hashToken(token: string): string {
-    return createHash("sha256").update(token).digest("hex");
-  }
-}
-
-const admins = new AdminService();
-
-const adminService = {
-  authenticate: (username: string, password: string) =>
-    admins.authenticate(username, password),
-  createSession: (userId: number) => admins.createSession(userId),
-  findBySession: (token: string) => admins.findBySession(token),
-  deleteSession: (token: string) => admins.deleteSession(token),
-  createOrUpdateAdmin: (username: string, password: string) =>
-    admins.createOrUpdateAdmin(username, password),
-  toProfile: (admin: Admin) => admins.toProfile(admin),
-} as const;
 
 const requireAdmin = createMiddleware<AdminEnv>(async (c, next) => {
   const token = getCookie(c, SESSION_COOKIE);
@@ -198,5 +101,6 @@ routes.get("/admin/me", requireAdmin, (c) =>
 export const adminApi = {
   routes,
   requireAdmin,
-  createOrUpdateAdmin: adminService.createOrUpdateAdmin,
+  createOrUpdateAdmin: (username: string, password: string) =>
+    adminService.createOrUpdateAdmin(username, password),
 } as const;
