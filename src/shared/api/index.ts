@@ -1,11 +1,12 @@
 import {
   API_BASE,
   ApiError,
+  ERROR_STATUS,
   TIMEOUT_MS,
   UNKNOWN_CODE,
+  type ErrorCode,
   type ErrorKey,
 } from "./data";
-import { ERROR_STATUS, type ErrorCode } from "@api/contracts";
 
 export { ApiError, type ErrorKey };
 

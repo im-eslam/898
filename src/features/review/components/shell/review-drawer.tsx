@@ -17,10 +17,9 @@ interface DrawerProps {
 }
 
 const STYLES = {
-  overlay:
-    "fixed inset-0 z-50 bg-scrim transition-opacity duration-(--duration-interactive) ease-smooth data-[state=open]:opacity-100 data-[state=closed]:!pointer-events-none data-[state=closed]:opacity-0 motion-reduce:transition-none",
+  overlay: "fixed inset-0 z-50 bg-scrim",
   content:
-    "fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[88dvh] w-full max-w-120 flex-col overflow-clip rounded-t-sheet border-t border-sand/50 bg-cream text-charcoal outline-none data-[state=closed]:!pointer-events-none md:max-w-140",
+    "fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[88dvh] w-full max-w-120 flex-col overflow-hidden rounded-t-sheet border-t border-sand/50 bg-cream text-charcoal outline-none md:max-w-140",
   closeButton:
     "group absolute end-2 top-1 z-10 inline-flex size-10 items-center justify-center rounded-full outline-none transition-transform duration-(--duration-interactive) ease-smooth [@media(hover:hover)_and_(pointer:fine)]:active:scale-95 motion-reduce:transition-none",
   closeVisual:
@@ -28,7 +27,7 @@ const STYLES = {
   handleRow:
     "relative z-0 flex h-11 w-full shrink-0 items-center justify-center",
   handle:
-    "cursor-grab touch-none rounded-full !bg-charcoal/60 [&_[data-vaul-handle-hitarea]]:!h-20 [&_[data-vaul-handle-hitarea]]:!w-999 hover:!bg-charcoal/70 active:cursor-grabbing active:!bg-charcoal/80",
+    "cursor-grab touch-none rounded-full !bg-charcoal/60 [@media(hover:hover)_and_(pointer:fine)]:hover:!bg-charcoal/70 active:cursor-grabbing",
   body: "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 pb-6 md:px-6",
   header: "mb-5 pe-12",
   title: "text-title font-bold text-balance text-charcoal",
@@ -43,7 +42,6 @@ export function ReviewDrawer(props: DrawerProps) {
         if (!open) props.onClose();
       }}
       shouldScaleBackground={false}
-      handleOnly={true}
       repositionInputs={false}
     >
       <VaulDrawer.Portal>
@@ -51,6 +49,7 @@ export function ReviewDrawer(props: DrawerProps) {
 
         <VaulDrawer.Content className={STYLES.content}>
           <Button
+            data-vaul-no-drag
             aria-label={props.strings.closeLabel}
             onPress={props.onClose}
             className={STYLES.closeButton}
@@ -64,7 +63,7 @@ export function ReviewDrawer(props: DrawerProps) {
             <VaulDrawer.Handle className={STYLES.handle} />
           </div>
 
-          <div className={STYLES.body}>
+          <div data-vaul-no-drag className={STYLES.body}>
             <div className={STYLES.header}>
               <VaulDrawer.Title className={STYLES.title}>
                 {props.strings.title}
