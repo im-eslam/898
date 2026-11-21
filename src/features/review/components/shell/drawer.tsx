@@ -1,0 +1,83 @@
+import type { ReactNode } from "react";
+import { Drawer as VaulDrawer } from "vaul";
+import { Button } from "react-aria-components";
+import { Icon } from "@/shared/icons";
+
+interface DrawerStrings {
+  closeLabel: string;
+  title: string;
+  description: string;
+}
+
+interface DrawerProps {
+  strings: DrawerStrings;
+  isOpen: boolean;
+  onClose: () => void;
+  children: ReactNode;
+}
+
+const STYLES = {
+  overlay:
+    "fixed inset-0 z-50 bg-scrim transition-opacity duration-(--duration-interactive) ease-smooth data-[state=open]:opacity-100 data-[state=closed]:!pointer-events-none data-[state=closed]:opacity-0 motion-reduce:transition-none",
+  content:
+    "fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[88dvh] w-full max-w-120 flex-col overflow-clip rounded-t-sheet border-t border-sand/50 bg-cream text-charcoal outline-none data-[state=closed]:!pointer-events-none md:max-w-140",
+  closeButton:
+    "group absolute end-2 top-1 z-10 inline-flex size-10 items-center justify-center rounded-full outline-none transition-transform duration-(--duration-interactive) ease-smooth [@media(hover:hover)_and_(pointer:fine)]:active:scale-95 motion-reduce:transition-none",
+  closeVisual:
+    "flex size-8 items-center justify-center rounded-full bg-white text-brand ring-1 ring-black/5 transition-colors duration-(--duration-interactive) ease-smooth group-hover:bg-arctic motion-reduce:transition-none",
+  handleRow:
+    "relative z-0 flex h-11 w-full shrink-0 items-center justify-center",
+  handle:
+    "cursor-grab touch-none rounded-full !bg-charcoal/60 [&_[data-vaul-handle-hitarea]]:!h-20 [&_[data-vaul-handle-hitarea]]:!w-999 hover:!bg-charcoal/70 active:cursor-grabbing active:!bg-charcoal/80",
+  body: "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 pb-6 md:px-6",
+  header: "mb-5 pe-12",
+  title: "text-title font-bold text-balance text-charcoal",
+  description: "sr-only",
+} as const;
+
+export function Drawer(props: DrawerProps) {
+  return (
+    <VaulDrawer.Root
+      open={props.isOpen}
+      onOpenChange={(open) => {
+        if (!open) props.onClose();
+      }}
+      shouldScaleBackground={false}
+      handleOnly={true}
+      repositionInputs={false}
+    >
+      <VaulDrawer.Portal>
+        <VaulDrawer.Overlay className={STYLES.overlay} />
+
+        <VaulDrawer.Content className={STYLES.content}>
+          <Button
+            aria-label={props.strings.closeLabel}
+            onPress={props.onClose}
+            className={STYLES.closeButton}
+          >
+            <span className={STYLES.closeVisual}>
+              <Icon name="close" size={20} />
+            </span>
+          </Button>
+
+          <div className={STYLES.handleRow}>
+            <VaulDrawer.Handle className={STYLES.handle} />
+          </div>
+
+          <div className={STYLES.body}>
+            <div className={STYLES.header}>
+              <VaulDrawer.Title className={STYLES.title}>
+                {props.strings.title}
+              </VaulDrawer.Title>
+              <VaulDrawer.Description className={STYLES.description}>
+                {props.strings.description}
+              </VaulDrawer.Description>
+            </div>
+
+            {props.children}
+          </div>
+        </VaulDrawer.Content>
+      </VaulDrawer.Portal>
+    </VaulDrawer.Root>
+  );
+}

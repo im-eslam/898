@@ -1,4 +1,5 @@
 import { LandingPage } from "@/features/landing/";
+import { ReviewPage } from "@/features/review/";
 import { ROUTES, Route, ScrollToTop, Switch } from "@/shared/router";
 
 export default function App() {
@@ -9,7 +10,11 @@ export default function App() {
         <Route path={ROUTES.landing}>
           <LandingPage />
         </Route>
+        <Route path={ROUTES.review}>
+          <LandingPage />
+        </Route>
       </Switch>
+      <ReviewPage />
     </>
   );
 }
