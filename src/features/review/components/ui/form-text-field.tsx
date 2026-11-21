@@ -2,9 +2,10 @@ import {
   FieldError,
   Input,
   Label,
+  Text,
   TextArea,
   TextField,
-  type TextFieldProps,
+  type ValidationResult,
 } from "react-aria-components";
 
 interface FormTextFieldProps {
@@ -13,8 +14,11 @@ interface FormTextFieldProps {
   label: string;
   hint?: string;
   autoComplete?: string;
+  autoFocus?: boolean;
+  isRequired?: boolean;
+  minLength?: number;
   maxLength: number;
-  validate?: TextFieldProps["validate"];
+  errorMessage?: string | ((validation: ValidationResult) => string);
 }
 
 const STYLES = {
@@ -33,14 +37,19 @@ export function FormTextField({
   label,
   hint,
   autoComplete,
+  autoFocus,
+  isRequired,
+  minLength,
   maxLength,
-  validate,
+  errorMessage,
 }: FormTextFieldProps) {
   return (
     <TextField
       name={name}
+      autoFocus={autoFocus}
+      isRequired={isRequired}
+      minLength={minLength}
       maxLength={maxLength}
-      validate={validate}
       className={STYLES.wrapper}
       dir="auto"
     >
@@ -52,8 +61,13 @@ export function FormTextField({
         <Input autoComplete={autoComplete} className={STYLES.control} />
       )}
 
-      {hint ? <span className={STYLES.hint}>{hint}</span> : null}
-      <FieldError className={STYLES.error} />
+      {hint ? (
+        <Text slot="description" className={STYLES.hint}>
+          {hint}
+        </Text>
+      ) : null}
+
+      <FieldError className={STYLES.error}>{errorMessage}</FieldError>
     </TextField>
   );
 }

@@ -2,12 +2,12 @@ import { Button } from "react-aria-components";
 import { Icon, type IconName } from "@/shared/icons";
 
 interface ChoiceCardStrings {
-  icon: IconName;
   title: string;
   hint: string;
 }
 
 interface ChoiceCardProps {
+  icon: IconName;
   strings: ChoiceCardStrings;
   onPress: () => void;
 }
@@ -28,7 +28,7 @@ export function ChoiceCard(props: ChoiceCardProps) {
   return (
     <Button onPress={props.onPress} className={STYLES.card}>
       <span className={STYLES.bubble}>
-        <Icon name={props.strings.icon} className={STYLES.icon} />
+        <Icon name={props.icon} className={STYLES.icon} />
       </span>
       <span className={STYLES.text}>
         <span className={STYLES.title}>{props.strings.title}</span>

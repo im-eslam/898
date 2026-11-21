@@ -9,25 +9,15 @@ const STYLES = {
   emphasis: "font-bold text-brand",
 } as const;
 
-function mapStrings(s: typeof strings.en) {
-  return {
-    brandName: s.header.brandName,
-    taglineLead: s.header.taglineLead,
-    taglineEmphasis: s.header.taglineEmphasis,
-  };
-}
-
 export function Header() {
-  const { brandName, taglineLead, taglineEmphasis } = mapStrings(
-    useStrings(strings)
-  );
+  const s = useStrings(strings);
 
   return (
     <header className={STYLES.header}>
       <h1>
         <img
           src={logo}
-          alt={brandName}
+          alt={s.header.brandName}
           width={462}
           height={447}
           fetchPriority="high"
@@ -36,7 +26,8 @@ export function Header() {
         />
       </h1>
       <p className={STYLES.tagline}>
-        {taglineLead} <span className={STYLES.emphasis}>{taglineEmphasis}</span>
+        {s.header.taglineLead}{" "}
+        <span className={STYLES.emphasis}>{s.header.taglineEmphasis}</span>
       </p>
     </header>
   );

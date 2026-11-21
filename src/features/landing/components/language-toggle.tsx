@@ -11,24 +11,17 @@ const STYLES = {
     "inline-flex min-h-10 min-w-10 items-center justify-center rounded-full bg-paper/85 px-4 text-small font-bold whitespace-nowrap text-navy transition duration-fast ease-smooth group-hover:bg-paper [@media(hover:hover)_and_(pointer:fine)]:group-active:scale-[0.97] motion-reduce:transition-none",
 } as const;
 
-function mapStrings(s: typeof strings.en) {
-  return {
-    name: s.language.name,
-    switchTo: s.language.switchTo,
-  };
-}
-
 export function LanguageToggle(props: LanguageToggleProps) {
-  const { name, switchTo } = mapStrings(useStrings(strings));
+  const s = useStrings(strings);
 
   return (
     <button
       type="button"
       onClick={props.onPress}
-      aria-label={switchTo}
+      aria-label={s.language.switchTo}
       className={STYLES.button}
     >
-      <span className={STYLES.label}>{name}</span>
+      <span className={STYLES.label}>{s.language.name}</span>
     </button>
   );
 }

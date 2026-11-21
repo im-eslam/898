@@ -1,6 +1,7 @@
-import { Button, Form } from "react-aria-components";
+import { Button, type ValidationResult } from "react-aria-components";
 import { useStrings } from "@/shared/i18n";
 import { Icon } from "@/shared/icons";
+import type { ErrorKey } from "@/shared/api";
 import { REVIEW_LIMITS } from "./data";
 import { ReviewDrawer } from "./components/shell/review-drawer";
 import { ChoiceCard } from "./components/ui/choice-card";
@@ -30,29 +31,63 @@ export function ReviewPage() {
   const s = useStrings(strings);
   const review = useReview();
 
+  const getValidationMessage = (v: ValidationResult): string => {
+    if (v.validationDetails.valueMissing) return s.form.validation.required;
+    if (v.validationDetails.tooShort) return s.form.validation.tooShort;
+    return v.validationErrors[0] ?? "";
+  };
+
+  const getErrorMessage = (error: ErrorKey): string => {
+    switch (error) {
+      case "INVALID_INPUT":
+      case "PAYLOAD_TOO_LARGE":
+        return s.form.errors.invalidInput;
+      case "RATE_LIMITED":
+        return s.form.errors.rateLimited;
+      case "TIMEOUT":
+        return s.form.errors.timeout;
+      case "NETWORK":
+        return s.form.errors.network;
+      case "HTTP_ERROR":
+      case "INTERNAL_ERROR":
+        return s.form.errors.server;
+      case "NOT_FOUND":
+      case "INVALID_CREDENTIALS":
+      case "UNAUTHORIZED":
+      case "UNKNOWN":
+        return s.form.errors.unknown;
+    }
+  };
+
   return (
     <ReviewDrawer
       strings={{
         closeLabel: s.common.close,
-        title: review.step === "note" ? s.choices.note.title : s.drawer.title,
+        title:
+          review.step === "note"
+            ? s.choices.note.title
+            : review.step === "success"
+              ? s.success.title
+              : s.drawer.title,
         description: s.drawer.description,
       }}
       isOpen={review.isOpen}
+      hideHeader={review.step === "success"}
       onClose={review.close}
     >
       {review.step === "choices" && (
         <section className={STYLES.choices}>
           <ChoiceCard
+            icon="star"
             strings={{
-              icon: "star",
               title: s.choices.google.title,
               hint: s.choices.google.hint,
             }}
             onPress={review.openGoogleReview}
           />
           <ChoiceCard
+            icon="chat"
             strings={{
-              icon: "chat",
               title: s.choices.note.title,
               hint: s.choices.note.hint,
             }}
@@ -62,17 +97,25 @@ export function ReviewPage() {
       )}
 
       {review.step === "note" && (
-        <Form
-          validationBehavior="native"
-          action={review.submit}
+        <form
+          onChange={() => {
+            if (review.error) review.clearError();
+          }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            review.submit(new FormData(e.currentTarget));
+          }}
           className={STYLES.form}
         >
           <FormTextField
             name="message"
             kind="textarea"
+            autoFocus
+            isRequired
             label={s.form.fields.message.label}
+            minLength={REVIEW_LIMITS.message.min}
             maxLength={REVIEW_LIMITS.message.max}
-            validate={review.validateMessage}
+            errorMessage={getValidationMessage}
           />
           <FormTextField
             name="name"
@@ -93,13 +136,15 @@ export function ReviewPage() {
             name="website"
             tabIndex={-1}
             autoComplete="off"
+            data-1p-ignore
+            data-lpignore="true"
             aria-hidden="true"
             className={STYLES.honeypot}
           />
 
-          {review.submitError && (
+          {review.error && (
             <p role="alert" className={STYLES.error}>
-              {s.form.errors[review.submitError]}
+              {getErrorMessage(review.error)}
             </p>
           )}
 
@@ -110,7 +155,7 @@ export function ReviewPage() {
           >
             {review.sending ? s.form.actions.sending : s.form.actions.send}
           </Button>
-        </Form>
+        </form>
       )}
 
       {review.step === "success" && (

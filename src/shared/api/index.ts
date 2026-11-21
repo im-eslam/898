@@ -8,8 +8,6 @@ import {
   type ErrorKey,
 } from "./data";
 
-export { ApiError, type ErrorKey };
-
 type QueryParams = Record<string, string | number | boolean | undefined>;
 
 class Client {
@@ -78,13 +76,12 @@ class Client {
 }
 
 const client = new Client();
-
-export const api = {
+const Api = {
   get: <T>(path: string, query?: QueryParams) => client.get<T>(path, query),
   post: <T>(path: string, body?: unknown) => client.post<T>(path, body),
 } as const;
 
-export function toErrorKey(error: unknown): ErrorKey {
+function toErrorKey(error: unknown): ErrorKey {
   if (error instanceof ApiError) {
     if (Object.hasOwn(ERROR_STATUS, error.code)) return error.code as ErrorCode;
     return error.status >= 500 ? "INTERNAL_ERROR" : "UNKNOWN";
@@ -97,3 +94,5 @@ export function toErrorKey(error: unknown): ErrorKey {
   }
   return "UNKNOWN";
 }
+
+export { ApiError, type ErrorKey, Api, toErrorKey };

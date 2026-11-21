@@ -54,9 +54,6 @@ const STYLES = {
     title: "text-heading font-bold",
     hint: "text-small opacity-80",
   },
-  a11y: {
-    srOnly: "sr-only",
-  },
 } as const;
 
 export function ActionCard(props: ActionCardProps) {

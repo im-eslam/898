@@ -12,24 +12,17 @@ function formatCopyright(template: string): string {
   return template.replaceAll("{year}", String(new Date().getFullYear()));
 }
 
-function mapStrings(s: typeof strings.en) {
-  return {
-    lead: s.footer.lead,
-    emphasis: s.footer.emphasis,
-    copyright: s.footer.copyright,
-  };
-}
-
 export function Footer() {
-  const { lead, emphasis, copyright } = mapStrings(useStrings(strings));
+  const s = useStrings(strings);
 
   return (
     <footer className={STYLES.footer}>
       <p className={STYLES.lead}>
-        {lead} <span className={STYLES.emphasis}>{emphasis}</span>
+        {s.footer.lead}{" "}
+        <span className={STYLES.emphasis}>{s.footer.emphasis}</span>
       </p>
       <p dir="ltr" className={STYLES.copyright}>
-        {formatCopyright(copyright)}
+        {formatCopyright(s.footer.copyright)}
       </p>
     </footer>
   );

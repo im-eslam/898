@@ -34,15 +34,18 @@ const en = {
     },
     errors: {
       unknown: "Something went wrong. Please try again.",
-      "invalid-input": "Please check your message and try again.",
+      network:
+        "No internet connection. Please check your network and try again.",
+      invalidInput: "Please check your message and try again.",
       timeout: "The request took too long. Please try again.",
       server:
         "We couldn't send your feedback right now. Please try again later.",
-      "rate-limited":
+      rateLimited:
         "You've sent a few messages already. Please try again in a few minutes.",
     },
   },
   success: {
+    title: "Feedback sent",
     message: "Thank you! We truly value your thoughts.",
   },
 };
@@ -81,13 +84,16 @@ const ar: typeof en = {
     },
     errors: {
       unknown: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
-      "invalid-input": "يرجى مراجعة رسالتك والمحاولة مرة أخرى.",
+      network:
+        "لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة والمحاولة مرة أخرى.",
+      invalidInput: "يرجى مراجعة رسالتك والمحاولة مرة أخرى.",
       timeout: "استغرق الطلب وقتًا أطول من المتوقع. يرجى المحاولة مرة أخرى.",
       server: "تعذر إرسال ملاحظاتك الآن. يرجى المحاولة لاحقًا.",
-      "rate-limited": "أرسلت عدة رسائل بالفعل. يرجى المحاولة بعد بضع دقائق.",
+      rateLimited: "أرسلت عدة رسائل بالفعل. يرجى المحاولة بعد بضع دقائق.",
     },
   },
   success: {
+    title: "تم إرسال الملاحظات",
     message: "شكرًا لك! نحن نقدر ملاحظاتك جداً.",
   },
 };

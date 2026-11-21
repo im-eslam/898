@@ -20,7 +20,8 @@ const STYLES = {
 
 export function LandingPage() {
   const s = useStrings(strings);
-  const otherLocale = useLocale() === "en" ? "ar" : "en";
+
+  const otherLang = useLocale() === "en" ? "ar" : "en";
 
   return (
     <main className={STYLES.main}>
@@ -28,7 +29,7 @@ export function LandingPage() {
 
       <div className={STYLES.container}>
         <div className={STYLES.languageToggle}>
-          <LanguageToggle onPress={() => setLocale(otherLocale)} />
+          <LanguageToggle onPress={() => setLocale(otherLang)} />
         </div>
 
         <Header />
