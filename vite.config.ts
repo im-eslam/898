@@ -8,13 +8,18 @@ const proxy = {
   "/api": {
     target: "http://localhost:3000",
     changeOrigin: true,
+    bypass(req: import("http").IncomingMessage) {
+      if (req.url && /\.ts(\?|$)/.test(req.url)) {
+        return req.url;
+      }
+    },
   },
 };
 
-const FONTS_TO_PRELOAD = [/montserrat-latin-wght-normal.*\.woff2$/];
-
 function preloadFonts(): Plugin {
   let base = "/";
+  const FONTS_TO_PRELOAD = [/montserrat-latin-wght-normal.*\.woff2$/];
+
   return {
     name: "preload-fonts",
     apply: "build",

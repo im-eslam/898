@@ -1,11 +1,10 @@
+import { db } from "../../config.js";
 import { count, desc, ilike, inArray, or, type SQL } from "drizzle-orm";
 import type { z } from "zod";
-import { db } from "../../base/database.js";
-import type { ReviewDto, ReviewPageDto } from "./contract.js";
-import { reviewsSchema } from "./schema.js";
-import type { reviewValidation } from "./validation.js";
 
-const { reviews } = reviewsSchema;
+import type { ReviewDto, ReviewPageDto } from "../../contracts.js";
+import { reviews } from "./schema.js";
+import type { reviewValidation } from "./validation.js";
 
 type CreateInput = Omit<z.output<typeof reviewValidation.create>, "website">;
 type ListInput = z.output<typeof reviewValidation.list>;

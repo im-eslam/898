@@ -1,6 +1,7 @@
+import { db } from "../../config.js";
 import { asc, isNull } from "drizzle-orm";
-import { db } from "../../base/database.js";
-import { AppError } from "../../base/errors.js";
+
+import { AppError } from "../../contracts.js";
 import {
   menuCategories,
   menuPairingItems,

@@ -1,17 +1,13 @@
-import type {
-  ApiBody,
-  ApiErrorBody,
-  ApiQuery,
-  ApiResponse,
-  ApiRoute,
-} from "@api/contracts";
 import {
-  ApiError,
-  BACKEND_ERROR_CODES,
-  TIMEOUT_MS,
-  type BackendErrorCodes,
-  type ErrorKey,
-} from "./data";
+  ERROR_STATUS,
+  type ApiBody,
+  type ApiErrorBody,
+  type ApiQuery,
+  type ApiResponse,
+  type ApiRoute,
+  type ErrorCode,
+} from "@api/contracts";
+import { ApiError, TIMEOUT_MS, type ErrorKey } from "./data";
 
 type Options<R extends ApiRoute> = {
   query?: ApiQuery<R>;
@@ -20,10 +16,10 @@ type Options<R extends ApiRoute> = {
 
 class Helpers {
   private static readonly backendErrorCodes: ReadonlySet<string> = new Set(
-    BACKEND_ERROR_CODES
+    Object.keys(ERROR_STATUS)
   );
 
-  private static isBackendErrorCode(code: unknown): code is BackendErrorCodes {
+  private static isBackendErrorCode(code: unknown): code is ErrorCode {
     return typeof code === "string" && Helpers.backendErrorCodes.has(code);
   }
 
@@ -104,4 +100,4 @@ async function api<R extends ApiRoute>(
   }
 }
 
-export { type ErrorKey, api };
+export { ApiError, type ErrorKey, api };

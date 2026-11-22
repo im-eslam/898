@@ -1,14 +1,13 @@
-import {
-  MENU_BADGES,
-  type MenuAddOnDto,
-  type MenuCategoryDto,
-  type MenuDto,
-  type MenuPairingDto,
-  type MenuPriceDto,
-  type MenuPriceOptionDto,
-  type MenuProductDto,
-  type MenuProductRefDto,
-} from "./contract.js";
+import type {
+  MenuAddOnDto,
+  MenuCategoryDto,
+  MenuDto,
+  MenuPairingDto,
+  MenuPriceDto,
+  MenuPriceOptionDto,
+  MenuProductDto,
+  MenuProductRefDto,
+} from "../../contracts.js";
 import type { MenuRows } from "./repository.js";
 
 type RawCategory = MenuRows["categories"][number];
@@ -98,7 +97,7 @@ export function mapMenu(rows: MenuRows): MenuDto {
   return {
     updatedAt: rows.settings.updatedAt.toISOString(),
     currency: rows.settings.currency,
-    badges: [...MENU_BADGES],
+    badges: ["top", "new"],
     categories,
     signatures: rows.signatures.map((signature) => toProduct(signature.product)),
     pairings: rows.pairings.map(toPairing),

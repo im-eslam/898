@@ -1,12 +1,13 @@
+import { db } from "../config.js";
 import { readFileSync } from "node:fs";
-import { db } from "../base/database.js";
+
 import type {
   LocalizedText,
   MenuAvailability,
   MenuBadge,
   MenuCurrency,
   MenuPricingType,
-} from "../features/menu/contract.js";
+} from "../contracts.js";
 import { menuSchema as t } from "../features/menu/schema.js";
 
 type SeedOption = {

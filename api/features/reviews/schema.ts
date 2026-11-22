@@ -1,10 +1,4 @@
-import {
-  index,
-  integer,
-  pgTable,
-  timestamp,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { index, integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 
 export const reviewLimits = {
   message: { min: 3, max: 1000 },
@@ -14,6 +8,8 @@ export const reviewLimits = {
   bulkDelete: { maxIds: 100 },
   paging: { defaultPerPage: 20, maxPerPage: 100, maxPage: 100_000 },
 } as const;
+
+// ---- Reviews ------------------------------------------------------------
 
 export const reviews = pgTable(
   "reviews",

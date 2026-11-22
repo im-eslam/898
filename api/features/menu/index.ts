@@ -1,8 +1,6 @@
 import { Hono } from "hono";
-import type { MenuResponse } from "./contract.js";
+import type { MenuResponse } from "../../contracts.js";
 import { menuService } from "./service.js";
-
-export type * from "./contract.js";
 
 const MENU_CACHE_CONTROL = "public, max-age=60";
 

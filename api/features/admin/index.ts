@@ -2,36 +2,42 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
-import { env } from "../../base/config.js";
-import { AppError, type Ok } from "../../base/errors.js";
-import { http } from "../../base/http.js";
-import { createLogger } from "../../base/logger.js";
-import { createRateLimiter } from "../../base/rate-limiter.js";
-import type { LoginResponse, MeResponse } from "./contract.js";
-import { type Admin, adminService, SESSION_TTL_MS } from "./service.js";
-import { adminValidation } from "./validation.js";
+import { z } from "zod";
+import { clientIp, env, logger } from "../../config.js";
+import {
+  AppError,
+  type AdminDto,
+  type LoginResponse,
+  type MeResponse,
+  type Ok,
+} from "../../contracts.js";
+import { adminLimits } from "./schema.js";
+import { adminService, SESSION_TTL_MS } from "./service.js";
 
-export type * from "./contract.js";
+export type AdminEnv = { Variables: { admin: AdminDto; token: string } };
 
-export type AdminEnv = { Variables: { admin: Admin } };
+const log = logger.child({ scope: "admin" });
 
 const SESSION_COOKIE = "admin_session";
-const loginLimiter = createRateLimiter({ max: 5, windowMs: 15 * 60 * 1000 });
-const cookieOptions = {
+const COOKIE_OPTIONS = {
   path: "/",
   httpOnly: true,
   secure: env.NODE_ENV === "production",
   sameSite: "Strict" as const,
 };
-const log = createLogger("admin");
+
+const loginBody = z.object({
+  username: z.string().trim().max(adminLimits.username.max),
+  password: z.string().min(1).max(adminLimits.password.max),
+});
 
 const requireAdmin = createMiddleware<AdminEnv>(async (c, next) => {
   const token = getCookie(c, SESSION_COOKIE);
-  const admin = token ? await adminService.findBySession(token) : null;
-
-  if (!admin) throw new AppError("UNAUTHORIZED", "Unauthorized");
+  const admin = token ? await adminService.findAdminByToken(token) : null;
+  if (!token || !admin) throw new AppError("UNAUTHORIZED", "Unauthorized");
 
   c.set("admin", admin);
+  c.set("token", token);
   await next();
 });
 
@@ -39,68 +45,42 @@ const routes = new Hono<AdminEnv>();
 
 routes.post(
   "/admin/login",
-  zValidator("json", adminValidation.login, (result, c) => {
-    if (!result.success) {
-      return http.respondWithError(
-        c,
-        new AppError("INVALID_CREDENTIALS", "Invalid credentials")
-      );
-    }
+  zValidator("json", loginBody, (result) => {
+    if (!result.success)
+      throw new AppError("INVALID_CREDENTIALS", "Invalid credentials");
   }),
   async (c) => {
-    const ip = http.clientIp(c);
-    const retryAfter = loginLimiter.getRetryAfter(ip);
-
-    if (retryAfter) {
-      log.warn("Login rate-limited", { ip, retryAfterSec: retryAfter });
-      throw new AppError("RATE_LIMITED", "Too many attempts", {
-        headers: { "Retry-After": String(retryAfter) },
-      });
-    }
-
     const { username, password } = c.req.valid("json");
-    const admin = await adminService.authenticate(username, password);
+    const ip = clientIp(c);
 
+    const admin = await adminService.verifyCredentials(username, password);
     if (!admin) {
-      loginLimiter.record(ip);
-      log.warn("Login failed", { username, ip });
-      throw new AppError("INVALID_CREDENTIALS", "Invalid credentials");
+      log.warn({ username, ip }, "Login failed");
+      const error = new AppError("INVALID_CREDENTIALS", "Invalid credentials");
+      return c.json(error.toBody(), error.status);
     }
 
-    loginLimiter.reset(ip);
-    const token = await adminService.createSession(admin.id);
+    const token = await adminService.startSession(admin.id);
     setCookie(c, SESSION_COOKIE, token, {
-      ...cookieOptions,
+      ...COOKIE_OPTIONS,
       maxAge: SESSION_TTL_MS / 1000,
     });
 
-    log.info("Login succeeded", { username: admin.username, ip });
-    return c.json({
-      ok: true,
-      user: adminService.toProfile(admin),
-    } satisfies LoginResponse);
+    log.info({ username: admin.username, ip }, "Login succeeded");
+    return c.json({ ok: true, user: admin } satisfies LoginResponse);
   }
 );
 
 routes.post("/admin/logout", requireAdmin, async (c) => {
-  const token = getCookie(c, SESSION_COOKIE);
-  if (token) await adminService.deleteSession(token);
+  await adminService.endSession(c.get("token"));
+  deleteCookie(c, SESSION_COOKIE, COOKIE_OPTIONS);
 
-  deleteCookie(c, SESSION_COOKIE, cookieOptions);
-  log.info("Logout", { username: c.get("admin").username });
+  log.info({ username: c.get("admin").username }, "Logout");
   return c.json({ ok: true } satisfies Ok);
 });
 
 routes.get("/admin/me", requireAdmin, (c) =>
-  c.json({
-    ok: true,
-    user: adminService.toProfile(c.get("admin")),
-  } satisfies MeResponse)
+  c.json({ ok: true, user: c.get("admin") } satisfies MeResponse)
 );
 
-export const adminApi = {
-  routes,
-  requireAdmin,
-  createOrUpdateAdmin: (username: string, password: string) =>
-    adminService.createOrUpdateAdmin(username, password),
-} as const;
+export const adminApi = { routes, requireAdmin } as const;

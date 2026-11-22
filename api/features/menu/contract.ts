@@ -1,14 +1,13 @@
+import type { Ok } from "../../contracts.js";
+
+// ---- Menu ---------------------------------------------------------------
+
 export type LocalizedText = { en: string; ar: string };
 
-export const MENU_CURRENCIES = ["EGP"] as const;
-export const MENU_BADGES = ["top", "new"] as const;
-export const MENU_AVAILABILITY = ["in_stock", "out_of_stock"] as const;
-export const MENU_PRICING_TYPES = ["single", "multiple"] as const;
-
-export type MenuCurrency = (typeof MENU_CURRENCIES)[number];
-export type MenuBadge = (typeof MENU_BADGES)[number];
-export type MenuAvailability = (typeof MENU_AVAILABILITY)[number];
-export type MenuPricingType = (typeof MENU_PRICING_TYPES)[number];
+export type MenuCurrency = "EGP";
+export type MenuBadge = "top" | "new";
+export type MenuAvailability = "in_stock" | "out_of_stock";
+export type MenuPricingType = "single" | "multiple";
 
 export type MenuPriceDto = {
   price: number;
@@ -79,11 +78,8 @@ export type MenuDto = {
   };
 };
 
-export type MenuResponse = { ok: true } & MenuDto;
+export type MenuResponse = MenuDto & { ok: true };
 
-export type MenuApiContract = {
-  "GET /api/menu": {
-    response: MenuResponse;
-    errors: "NOT_FOUND" | "INTERNAL_ERROR";
-  };
+export type MenuRoutes = {
+  "GET /api/menu": { response: MenuResponse };
 };

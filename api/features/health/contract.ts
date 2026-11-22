@@ -1,5 +1,5 @@
-import type { Ok } from "../../base/errors.js";
+export type HealthResponse = { ok: true; database: "up" };
 
-export type HealthApiContract = {
-  "GET /api/health": { response: Ok; errors: "INTERNAL_ERROR" };
+export type HealthRoutes = {
+  "GET /api/health": { response: HealthResponse };
 };

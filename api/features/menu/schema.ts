@@ -10,17 +10,18 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import {
-  MENU_AVAILABILITY,
-  MENU_BADGES,
-  MENU_CURRENCIES,
-  MENU_PRICING_TYPES,
-} from "./contract.js";
 
-export const currencyEnum = pgEnum("menu_currency", MENU_CURRENCIES);
-export const badgeEnum = pgEnum("menu_badge", MENU_BADGES);
-export const availabilityEnum = pgEnum("menu_availability", MENU_AVAILABILITY);
-export const pricingTypeEnum = pgEnum("menu_pricing_type", MENU_PRICING_TYPES);
+// ---- Menu enums ---------------------------------------------------------
+
+export const currencyEnum = pgEnum("menu_currency", ["EGP"]);
+export const badgeEnum = pgEnum("menu_badge", ["top", "new"]);
+export const availabilityEnum = pgEnum("menu_availability", [
+  "in_stock",
+  "out_of_stock",
+]);
+export const pricingTypeEnum = pgEnum("menu_pricing_type", ["single", "multiple"]);
+
+// ---- Menu tables --------------------------------------------------------
 
 export const menuSettings = pgTable("menu_settings", {
   currency: currencyEnum("currency").notNull(),

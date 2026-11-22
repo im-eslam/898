@@ -1,5 +1,5 @@
+import { db } from "../config.js";
 import { migrate } from "drizzle-orm/neon-serverless/migrator";
-import { db } from "../base/database.js";
 
 try {
   await migrate(db, { migrationsFolder: "./api/drizzle" });

@@ -1,9 +1,11 @@
-import { createLogger } from "../../base/logger.js";
-import type { MenuDto } from "./contract.js";
+
+
+import { logger } from "../../config.js";
+import type { MenuDto } from "../../contracts.js";
 import { mapMenu } from "./mapper.js";
 import { loadMenuRows } from "./repository.js";
 
-const log = createLogger("menu");
+const log = logger.child({ scope: "menu" });
 
 /** How long a built menu is reused. Edits made by the seed script appear within this window. */
 const CACHE_TTL_MS = 60 * 1000;
@@ -13,10 +15,13 @@ async function loadAndBuild(): Promise<MenuDto> {
 
   const uncategorized = menu.categories.find((c) => c.id === null);
   if (uncategorized)
-    log.warn("Menu has uncategorized products", {
-      count: uncategorized.products.length,
-      productIds: uncategorized.products.map((p) => p.id),
-    });
+    log.warn(
+      {
+        count: uncategorized.products.length,
+        productIds: uncategorized.products.map((p) => p.id),
+      },
+      "Menu has uncategorized products"
+    );
 
   return menu;
 }
@@ -35,8 +40,4 @@ function getMenu(): Promise<MenuDto> {
   return value;
 }
 
-function invalidateMenu(): void {
-  cached = null;
-}
-
-export const menuService = { getMenu, invalidateMenu } as const;
+export const menuService = { getMenu } as const;

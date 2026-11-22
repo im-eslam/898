@@ -42,8 +42,6 @@ export function ReviewPage() {
       case "INVALID_INPUT":
       case "PAYLOAD_TOO_LARGE":
         return s.form.errors.invalidInput;
-      case "RATE_LIMITED":
-        return s.form.errors.rateLimited;
       case "TIMEOUT":
         return s.form.errors.timeout;
       case "NETWORK":

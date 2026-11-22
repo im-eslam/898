@@ -1,30 +1,64 @@
-import type { AdminApiContract } from "./features/admin/contract.js";
-import type { HealthApiContract } from "./features/health/contract.js";
-import type { MenuApiContract } from "./features/menu/contract.js";
-import type { ReviewsApiContract } from "./features/reviews/contract.js";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
+import type { AdminRoutes } from "./features/admin/contract.js";
+import type { HealthRoutes } from "./features/health/contract.js";
+import type { MenuRoutes } from "./features/menu/contract.js";
+import type { ReviewsRoutes } from "./features/reviews/contract.js";
 
-export { ERROR_STATUS } from "./base/errors.js";
-export type { ApiErrorBody, ErrorCode, Ok } from "./base/errors.js";
 export type * from "./features/admin/contract.js";
-export type * from "./features/health/contract.js";
 export type * from "./features/menu/contract.js";
 export type * from "./features/reviews/contract.js";
 
-export type ApiRouteMap = HealthApiContract &
-  AdminApiContract &
-  ReviewsApiContract &
-  MenuApiContract;
+export const ERROR_STATUS = {
+  INVALID_INPUT: 422,
+  INVALID_CREDENTIALS: 401,
+  UNAUTHORIZED: 401,
+  NOT_FOUND: 404,
+  PAYLOAD_TOO_LARGE: 413,
+  HTTP_ERROR: 500,
+  INTERNAL_ERROR: 500,
+  UNAVAILABLE: 503,
+} satisfies Record<string, ContentfulStatusCode>;
+
+export type ErrorCode = keyof typeof ERROR_STATUS;
+
+export type ApiErrorBody = { ok: false; error: string; code: ErrorCode };
+
+export class AppError extends Error {
+  readonly code: ErrorCode;
+  readonly status: ContentfulStatusCode;
+
+  constructor(
+    code: ErrorCode,
+    message: string,
+    status: ContentfulStatusCode = ERROR_STATUS[code]
+  ) {
+    super(message);
+    this.name = "AppError";
+    this.code = code;
+    this.status = status;
+  }
+
+  toBody(): ApiErrorBody {
+    return { ok: false, error: this.message, code: this.code };
+  }
+}
+
+export type Ok = { ok: true };
+
+export type ApiRouteMap = HealthRoutes &
+  AdminRoutes &
+  ReviewsRoutes &
+  MenuRoutes;
 
 export type ApiRoute = keyof ApiRouteMap;
+export type ApiResponse<R extends ApiRoute> = ApiRouteMap[R]["response"];
 export type ApiBody<R extends ApiRoute> = ApiRouteMap[R] extends {
-  body: infer Body;
+  body: infer B;
 }
-  ? Body
+  ? B
   : never;
 export type ApiQuery<R extends ApiRoute> = ApiRouteMap[R] extends {
-  query: infer Query;
+  query: infer Q;
 }
-  ? Query
+  ? Q
   : never;
-export type ApiResponse<R extends ApiRoute> = ApiRouteMap[R]["response"];
-export type ApiErrorCode<R extends ApiRoute> = ApiRouteMap[R]["errors"];
