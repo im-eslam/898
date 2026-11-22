@@ -24,6 +24,8 @@ class HttpHelpers {
     if (env.TRUST_PROXY) {
       const forwarded = c.req.header("x-forwarded-for");
       if (forwarded) {
+        // The proxy appends the address it saw, so the last entry is the one we trust.
+        // The first entry is whatever the client sent, and can be faked.
         const hops = forwarded.split(",");
         return hops[hops.length - 1].trim();
       }

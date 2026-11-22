@@ -4,7 +4,6 @@ import { Button } from "react-aria-components";
 import { Icon } from "@/shared/icons";
 
 interface DrawerStrings {
-  closeLabel: string;
   title: string;
   description: string;
 }
@@ -51,7 +50,6 @@ export function ReviewDrawer(props: DrawerProps) {
         <VaulDrawer.Content className={STYLES.content}>
           <Button
             data-vaul-no-drag
-            aria-label={props.strings.closeLabel}
             onPress={props.onClose}
             className={STYLES.closeButton}
           >

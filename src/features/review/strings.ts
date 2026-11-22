@@ -25,6 +25,7 @@ const en = {
       contact: { label: "Phone or email (optional)" },
     },
     validation: {
+      general: "Some thign went wrong.",
       required: "Please write your review.",
       tooShort: "Your review must be at least 3 characters.",
     },
@@ -75,6 +76,7 @@ const ar: typeof en = {
       contact: { label: "الهاتف أو البريد (اختياري)" },
     },
     validation: {
+      general: "حدث خطأ ما",
       required: "يرجى كتابة تقييمك.",
       tooShort: "يجب أن يتكون تقييمك من 3 أحرف على الأقل.",
     },

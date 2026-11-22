@@ -10,17 +10,30 @@ export type MenuBadge = (typeof MENU_BADGES)[number];
 export type MenuAvailability = (typeof MENU_AVAILABILITY)[number];
 export type MenuPricingType = (typeof MENU_PRICING_TYPES)[number];
 
+export type MenuPriceDto = {
+  price: number;
+  discount: number;
+  final: number;
+};
+
+export type MenuPriceOptionDto = MenuPriceDto & {
+  id: number;
+  name: LocalizedText | null;
+};
+
 export type MenuAddOnDto = {
+  id: number;
   name: LocalizedText;
   price: number;
 };
 
-export type MenuPriceOptionDto = {
+/** A product as it appears in another product's "often ordered" list. */
+export type MenuProductRefDto = {
   id: number;
-  name: LocalizedText | null;
-  price: number;
-  discount: number;
-  final: number;
+  name: LocalizedText;
+  image: string;
+  availability: MenuAvailability;
+  price: MenuPriceDto | null;
 };
 
 export type MenuProductDto = {
@@ -30,16 +43,17 @@ export type MenuProductDto = {
   image: string;
   availability: MenuAvailability;
   badge: MenuBadge | null;
-  addOns: number[];
-  baristaWay: number[];
-  oftenOrderedWith: number[];
   pricing: {
     type: MenuPricingType;
     options: MenuPriceOptionDto[];
   };
+  addOns: MenuAddOnDto[];
+  baristaWay: MenuAddOnDto[];
+  oftenOrderedWith: MenuProductRefDto[];
 };
 
 export type MenuCategoryDto = {
+  /** null is the group of products that have no category. */
   id: number | null;
   name: LocalizedText | null;
   products: MenuProductDto[];
@@ -47,21 +61,16 @@ export type MenuCategoryDto = {
 
 export type MenuPairingDto = {
   id: number;
-  items: number[];
-  pricing: {
-    price: number;
-    discount: number;
-    final: number;
-  };
+  items: MenuProductDto[];
+  pricing: MenuPriceDto;
 };
 
 export type MenuDto = {
   updatedAt: string;
   currency: MenuCurrency;
   badges: MenuBadge[];
-  addOns: Record<string, MenuAddOnDto>;
   categories: MenuCategoryDto[];
-  signatures: number[];
+  signatures: MenuProductDto[];
   pairings: MenuPairingDto[];
   popup: {
     enabled: boolean;

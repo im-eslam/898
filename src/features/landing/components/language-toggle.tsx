@@ -12,16 +12,16 @@ const STYLES = {
 } as const;
 
 export function LanguageToggle(props: LanguageToggleProps) {
-  const s = useStrings(strings);
+  const { language } = useStrings(strings);
 
   return (
     <button
       type="button"
       onClick={props.onPress}
-      aria-label={s.language.switchTo}
+      aria-label={language.switchTo}
       className={STYLES.button}
     >
-      <span className={STYLES.label}>{s.language.name}</span>
+      <span className={STYLES.label}>{language.name}</span>
     </button>
   );
 }

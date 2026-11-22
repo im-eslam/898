@@ -13,16 +13,15 @@ function formatCopyright(template: string): string {
 }
 
 export function Footer() {
-  const s = useStrings(strings);
+  const { footer } = useStrings(strings);
 
   return (
     <footer className={STYLES.footer}>
       <p className={STYLES.lead}>
-        {s.footer.lead}{" "}
-        <span className={STYLES.emphasis}>{s.footer.emphasis}</span>
+        {footer.lead} <span className={STYLES.emphasis}>{footer.emphasis}</span>
       </p>
       <p dir="ltr" className={STYLES.copyright}>
-        {formatCopyright(s.footer.copyright)}
+        {formatCopyright(footer.copyright)}
       </p>
     </footer>
   );

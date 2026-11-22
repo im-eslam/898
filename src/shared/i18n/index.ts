@@ -40,6 +40,10 @@ function getLocale(): Locale {
   return Helpers.current;
 }
 
+function getOtherLocal(locale: Locale = getLocale()): Locale {
+  return locale === "en" ? "ar" : "en";
+}
+
 function setLocale(locale: Locale): void {
   if (Helpers.current === locale && document.documentElement.lang === locale) {
     return;
@@ -69,6 +73,7 @@ export {
   type Locale,
   type Localized,
   getLocale,
+  getOtherLocal,
   setLocale,
   useLocale,
   useStrings,

@@ -1,4 +1,4 @@
-import { setLocale, useLocale, useStrings } from "@/shared/i18n";
+import { setLocale, getOtherLocal, useStrings } from "@/shared/i18n";
 import { ROUTES } from "@/shared/router";
 import { Background } from "./components/background";
 import { Footer } from "./components/footer";
@@ -21,15 +21,13 @@ const STYLES = {
 export function LandingPage() {
   const s = useStrings(strings);
 
-  const otherLang = useLocale() === "en" ? "ar" : "en";
-
   return (
     <main className={STYLES.main}>
       <Background />
 
       <div className={STYLES.container}>
         <div className={STYLES.languageToggle}>
-          <LanguageToggle onPress={() => setLocale(otherLang)} />
+          <LanguageToggle onPress={() => setLocale(getOtherLocal())} />
         </div>
 
         <Header />

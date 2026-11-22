@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { ROUTES, useLocation } from "@/shared/router";
-import { toErrorKey } from "@/shared/api";
+import { ApiError } from "@/shared/api/data";
 import { submitReview } from "../api/review";
 import { GOOGLE_REVIEW_URL } from "../data";
 
@@ -53,6 +53,6 @@ export function useReview() {
     submit,
     clearError: mutation.reset,
     sending: mutation.isPending,
-    error: mutation.error ? toErrorKey(mutation.error) : null,
+    error: (mutation.error as ApiError | null)?.code ?? null,
   };
 }

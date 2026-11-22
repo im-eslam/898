@@ -10,6 +10,11 @@ const en = {
     name: "عربي",
     switchTo: "Switch language to Arabic",
   },
+  footer: {
+    lead: "Every visit tells",
+    emphasis: "a story.",
+    copyright: "© {year} 898 Coffee.",
+  },
   sections: {
     primary: {
       menu: { title: "Menu", hint: "Drinks, desserts & offers" },
@@ -25,11 +30,6 @@ const en = {
       title: "Main branch",
     },
   },
-  footer: {
-    lead: "Every visit tells",
-    emphasis: "a story.",
-    copyright: "© {year} 898 Coffee.",
-  },
 };
 
 const ar: typeof en = {
@@ -41,6 +41,11 @@ const ar: typeof en = {
   language: {
     name: "English",
     switchTo: "تبديل اللغة إلى الإنجليزية",
+  },
+  footer: {
+    lead: "كل قعدة ليها",
+    emphasis: "حكاية.",
+    copyright: "© {year} 898 Coffee.",
   },
   sections: {
     primary: {
@@ -56,11 +61,6 @@ const ar: typeof en = {
       heading: "لاقي قعدتك",
       title: "الفرع الرئيسي",
     },
-  },
-  footer: {
-    lead: "كل قعدة ليها",
-    emphasis: "حكاية.",
-    copyright: "© {year} 898 Coffee.",
   },
 };
 

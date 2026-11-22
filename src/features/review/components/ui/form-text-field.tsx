@@ -31,43 +31,32 @@ const STYLES = {
   error: "text-caption text-error",
 } as const;
 
-export function FormTextField({
-  name,
-  kind,
-  label,
-  hint,
-  autoComplete,
-  autoFocus,
-  isRequired,
-  minLength,
-  maxLength,
-  errorMessage,
-}: FormTextFieldProps) {
+export function FormTextField(props: FormTextFieldProps) {
   return (
     <TextField
-      name={name}
-      autoFocus={autoFocus}
-      isRequired={isRequired}
-      minLength={minLength}
-      maxLength={maxLength}
+      name={props.name}
+      autoFocus={props.autoFocus}
+      isRequired={props.isRequired}
+      minLength={props.minLength}
+      maxLength={props.maxLength}
       className={STYLES.wrapper}
       dir="auto"
     >
-      <Label className={STYLES.label}>{label}</Label>
+      <Label className={STYLES.label}>{props.label}</Label>
 
-      {kind === "textarea" ? (
+      {props.kind === "textarea" ? (
         <TextArea rows={5} className={`${STYLES.control} ${STYLES.textarea}`} />
       ) : (
-        <Input autoComplete={autoComplete} className={STYLES.control} />
+        <Input autoComplete={props.autoComplete} className={STYLES.control} />
       )}
 
-      {hint ? (
+      {props.hint ? (
         <Text slot="description" className={STYLES.hint}>
-          {hint}
+          {props.hint}
         </Text>
       ) : null}
 
-      <FieldError className={STYLES.error}>{errorMessage}</FieldError>
+      <FieldError className={STYLES.error}>{props.errorMessage}</FieldError>
     </TextField>
   );
 }

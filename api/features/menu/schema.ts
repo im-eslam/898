@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
@@ -174,4 +175,86 @@ export const menuSchema = {
   signatures: menuSignatures,
   pairings: menuPairings,
   pairingItems: menuPairingItems,
+} as const;
+
+// Relations let the query API load a menu's nested shape in one query.
+export const menuRelations = {
+  menuCategoriesRelations: relations(menuCategories, ({ many }) => ({
+    products: many(menuProducts),
+  })),
+
+  menuProductsRelations: relations(menuProducts, ({ one, many }) => ({
+    category: one(menuCategories, {
+      fields: [menuProducts.categoryId],
+      references: [menuCategories.id],
+    }),
+    options: many(menuProductOptions),
+    addOnLinks: many(menuProductAddOns),
+    baristaLinks: many(menuProductBaristaWay),
+    relatedLinks: many(menuProductRelated, { relationName: "product_related_from" }),
+  })),
+
+  menuProductOptionsRelations: relations(menuProductOptions, ({ one }) => ({
+    product: one(menuProducts, {
+      fields: [menuProductOptions.productId],
+      references: [menuProducts.id],
+    }),
+  })),
+
+  menuProductAddOnsRelations: relations(menuProductAddOns, ({ one }) => ({
+    product: one(menuProducts, {
+      fields: [menuProductAddOns.productId],
+      references: [menuProducts.id],
+    }),
+    addOn: one(menuAddOns, {
+      fields: [menuProductAddOns.addOnId],
+      references: [menuAddOns.id],
+    }),
+  })),
+
+  menuProductBaristaWayRelations: relations(menuProductBaristaWay, ({ one }) => ({
+    product: one(menuProducts, {
+      fields: [menuProductBaristaWay.productId],
+      references: [menuProducts.id],
+    }),
+    addOn: one(menuAddOns, {
+      fields: [menuProductBaristaWay.addOnId],
+      references: [menuAddOns.id],
+    }),
+  })),
+
+  menuProductRelatedRelations: relations(menuProductRelated, ({ one }) => ({
+    product: one(menuProducts, {
+      fields: [menuProductRelated.productId],
+      references: [menuProducts.id],
+      relationName: "product_related_from",
+    }),
+    relatedProduct: one(menuProducts, {
+      fields: [menuProductRelated.relatedProductId],
+      references: [menuProducts.id],
+      relationName: "product_related_to",
+    }),
+  })),
+
+  menuSignaturesRelations: relations(menuSignatures, ({ one }) => ({
+    product: one(menuProducts, {
+      fields: [menuSignatures.productId],
+      references: [menuProducts.id],
+    }),
+  })),
+
+  menuPairingsRelations: relations(menuPairings, ({ many }) => ({
+    items: many(menuPairingItems),
+  })),
+
+  menuPairingItemsRelations: relations(menuPairingItems, ({ one }) => ({
+    pairing: one(menuPairings, {
+      fields: [menuPairingItems.pairingId],
+      references: [menuPairings.id],
+    }),
+    product: one(menuProducts, {
+      fields: [menuPairingItems.productId],
+      references: [menuProducts.id],
+    }),
+  })),
 } as const;

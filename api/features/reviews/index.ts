@@ -47,6 +47,7 @@ routes.post(
   zValidator("json", reviewValidation.remove, http.invalidInput),
   async (c) => {
     const deleted = await reviewsService.delete(c.req.valid("json").ids);
+
     log.info("Reviews deleted", {
       count: deleted,
       admin: c.get("admin").username,

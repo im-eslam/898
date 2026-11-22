@@ -1,4 +1,3 @@
-import logo from "@/assets/mark.svg";
 import { useStrings } from "@/shared/i18n";
 import { Link, ROUTES } from "@/shared/router";
 import { Background } from "../components/background";
@@ -21,14 +20,6 @@ export function MissingPage() {
     <main className={styles.page}>
       <Background />
       <div className={styles.content}>
-        <img
-          src={logo}
-          width={462}
-          height={447}
-          fetchPriority="high"
-          decoding="async"
-          className={styles.logo}
-        />
         <p className={styles.code}>{s.page.code}</p>
         <h1 className={styles.title}>{s.page.title}</h1>
         <p className={styles.message}>{s.page.message}</p>

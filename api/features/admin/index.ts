@@ -20,7 +20,7 @@ const loginLimiter = createRateLimiter({ max: 5, windowMs: 15 * 60 * 1000 });
 const cookieOptions = {
   path: "/",
   httpOnly: true,
-  secure: true,
+  secure: env.NODE_ENV === "production",
   sameSite: "Strict" as const,
 };
 const log = createLogger("admin");

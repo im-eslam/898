@@ -10,14 +10,14 @@ const STYLES = {
 } as const;
 
 export function Header() {
-  const s = useStrings(strings);
+  const { header } = useStrings(strings);
 
   return (
     <header className={STYLES.header}>
       <h1>
         <img
           src={logo}
-          alt={s.header.brandName}
+          alt={header.brandName}
           width={462}
           height={447}
           fetchPriority="high"
@@ -26,8 +26,8 @@ export function Header() {
         />
       </h1>
       <p className={STYLES.tagline}>
-        {s.header.taglineLead}{" "}
-        <span className={STYLES.emphasis}>{s.header.taglineEmphasis}</span>
+        {header.taglineLead}{" "}
+        <span className={STYLES.emphasis}>{header.taglineEmphasis}</span>
       </p>
     </header>
   );

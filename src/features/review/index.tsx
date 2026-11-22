@@ -34,7 +34,7 @@ export function ReviewPage() {
   const getValidationMessage = (v: ValidationResult): string => {
     if (v.validationDetails.valueMissing) return s.form.validation.required;
     if (v.validationDetails.tooShort) return s.form.validation.tooShort;
-    return v.validationErrors[0] ?? "";
+    return s.form.validation.general;
   };
 
   const getErrorMessage = (error: ErrorKey): string => {
@@ -62,7 +62,6 @@ export function ReviewPage() {
   return (
     <ReviewDrawer
       strings={{
-        closeLabel: s.common.close,
         title:
           review.step === "note"
             ? s.choices.note.title

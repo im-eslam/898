@@ -17,11 +17,11 @@ function assertValidNewAdmin(username: string, password: string): void {
     password.toLowerCase() === username.toLowerCase();
   if (
     password.length < 10 ||
-    Buffer.byteLength(password, "utf8") > adminLimits.password.max ||
+    password.length > adminLimits.password.max ||
     passwordMatchesUsername
   ) {
     throw new Error(
-      `Password must be 10 to ${adminLimits.password.max} bytes (Arabic letters use 2 bytes each) and must not equal the username.`
+      `Password must be 10-${adminLimits.password.max} characters and must not equal the username.`
     );
   }
 }

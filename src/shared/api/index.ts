@@ -1,98 +1,107 @@
+import type {
+  ApiBody,
+  ApiErrorBody,
+  ApiQuery,
+  ApiResponse,
+  ApiRoute,
+} from "@api/contracts";
 import {
-  API_BASE,
   ApiError,
-  ERROR_STATUS,
+  BACKEND_ERROR_CODES,
   TIMEOUT_MS,
-  UNKNOWN_CODE,
-  type ErrorCode,
+  type BackendErrorCodes,
   type ErrorKey,
 } from "./data";
 
-type QueryParams = Record<string, string | number | boolean | undefined>;
+type Options<R extends ApiRoute> = {
+  query?: ApiQuery<R>;
+  body?: ApiBody<R>;
+};
 
-class Client {
-  get<T>(path: string, query?: QueryParams): Promise<T> {
-    return this.request<T>("GET", this.withQuery(path, query));
+class Helpers {
+  private static readonly backendErrorCodes: ReadonlySet<string> = new Set(
+    BACKEND_ERROR_CODES
+  );
+
+  private static isBackendErrorCode(code: unknown): code is BackendErrorCodes {
+    return typeof code === "string" && Helpers.backendErrorCodes.has(code);
   }
 
-  post<T>(path: string, body?: unknown): Promise<T> {
-    return this.request<T>("POST", path, body);
-  }
-
-  private withQuery(path: string, query?: QueryParams): string {
-    if (!query) return path;
-
+  static buildUrl(path: string, query: Record<string, unknown> = {}): string {
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(query)) {
-      if (value !== undefined && value !== "") {
-        params.set(key, String(value));
-      }
+      if (value !== undefined && value !== "") params.set(key, String(value));
     }
-
     const qs = params.toString();
     return qs ? `${path}?${qs}` : path;
   }
 
-  private async request<T>(
-    method: string,
-    path: string,
-    body?: unknown
-  ): Promise<T> {
+  static buildInit(method: string, body?: unknown): RequestInit {
     const hasBody = body !== undefined;
-
-    const response = await fetch(`${API_BASE}${path}`, {
+    return {
       method,
       credentials: "include",
       headers: hasBody ? { "Content-Type": "application/json" } : undefined,
       body: hasBody ? JSON.stringify(body) : undefined,
       signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
+    };
+  }
 
-    if (!response.ok) {
-      const data = await response.json().catch(() => null);
-      const error = data as { code?: unknown; error?: unknown } | null;
+  static async toBackendError(response: Response): Promise<ApiError> {
+    const body = (await response
+      .json()
+      .catch(() => ({}))) as Partial<ApiErrorBody> | null;
 
-      throw new ApiError(
-        response.status,
-        typeof error?.code === "string" ? error.code : UNKNOWN_CODE,
-        typeof error?.error === "string"
-          ? error.error
-          : response.statusText || "Request failed"
-      );
+    const rawCode = body?.code;
+    const code: ErrorKey = Helpers.isBackendErrorCode(rawCode)
+      ? rawCode
+      : "UNKNOWN";
+
+    const message =
+      typeof body?.error === "string" ? body.error : response.statusText;
+
+    return new ApiError(response.status, code, message);
+  }
+
+  static toFetchError(error: unknown): ApiError {
+    if (error instanceof DOMException && error.name === "TimeoutError") {
+      return new ApiError(0, "TIMEOUT", "Request timed out");
     }
-
-    if (response.status === 204) return undefined as T;
-
-    const data: unknown = await response.json().catch(() => {
-      throw new ApiError(
-        response.status,
-        UNKNOWN_CODE,
-        "Invalid response from server"
-      );
-    });
-
-    return data as T;
+    if (error instanceof TypeError) {
+      return new ApiError(0, "NETWORK", "Network error");
+    }
+    return new ApiError(0, "UNKNOWN", "Unknown error");
   }
 }
 
-const client = new Client();
-const Api = {
-  get: <T>(path: string, query?: QueryParams) => client.get<T>(path, query),
-  post: <T>(path: string, body?: unknown) => client.post<T>(path, body),
-} as const;
+async function api<R extends ApiRoute>(
+  route: R,
+  options: Options<R> = {}
+): Promise<ApiResponse<R>> {
+  const [method, path] = route.split(" ") as [string, string];
+  const url = Helpers.buildUrl(
+    path,
+    options.query as Record<string, unknown> | undefined
+  );
 
-function toErrorKey(error: unknown): ErrorKey {
-  if (error instanceof ApiError) {
-    if (Object.hasOwn(ERROR_STATUS, error.code)) return error.code as ErrorCode;
-    return error.status >= 500 ? "INTERNAL_ERROR" : "UNKNOWN";
+  let response: Response;
+  try {
+    response = await fetch(url, Helpers.buildInit(method, options.body));
+  } catch (error) {
+    throw Helpers.toFetchError(error);
   }
-  if (error instanceof DOMException && error.name === "TimeoutError") {
-    return "TIMEOUT";
+
+  if (!response.ok) throw await Helpers.toBackendError(response);
+
+  try {
+    return (await response.json()) as ApiResponse<R>;
+  } catch {
+    throw new ApiError(
+      response.status,
+      "UNKNOWN",
+      "Invalid response from server"
+    );
   }
-  if (error instanceof TypeError) {
-    return "NETWORK";
-  }
-  return "UNKNOWN";
 }
 
-export { ApiError, type ErrorKey, Api, toErrorKey };
+export { type ErrorKey, api };

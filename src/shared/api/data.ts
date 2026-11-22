@@ -1,30 +1,27 @@
-export const API_BASE = "/api";
 export const TIMEOUT_MS = 25_000;
-export const UNKNOWN_CODE = "UNKNOWN";
 
-export const ERROR_STATUS = {
-  INVALID_INPUT: 422,
-  INVALID_CREDENTIALS: 401,
-  UNAUTHORIZED: 401,
-  NOT_FOUND: 404,
-  PAYLOAD_TOO_LARGE: 413,
-  RATE_LIMITED: 429,
-  HTTP_ERROR: 500,
-  INTERNAL_ERROR: 500,
-} as const;
+export const BACKEND_ERROR_CODES = [
+  "INVALID_INPUT",
+  "INVALID_CREDENTIALS",
+  "UNAUTHORIZED",
+  "NOT_FOUND",
+  "PAYLOAD_TOO_LARGE",
+  "RATE_LIMITED",
+  "HTTP_ERROR",
+  "INTERNAL_ERROR",
+] as const;
+export type BackendErrorCodes = (typeof BACKEND_ERROR_CODES)[number];
+
+export type ErrorKey = BackendErrorCodes | "TIMEOUT" | "NETWORK" | "UNKNOWN";
 
 export class ApiError extends Error {
   readonly status: number;
-  readonly code: string;
+  readonly code: ErrorKey;
 
-  constructor(status: number, code: string, message: string) {
+  constructor(status: number, code: ErrorKey, message: string) {
     super(message);
-    this.name = "ApiError";
     this.status = status;
     this.code = code;
+    this.name = "ApiError";
   }
 }
-
-export type ErrorCode = keyof typeof ERROR_STATUS;
-
-export type ErrorKey = ErrorCode | "TIMEOUT" | "NETWORK" | "UNKNOWN";
