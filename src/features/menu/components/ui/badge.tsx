@@ -1,6 +1,7 @@
 import { Icon } from "@/shared/icons";
-import { useStrings } from "@/shared/i18n";
+import { useLocale, useStrings } from "@/shared/i18n";
 import { strings } from "../../strings";
+import { formatSavings } from "../../util/price";
 
 type StatusBadgeType = "top" | "new" | "outOfStock";
 type BadgeType = StatusBadgeType | "savings";
@@ -34,6 +35,7 @@ const STYLES = {
 
 export function Badge(props: BadgeProps) {
   const { badges } = useStrings(strings);
+  const locale = useLocale();
 
   const size = props.compact ? STYLES.compact : STYLES.regular;
   const classes = [STYLES.base, size, STYLES.tone[props.type], props.className]
@@ -41,7 +43,7 @@ export function Badge(props: BadgeProps) {
     .join(" ");
   const label =
     props.type === "savings"
-      ? badges.savings(props.amount.toString())
+      ? formatSavings(props.amount, locale)
       : badges[props.type];
 
   return (

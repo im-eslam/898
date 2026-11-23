@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
 import { Drawer as VaulDrawer } from "vaul";
-import { CloseButton } from "./close-button";
+import { CloseButton } from "../ui/close-button";
 
-interface MenuSheetStrings {
+interface BaseSheetStrings {
   title: string;
   description: string;
 }
 
-interface MenuSheetProps {
-  strings: MenuSheetStrings;
+interface BaseSheetProps {
+  strings: BaseSheetStrings;
   isOpen: boolean;
   onClose: () => void;
   footer?: ReactNode;
@@ -32,7 +32,7 @@ const STYLES = {
     "shrink-0 border-t-[0.5px] border-sand/40 bg-cream px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] md:px-6",
 } as const;
 
-export function MenuSheet(props: MenuSheetProps) {
+export function BaseSheet(props: BaseSheetProps) {
   return (
     <VaulDrawer.Root
       open={props.isOpen}

@@ -1,19 +1,18 @@
 import { useLocale, useStrings } from "@/shared/i18n";
 import type { MenuPairingDto, MenuProductDto } from "@api/contracts";
-import { strings } from "../../../strings";
 import { MenuLookup, Pricing, Stock } from "../../../util/menu";
-import { formatPrice } from "../../ui/price";
+import { formatPrice } from "../../../util/price";
 import { RollingNumber } from "../../ui/rolling-number";
-import { ProductImage } from "../../ui/product-image";
-import { Badge } from "../../ui/badge";
-import { ItemAddons } from "./item-addons";
-import { BundleHero, ProductHero } from "./item-parts";
-import { ItemOftenOrdered } from "./item-often-ordered";
-import { ItemSizes } from "./item-sizes";
-import { MenuSheet } from "../../ui/menu-sheet";
+import { BaseSheet } from "../base-sheet";
+import { BundleHero } from "./bundle-hero";
+import { BundleLineHeader } from "./bundle-line-header";
+import { ProductAddons } from "./product-addons";
+import { ProductHero } from "./product-hero";
+import { ProductOftenOrdered } from "./product-often-ordered";
+import { ProductOptions } from "./product-options";
+import { strings } from "../../../strings";
 
-interface ItemSheetProps {
-  /** The product or bundle to show. */
+interface ProductSheetProps {
   source: MenuProductDto | MenuPairingDto;
   optionIds: (number | null)[];
   addOnIds: number[][];
@@ -22,54 +21,28 @@ interface ItemSheetProps {
   onSelectSize: (index: number, optionId: number) => void;
   onSetBarista: (index: number, on: boolean) => void;
   onSetAddOns: (index: number, ids: number[]) => void;
-  /** Receives the id of a product from "often ordered with". */
   onOpenReference: (productId: number) => void;
 }
 
 const STYLES = {
   content: "flex flex-col gap-6",
   line: "flex flex-col gap-4",
-  lineHeader: "flex items-center gap-3",
-  lineImage: "size-12 shrink-0 rounded-md",
-  lineName: "min-w-0 flex-1 text-body font-semibold text-balance",
   total:
     "flex h-14 w-full items-center justify-center rounded-full bg-brand px-4 text-heading font-bold text-white tabular-nums",
   unavailable: "opacity-50",
 } as const;
 
-/** The name, image and badge of one product inside a bundle's sheet. */
-function BundleLineHeader(props: { product: MenuProductDto }) {
+export function ProductSheet(props: ProductSheetProps) {
+  const { sheet } = useStrings(strings);
   const locale = useLocale();
-  const { product } = props;
-  const badge = Stock.badgeFor(product);
 
-  return (
-    <div className={STYLES.lineHeader}>
-      <ProductImage
-        image={product.image}
-        kind="thumb"
-        grayscale={!Stock.isAvailable(product)}
-        className={STYLES.lineImage}
-      />
-      <h3 className={STYLES.lineName}>{product.name[locale]}</h3>
-      {badge && <Badge type={badge} compact />}
-    </div>
-  );
-}
-
-/** The product or bundle sheet: the hero, each line's options, and the total. */
-export function ItemSheet(props: ItemSheetProps) {
-  const s = useStrings(strings);
-  const locale = useLocale();
-  const { source } = props;
-
-  const lines = MenuLookup.lines(source);
+  const lines = MenuLookup.lines(props.source);
   const available = lines.every((line) => Stock.isAvailable(line));
   const total =
-    "items" in source
-      ? Pricing.pairing(source, props.optionIds, props.addOnIds)
+    "items" in props.source
+      ? Pricing.pairing(props.source, props.optionIds, props.addOnIds)
       : Pricing.product(
-          source,
+          props.source,
           props.optionIds[0] ?? null,
           props.addOnIds[0] ?? []
         );
@@ -81,25 +54,22 @@ export function ItemSheet(props: ItemSheetProps) {
     </div>
   ) : (
     <div className={`${STYLES.total} ${STYLES.unavailable}`}>
-      {s.sheet.outOfStock}
+      {sheet.items.outOfStock}
     </div>
   );
 
   return (
-    <MenuSheet
-      strings={{
-        title,
-        description: s.sheet.itemDescription,
-      }}
+    <BaseSheet
+      strings={{ title, description: sheet.items.description }}
       isOpen={props.isOpen}
       onClose={props.onClose}
       footer={footer}
     >
       <div className={STYLES.content}>
-        {"items" in source ? (
-          <BundleHero pairing={source} available={available} />
+        {"items" in props.source ? (
+          <BundleHero pairing={props.source} available={available} />
         ) : (
-          <ProductHero product={source} />
+          <ProductHero product={props.source} />
         )}
 
         {lines.map((line, index) => (
@@ -108,14 +78,14 @@ export function ItemSheet(props: ItemSheetProps) {
             aria-label={line.name[locale]}
             className={STYLES.line}
           >
-            {"items" in source && <BundleLineHeader product={line} />}
-            <ItemSizes
+            {"items" in props.source && <BundleLineHeader product={line} />}
+            <ProductOptions
               product={line}
               optionId={props.optionIds[index] ?? null}
               disabled={!available}
               onSelect={(optionId) => props.onSelectSize(index, optionId)}
             />
-            <ItemAddons
+            <ProductAddons
               product={line}
               addOnIds={props.addOnIds[index] ?? []}
               disabled={!available}
@@ -125,13 +95,14 @@ export function ItemSheet(props: ItemSheetProps) {
           </section>
         ))}
 
-        {!("items" in source) && source.oftenOrderedWith.length > 0 && (
-          <ItemOftenOrdered
-            references={source.oftenOrderedWith}
-            onOpen={props.onOpenReference}
-          />
-        )}
+        {!("items" in props.source) &&
+          props.source.oftenOrderedWith.length > 0 && (
+            <ProductOftenOrdered
+              references={props.source.oftenOrderedWith}
+              onOpen={props.onOpenReference}
+            />
+          )}
       </div>
-    </MenuSheet>
+    </BaseSheet>
   );
 }

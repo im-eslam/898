@@ -11,17 +11,17 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-// ---- Menu enums ---------------------------------------------------------
+import {
+  MENU_AVAILABILITIES,
+  MENU_BADGES,
+  MENU_CURRENCIES,
+  MENU_PRICING_TYPES,
+} from "./contract.js";
 
-export const currencyEnum = pgEnum("menu_currency", ["EGP"]);
-export const badgeEnum = pgEnum("menu_badge", ["top", "new"]);
-export const availabilityEnum = pgEnum("menu_availability", [
-  "in_stock",
-  "out_of_stock",
-]);
-export const pricingTypeEnum = pgEnum("menu_pricing_type", ["single", "multiple"]);
-
-// ---- Menu tables --------------------------------------------------------
+export const currencyEnum = pgEnum("menu_currency", MENU_CURRENCIES);
+export const badgeEnum = pgEnum("menu_badge", MENU_BADGES);
+export const availabilityEnum = pgEnum("menu_availability", MENU_AVAILABILITIES);
+export const pricingTypeEnum = pgEnum("menu_pricing_type", MENU_PRICING_TYPES);
 
 export const menuSettings = pgTable("menu_settings", {
   currency: currencyEnum("currency").notNull(),
@@ -178,7 +178,6 @@ export const menuSchema = {
   pairingItems: menuPairingItems,
 } as const;
 
-// Relations let the query API load a menu's nested shape in one query.
 export const menuRelations = {
   menuCategoriesRelations: relations(menuCategories, ({ many }) => ({
     products: many(menuProducts),

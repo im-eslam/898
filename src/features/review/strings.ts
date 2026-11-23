@@ -25,7 +25,6 @@ const en = {
       contact: { label: "Phone or email (optional)" },
     },
     validation: {
-      general: "Some thign went wrong.",
       required: "Please write your review.",
       tooShort: "Your review must be at least 3 characters.",
     },
@@ -38,11 +37,10 @@ const en = {
       network:
         "No internet connection. Please check your network and try again.",
       invalidInput: "Please check your message and try again.",
-      timeout: "The request took too long. Please try again.",
+      timeout:
+        "The request took too long, so we can't confirm your feedback was sent. Close this window and send again only if you're sure it didn't go through.",
       server:
         "We couldn't send your feedback right now. Please try again later.",
-      rateLimited:
-        "You've sent a few messages already. Please try again in a few minutes.",
     },
   },
   success: {
@@ -76,7 +74,6 @@ const ar: typeof en = {
       contact: { label: "الهاتف أو البريد (اختياري)" },
     },
     validation: {
-      general: "حدث خطأ ما",
       required: "يرجى كتابة تقييمك.",
       tooShort: "يجب أن يتكون تقييمك من 3 أحرف على الأقل.",
     },
@@ -89,9 +86,9 @@ const ar: typeof en = {
       network:
         "لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة والمحاولة مرة أخرى.",
       invalidInput: "يرجى مراجعة رسالتك والمحاولة مرة أخرى.",
-      timeout: "استغرق الطلب وقتًا أطول من المتوقع. يرجى المحاولة مرة أخرى.",
+      timeout:
+        "استغرق الطلب وقتًا أطول من المتوقع، لذلك لا نستطيع التأكد من وصول ملاحظاتك. أغلق هذه النافذة وأعد الإرسال فقط إذا كنت متأكدًا أنها لم تصل.",
       server: "تعذر إرسال ملاحظاتك الآن. يرجى المحاولة لاحقًا.",
-      rateLimited: "أرسلت عدة رسائل بالفعل. يرجى المحاولة بعد بضع دقائق.",
     },
   },
   success: {

@@ -8,7 +8,8 @@ import type {
   MenuProductDto,
   MenuProductRefDto,
 } from "../../contracts.js";
-import type { MenuRows } from "./repository.js";
+import { MENU_BADGES } from "./contract.js";
+import type { MenuRows } from "./service.js";
 
 type RawCategory = MenuRows["categories"][number];
 type RawProduct = MenuRows["uncategorized"][number];
@@ -29,7 +30,12 @@ function toOption(option: RawProduct["options"][number]): MenuPriceOptionDto {
   };
 }
 
-function toAddOn(addOn: { id: number; nameEn: string; nameAr: string; price: number }): MenuAddOnDto {
+function toAddOn(addOn: {
+  id: number;
+  nameEn: string;
+  nameAr: string;
+  price: number;
+}): MenuAddOnDto {
   return {
     id: addOn.id,
     name: { en: addOn.nameEn, ar: addOn.nameAr },
@@ -37,7 +43,9 @@ function toAddOn(addOn: { id: number; nameEn: string; nameAr: string; price: num
   };
 }
 
-function toRef(product: RawProduct["relatedLinks"][number]["relatedProduct"]): MenuProductRefDto {
+function toRef(
+  product: RawProduct["relatedLinks"][number]["relatedProduct"]
+): MenuProductRefDto {
   const first = product.options[0];
   return {
     id: product.id,
@@ -62,7 +70,9 @@ function toProduct(product: RawProduct): MenuProductDto {
     },
     addOns: product.addOnLinks.map((link) => toAddOn(link.addOn)),
     baristaWay: product.baristaLinks.map((link) => toAddOn(link.addOn)),
-    oftenOrderedWith: product.relatedLinks.map((link) => toRef(link.relatedProduct)),
+    oftenOrderedWith: product.relatedLinks.map((link) =>
+      toRef(link.relatedProduct)
+    ),
   };
 }
 
@@ -82,7 +92,6 @@ function toPairing(pairing: RawPairing): MenuPairingDto {
   };
 }
 
-/** Turns the loaded rows into the menu response. Pure: no I/O. */
 export function mapMenu(rows: MenuRows): MenuDto {
   const categories = rows.categories.map(toCategory);
 
@@ -97,9 +106,11 @@ export function mapMenu(rows: MenuRows): MenuDto {
   return {
     updatedAt: rows.settings.updatedAt.toISOString(),
     currency: rows.settings.currency,
-    badges: ["top", "new"],
+    badges: [...MENU_BADGES],
     categories,
-    signatures: rows.signatures.map((signature) => toProduct(signature.product)),
+    signatures: rows.signatures.map((signature) =>
+      toProduct(signature.product)
+    ),
     pairings: rows.pairings.map(toPairing),
     popup: {
       enabled: rows.settings.popupEnabled,

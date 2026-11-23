@@ -7,8 +7,17 @@ import {
 import { useLocale, useStrings } from "@/shared/i18n";
 import { Icon } from "@/shared/icons";
 import type { MenuProductDto } from "@api/contracts";
-import { strings } from "../../../strings";
+import { fromKey, toKey } from "../../../util/keys";
 import { Price } from "../../ui/price";
+import { strings } from "../../../strings";
+
+interface ProductAddonsProps {
+  product: MenuProductDto;
+  addOnIds: readonly number[];
+  disabled: boolean;
+  onBarista: (on: boolean) => void;
+  onAddOns: (ids: number[]) => void;
+}
 
 const STYLES = {
   root: "flex flex-col gap-4",
@@ -31,27 +40,17 @@ const STYLES = {
   tick: "size-4 scale-50 opacity-0 transition-[opacity,transform] duration-fast group-data-selected:scale-100 group-data-selected:opacity-100 motion-reduce:transition-none",
 } as const;
 
-interface ItemAddonsProps {
-  product: MenuProductDto;
-  addOnIds: readonly number[];
-  disabled: boolean;
-  onBarista: (on: boolean) => void;
-  onAddOns: (ids: number[]) => void;
-}
-
-/** The barista's way (one switch) and the add-on checkboxes. Renders nothing when there are neither. */
-export function ItemAddons(props: ItemAddonsProps) {
-  const s = useStrings(strings);
+export function ProductAddons(props: ProductAddonsProps) {
+  const { sheet } = useStrings(strings);
   const locale = useLocale();
-  const { product, addOnIds } = props;
 
-  const baristaIds = product.baristaWay.map((addOn) => addOn.id);
+  const baristaIds = props.product.baristaWay.map((addOn) => addOn.id);
   const hasBarista = baristaIds.length > 0;
-  const hasAddOns = product.addOns.length > 0;
+  const hasAddOns = props.product.addOns.length > 0;
 
   if (!hasBarista && !hasAddOns) return null;
 
-  const baristaOn = baristaIds.every((id) => addOnIds.includes(id));
+  const baristaOn = baristaIds.every((id) => props.addOnIds.includes(id));
 
   return (
     <div className={STYLES.root}>
@@ -64,8 +63,10 @@ export function ItemAddons(props: ItemAddonsProps) {
         >
           <Icon name="sparkle" className={STYLES.baristaIcon} />
           <span className={STYLES.baristaText}>
-            <span className={STYLES.baristaTitle}>{s.sheet.baristaWay}</span>
-            <span className={STYLES.baristaSub}>{s.sheet.baristaSub}</span>
+            <span className={STYLES.baristaTitle}>
+              {sheet.items.baristaWay}
+            </span>
+            <span className={STYLES.baristaSub}>{sheet.items.baristaSub}</span>
           </span>
           <span aria-hidden="true" className={STYLES.checkbox}>
             <Icon name="check" className={STYLES.tick} />
@@ -75,17 +76,17 @@ export function ItemAddons(props: ItemAddonsProps) {
 
       {hasAddOns && (
         <CheckboxGroup
-          value={product.addOns
-            .filter((addOn) => addOnIds.includes(addOn.id))
-            .map((addOn) => String(addOn.id))}
-          onChange={(values) => props.onAddOns(values.map(Number))}
+          value={props.product.addOns
+            .filter((addOn) => props.addOnIds.includes(addOn.id))
+            .map((addOn) => toKey(addOn.id))}
+          onChange={(values) => props.onAddOns(values.map(fromKey))}
           isDisabled={props.disabled}
         >
-          <Label className={STYLES.addOnsLabel}>{s.sheet.addOns}</Label>
-          {product.addOns.map((addOn) => (
+          <Label className={STYLES.addOnsLabel}>{sheet.items.addOns}</Label>
+          {props.product.addOns.map((addOn) => (
             <Checkbox
               key={addOn.id}
-              value={String(addOn.id)}
+              value={toKey(addOn.id)}
               className={STYLES.addOn}
             >
               <span aria-hidden="true" className={STYLES.addOnBox}>

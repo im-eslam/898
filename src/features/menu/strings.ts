@@ -18,9 +18,9 @@ const en = {
     savings: (amount: string) => `Save ${amount}`,
   },
   price: {
-    currency: "EGP",
     format: (amount: string) => `${amount} EGP`,
     extra: (amount: string) => `+${amount} EGP`,
+    from: (amount: string) => `From ${amount}`,
   },
   sections: {
     signatures: {
@@ -61,16 +61,20 @@ const en = {
     title: "Menu",
   },
   sheet: {
-    categories: "Categories",
-    categoriesDescription: "Jump to a section of the menu",
-    itemDescription: "Item details and options",
-    outOfStock: "Out of stock",
-    oftenOrdered: "Often ordered with",
-    openItem: (name: string) => `Open ${name}`,
-    size: "Size",
-    baristaWay: "The barista's way",
-    baristaSub: "Made the way our barista recommends",
-    addOns: "Add-ons",
+    items: {
+      description: "Item details and options",
+      outOfStock: "Out of stock",
+      oftenOrdered: "Often ordered with",
+      openItem: (name: string) => `Open ${name}`,
+      size: "Size",
+      baristaWay: "The barista's way",
+      baristaSub: "Made the way our barista recommends",
+      addOns: "Add-ons",
+    },
+    categories: {
+      title: "Categories",
+      description: "Jump to a section of the menu",
+    },
   },
 };
 
@@ -85,9 +89,9 @@ const ar: typeof en = {
     savings: (amount) => `وفّر ${amount}`,
   },
   price: {
-    currency: "ج.م",
     format: (amount) => `${amount} ج.م`,
     extra: (amount) => `+${amount} ج.م`,
+    from: (amount) => `من ${amount}`,
   },
   sections: {
     signatures: {
@@ -128,16 +132,20 @@ const ar: typeof en = {
     title: "القائمة",
   },
   sheet: {
-    categories: "الأقسام",
-    categoriesDescription: "انتقل إلى قسم من القائمة",
-    itemDescription: "تفاصيل الصنف وخياراته",
-    outOfStock: "غير متوفر",
-    oftenOrdered: "يُطلب غالبًا مع",
-    openItem: (name) => `افتح ${name}`,
-    size: "الحجم",
-    baristaWay: "طريقة الباريستا",
-    baristaSub: "يُحضّر كما يوصي الباريستا",
-    addOns: "إضافات",
+    items: {
+      description: "تفاصيل الصنف وخياراته",
+      outOfStock: "غير متوفر",
+      oftenOrdered: "يُطلب غالبًا مع",
+      openItem: (name) => `افتح ${name}`,
+      size: "الحجم",
+      baristaWay: "طريقة الباريستا",
+      baristaSub: "يُحضّر كما يوصي الباريستا",
+      addOns: "إضافات",
+    },
+    categories: {
+      title: "الأقسام",
+      description: "انتقل إلى قسم من القائمة",
+    },
   },
 };
 

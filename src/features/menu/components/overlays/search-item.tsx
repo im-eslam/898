@@ -7,18 +7,17 @@ import type {
   MenuPairingDto,
   MenuProductDto,
 } from "@api/contracts";
-import { strings } from "../../../strings";
-import { MenuLookup, Stock } from "../../../util/menu";
-import { categoryId } from "../../../util/section";
-import { Badge } from "../../ui/badge";
-import { Price } from "../../ui/price";
-import { ProductImage } from "../../ui/product-image";
+import { strings } from "../../strings";
+import { MenuLookup, Stock } from "../../util/menu";
+import { categoryId } from "../../util/section";
+import { Badge } from "../ui/badge";
+import { Price } from "../ui/price";
+import { ProductImage } from "../ui/product-image";
 
 const STYLES = {
   results: "min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6",
   message: {
-    root:
-      "flex flex-col items-center gap-3 px-6 py-12 text-center text-small font-medium text-pretty text-navy/65",
+    root: "flex flex-col items-center gap-3 px-6 py-12 text-center text-small font-medium text-pretty text-navy/65",
     icon: "size-8",
   },
   group: {
@@ -107,13 +106,14 @@ function CategoryRow(props: {
 
 function PairingRow(props: { pairing: MenuPairingDto; onPress: () => void }) {
   const locale = useLocale();
-  const { pairing } = props;
-  const available = pairing.items.every((item) => Stock.isAvailable(item));
+  const available = props.pairing.items.every((item) =>
+    Stock.isAvailable(item)
+  );
 
   return (
     <ResultRow variant="rich" onPress={props.onPress}>
       <span className={STYLES.pairing.thumbs}>
-        {pairing.items.map((item) => (
+        {props.pairing.items.map((item) => (
           <ProductImage
             key={item.id}
             image={item.image}
@@ -124,12 +124,12 @@ function PairingRow(props: { pairing: MenuPairingDto; onPress: () => void }) {
         ))}
       </span>
       <span className={STYLES.pairing.name}>
-        {pairing.items.map((item) => item.name[locale]).join(" + ")}
+        {props.pairing.items.map((item) => item.name[locale]).join(" + ")}
       </span>
       <span className={available ? "" : STYLES.unavailable}>
         <Price
-          original={pairing.pricing.price}
-          discounted={pairing.pricing.final}
+          original={props.pairing.pricing.price}
+          discounted={props.pairing.pricing.final}
         />
       </span>
     </ResultRow>
@@ -138,21 +138,22 @@ function PairingRow(props: { pairing: MenuPairingDto; onPress: () => void }) {
 
 function ProductRow(props: { product: MenuProductDto; onPress: () => void }) {
   const locale = useLocale();
-  const { product } = props;
-  const available = Stock.isAvailable(product);
-  const option = MenuLookup.defaultOption(product);
-  const description = product.description[locale];
+  const available = Stock.isAvailable(props.product);
+  const option = MenuLookup.startingOption(props.product);
+  const description = props.product.description[locale];
 
   return (
     <ResultRow variant="rich" onPress={props.onPress}>
       <ProductImage
-        image={product.image}
+        image={props.product.image}
         kind="thumb"
         grayscale={!available}
         className={STYLES.product.thumb}
       />
       <span className={STYLES.product.text}>
-        <span className={STYLES.product.name}>{product.name[locale]}</span>
+        <span className={STYLES.product.name}>
+          {props.product.name[locale]}
+        </span>
         {description && (
           <span className={STYLES.product.description}>{description}</span>
         )}
@@ -160,7 +161,11 @@ function ProductRow(props: { product: MenuProductDto; onPress: () => void }) {
       </span>
       {option && (
         <span className={available ? "" : STYLES.unavailable}>
-          <Price original={option.price} discounted={option.final} />
+          <Price
+            original={option.price}
+            discounted={option.final}
+            from={MenuLookup.isMultiSize(props.product)}
+          />
         </span>
       )}
     </ResultRow>

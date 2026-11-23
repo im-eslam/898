@@ -1,11 +1,11 @@
-import { useDeferredValue, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { Dialog, Modal, ModalOverlay } from "react-aria-components";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useLocale, useStrings, type Locale } from "@/shared/i18n";
+import { useLocale, useStrings } from "@/shared/i18n";
 import type { MenuDto, MenuPairingDto, MenuProductDto } from "@api/contracts";
-import { strings } from "../../../strings";
+import { strings } from "../../strings";
+import { matchMenu } from "../../util/search";
 import { SearchBar } from "./search-bar";
-import { SearchResults } from "./search-result";
+import { SearchResults } from "./search-item";
 
 interface SearchOverlayProps {
   menu: MenuDto;
@@ -26,60 +26,16 @@ const STYLES = {
   status: "sr-only",
 } as const;
 
-function normalize(value: string, locale: Locale): string {
-  return value
-    .toLocaleLowerCase(locale)
-    .normalize("NFD")
-    .replace(/\p{Mn}/gu, "")
-    .replace(/\u0640/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function matchMenu(menu: MenuDto, query: string, locale: Locale) {
-  const needle = normalize(query, locale);
-  const matches = (fields: (string | undefined)[]) =>
-    needle !== "" &&
-    fields.some(
-      (field) =>
-        field !== undefined && normalize(field, locale).includes(needle)
-    );
-
-  const categories = menu.categories.filter((category) =>
-    matches([category.name?.[locale]])
-  );
-
-  const pairings = menu.pairings.filter((pairing) =>
-    matches(pairing.items.map((item) => item.name[locale]))
-  );
-
-  const products = menu.categories
-    .flatMap((category) => category.products)
-    .filter((product) =>
-      matches([product.name[locale], product.description[locale]])
-    );
-
-  return {
-    categories,
-    pairings,
-    products,
-    total: categories.length + pairings.length + products.length,
-  };
-}
-
 function useMenuSearch(menu: MenuDto) {
   const locale = useLocale();
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
+  const data = useMemo(
+    () => matchMenu(menu, deferredQuery, locale),
+    [menu, deferredQuery, locale]
+  );
 
-  const search = useQuery({
-    queryKey: ["menu-search", menu.updatedAt, locale, deferredQuery.trim()],
-    queryFn: () => matchMenu(menu, deferredQuery, locale),
-    placeholderData: keepPreviousData,
-    staleTime: Infinity,
-  });
-
-  return { query, setQuery, deferredQuery, data: search.data };
+  return { query, setQuery, deferredQuery, data };
 }
 
 type SearchPanelProps = Omit<SearchOverlayProps, "isOpen">;
@@ -89,7 +45,7 @@ function SearchPanel(props: SearchPanelProps) {
 
   const search = useMenuSearch(props.menu);
   const hasQuery = search.query.trim() !== "";
-  const total = search.data?.total;
+  const total = search.data.total;
 
   return (
     <>
@@ -100,16 +56,16 @@ function SearchPanel(props: SearchPanelProps) {
       />
 
       <p aria-live="polite" className={STYLES.status}>
-        {hasQuery && total !== undefined ? searchS.itemsCount(total) : ""}
+        {hasQuery ? searchS.itemsCount(total) : ""}
       </p>
 
       <SearchResults
         query={search.query}
         deferredQuery={search.deferredQuery}
         total={total}
-        categories={search.data?.categories ?? []}
-        pairings={search.data?.pairings ?? []}
-        products={search.data?.products ?? []}
+        categories={search.data.categories}
+        pairings={search.data.pairings}
+        products={search.data.products}
         onPickSection={props.onPickSection}
         onOpenPairing={props.onOpenPairing}
         onOpenProduct={props.onOpenProduct}

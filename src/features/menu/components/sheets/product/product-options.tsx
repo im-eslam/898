@@ -1,9 +1,17 @@
 import { Label, Radio, RadioGroup } from "react-aria-components";
 import { useLocale, useStrings } from "@/shared/i18n";
 import type { MenuProductDto } from "@api/contracts";
-import { strings } from "../../../strings";
 import { MenuLookup } from "../../../util/menu";
+import { fromKey, toKey } from "../../../util/keys";
 import { Price } from "../../ui/price";
+import { strings } from "../../../strings";
+
+interface ProductOptionsProps {
+  product: MenuProductDto;
+  optionId: number | null;
+  disabled: boolean;
+  onSelect: (optionId: number) => void;
+}
 
 const STYLES = {
   group: "flex flex-col gap-2",
@@ -13,39 +21,34 @@ const STYLES = {
   sizeName: "text-small font-medium",
 } as const;
 
-interface ItemSizesProps {
-  product: MenuProductDto;
-  optionId: number | null;
-  disabled: boolean;
-  onSelect: (optionId: number) => void;
-}
-
-/** The size choice for a product that comes in several sizes. Renders nothing otherwise. */
-export function ItemSizes(props: ItemSizesProps) {
-  const s = useStrings(strings);
+export function ProductOptions(props: ProductOptionsProps) {
+  const { sheet } = useStrings(strings);
   const locale = useLocale();
-  const { product } = props;
 
-  if (product.pricing.type !== "multiple") return null;
-  const sizes = product.pricing.options;
+  if (props.product.pricing.type !== "multiple") return null;
+  const sizes = props.product.pricing.options;
   if (sizes.length === 0) return null;
 
-  const selected = MenuLookup.option(product, props.optionId);
+  const selected = MenuLookup.option(props.product, props.optionId);
 
   return (
     <RadioGroup
-      value={selected ? String(selected.id) : ""}
-      onChange={(value) => props.onSelect(Number(value))}
+      value={selected ? toKey(selected.id) : ""}
+      onChange={(key) => props.onSelect(fromKey(key))}
       orientation="horizontal"
       isDisabled={props.disabled}
       className={STYLES.group}
     >
-      <Label className={STYLES.label}>{s.sheet.size}</Label>
+      <Label className={STYLES.label}>{sheet.items.size}</Label>
       <div className={STYLES.sizes}>
         {sizes.map((size) => (
-          <Radio key={size.id} value={String(size.id)} className={STYLES.size}>
+          <Radio key={size.id} value={toKey(size.id)} className={STYLES.size}>
             <span className={STYLES.sizeName}>{size.name?.[locale]}</span>
-            <Price original={size.price} discounted={size.final} size="caption" />
+            <Price
+              original={size.price}
+              discounted={size.final}
+              size="caption"
+            />
           </Radio>
         ))}
       </div>

@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import type { MenuResponse } from "../../contracts.js";
-import { menuService } from "./service.js";
+import { MENU_CACHE_TTL_MS, menuService } from "./service.js";
 
-const MENU_CACHE_CONTROL = "public, max-age=60";
+const MENU_CACHE_CONTROL = `public, max-age=${MENU_CACHE_TTL_MS / 1000}`;
 
 const routes = new Hono();
 

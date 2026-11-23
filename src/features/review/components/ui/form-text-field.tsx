@@ -2,7 +2,6 @@ import {
   FieldError,
   Input,
   Label,
-  Text,
   TextArea,
   TextField,
   type ValidationResult,
@@ -12,13 +11,12 @@ interface FormTextFieldProps {
   name: string;
   kind: "input" | "textarea";
   label: string;
-  hint?: string;
+  errorMessage?: (validation: ValidationResult) => string;
   autoComplete?: string;
   autoFocus?: boolean;
   isRequired?: boolean;
   minLength?: number;
   maxLength: number;
-  errorMessage?: string | ((validation: ValidationResult) => string);
 }
 
 const STYLES = {
@@ -27,7 +25,6 @@ const STYLES = {
   control:
     "w-full rounded-md border border-navy/15 bg-white px-4 py-3 text-body text-navy placeholder:text-navy/40 outline-none transition-colors duration-interactive ease-smooth focus:border-brand data-[invalid]:border-error data-[invalid]:bg-error/5 motion-reduce:transition-none",
   textarea: "min-h-32 resize-y",
-  hint: "text-caption text-navy/65",
   error: "text-caption text-error",
 } as const;
 
@@ -39,6 +36,7 @@ export function FormTextField(props: FormTextFieldProps) {
       isRequired={props.isRequired}
       minLength={props.minLength}
       maxLength={props.maxLength}
+      validationBehavior="native"
       className={STYLES.wrapper}
       dir="auto"
     >
@@ -49,12 +47,6 @@ export function FormTextField(props: FormTextFieldProps) {
       ) : (
         <Input autoComplete={props.autoComplete} className={STYLES.control} />
       )}
-
-      {props.hint ? (
-        <Text slot="description" className={STYLES.hint}>
-          {props.hint}
-        </Text>
-      ) : null}
 
       <FieldError className={STYLES.error}>{props.errorMessage}</FieldError>
     </TextField>

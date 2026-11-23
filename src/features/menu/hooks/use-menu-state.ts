@@ -6,11 +6,8 @@ export type MenuPanel = "none" | "search" | "categories" | "item";
 
 export interface MenuState {
   panel: MenuPanel;
-  /** The product or bundle the sheet shows. It stays set after close so the close animation has content. */
   source: MenuProductDto | MenuPairingDto | null;
-  /** The chosen size for each line of source, by index. */
   optionIds: (number | null)[];
-  /** The chosen add-ons for each line of source, by index. */
   addOnIds: number[][];
 }
 
@@ -30,12 +27,10 @@ type MenuAction =
   | { type: "setBarista"; index: number; on: boolean }
   | { type: "setAddOns"; index: number; ids: number[] };
 
-/** Returns a copy of the list with one entry replaced. */
 function replaceAt<T>(list: readonly T[], index: number, value: T): T[] {
   return list.map((item, i) => (i === index ? value : item));
 }
 
-/** Every change to what the guest has opened and picked. Pure, so it is easy to test. */
 export function menuReducer(state: MenuState, action: MenuAction): MenuState {
   switch (action.type) {
     case "openSearch":
@@ -93,7 +88,6 @@ export function menuReducer(state: MenuState, action: MenuAction): MenuState {
   }
 }
 
-/** The menu's open panel and the guest's picks, with the actions that change them. */
 export function useMenuState() {
   const [state, dispatch] = useReducer(menuReducer, initialMenuState);
 

@@ -35,7 +35,7 @@ export function SignatureCard(props: SignatureCardProps) {
   const description = props.product.description[locale];
   const available = Stock.isAvailable(props.product);
   const badge = Stock.badgeFor(props.product);
-  const option = MenuLookup.defaultOption(props.product);
+  const option = MenuLookup.startingOption(props.product);
 
   return (
     <div className={STYLES.root}>
@@ -68,6 +68,7 @@ export function SignatureCard(props: SignatureCardProps) {
           <Price
             original={option.price}
             discounted={option.final}
+            from={MenuLookup.isMultiSize(props.product)}
             size="body"
           />
         )}

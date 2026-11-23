@@ -30,7 +30,7 @@ const STYLES = {
 
 export function SectionHeading(props: SectionHeadingProps) {
   const { sections } = useStrings(strings);
-  
+
   const content = "section" in props ? sections[props.section] : props;
   const light = props.light === true;
 

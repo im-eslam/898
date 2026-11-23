@@ -1,16 +1,15 @@
-import { useMemo } from "react";
+import { Suspense, lazy, useEffect, useMemo } from "react";
 import { ErrorPage } from "@/features/states/error/";
 import { LoadingPage } from "@/features/states/loading/";
 import { setLocale, useLocale, useStrings } from "@/shared/i18n";
 import type { MenuDto } from "@api/contracts";
-import { Header as MenuHeader, type HeaderTab } from "./components/header/header";
-import { PromoPopup } from "./components/overlays/promo-popup";
-import { SearchOverlay } from "./components/overlays/search/search";
-import { ProductsSection as CategorySection } from "./components/sections/products/products-section";
+import {
+  Header as MenuHeader,
+  type HeaderTab,
+} from "./components/header/header";
 import { PairingsSection } from "./components/sections/pairings/pairings-section";
+import { ProductsSection as CategorySection } from "./components/sections/products/products-section";
 import { SignaturesSection } from "./components/sections/signatures/signatures-section";
-import { CategorySheet } from "./components/sheets/items/category-sheet";
-import { ItemSheet } from "./components/sheets/items/item-sheet";
 import { useMenuNav } from "./hooks/use-menu-nav";
 import { useMenuQuery } from "./hooks/use-menu-query";
 import { useMenuState } from "./hooks/use-menu-state";
@@ -22,6 +21,39 @@ import {
   categoryId,
   sectionIds,
 } from "./util/section";
+
+// The overlays and sheets are not needed for the first paint, so each one is
+// its own chunk. Each loader both defines the lazy component and preloads it.
+const loadSearchOverlay = () =>
+  import("./components/overlays/search-overlay").then((m) => ({
+    default: m.SearchOverlay,
+  }));
+const loadPromoPopup = () =>
+  import("./components/overlays/promo-popup").then((m) => ({
+    default: m.PromoPopup,
+  }));
+const loadCategorySheet = () =>
+  import("./components/sheets/category-sheet").then((m) => ({
+    default: m.CategorySheet,
+  }));
+const loadItemSheet = () =>
+  import("./components/sheets/item-sheet").then((m) => ({
+    default: m.ItemSheet,
+  }));
+
+// Fetched once the page is on screen, so the first tap does not wait for a download.
+// A new overlay only needs its loader added here.
+const preloadOverlays = [
+  loadSearchOverlay,
+  loadPromoPopup,
+  loadCategorySheet,
+  loadItemSheet,
+];
+
+const SearchOverlay = lazy(loadSearchOverlay);
+const PromoPopup = lazy(loadPromoPopup);
+const CategorySheet = lazy(loadCategorySheet);
+const ItemSheet = lazy(loadItemSheet);
 
 const STYLES = {
   page: "min-h-dvh pb-10",
@@ -60,6 +92,11 @@ function MenuReady(props: MenuReadyProps) {
   const ids = useMemo(() => sectionIds(menu), [menu]);
   const nav = useMenuNav(ids);
   const { state, actions } = useMenuState();
+
+  // The page is on screen now, so start fetching the overlay code in the background.
+  useEffect(() => {
+    for (const load of preloadOverlays) void load();
+  }, []);
 
   // Jumping to a section closes whatever is open first.
   const select = (sectionId: string) => {
@@ -118,41 +155,43 @@ function MenuReady(props: MenuReadyProps) {
         ))}
       </main>
 
-      <SearchOverlay
-        menu={menu}
-        isOpen={state.panel === "search"}
-        onClose={actions.close}
-        onPickSection={select}
-        onOpenPairing={actions.openPairing}
-        onOpenProduct={actions.openProduct}
-      />
-
-      <CategorySheet
-        categories={menu.categories}
-        activeId={nav.activeId}
-        isOpen={state.panel === "categories"}
-        onClose={actions.close}
-        onPick={select}
-      />
-
-      {state.source && (
-        <ItemSheet
-          source={state.source}
-          optionIds={state.optionIds}
-          addOnIds={state.addOnIds}
-          isOpen={state.panel === "item"}
+      <Suspense fallback={null}>
+        <SearchOverlay
+          menu={menu}
+          isOpen={state.panel === "search"}
           onClose={actions.close}
-          onSelectSize={actions.selectSize}
-          onSetBarista={actions.setBarista}
-          onSetAddOns={actions.setAddOns}
-          onOpenReference={(productId) => {
-            const product = MenuLookup.product(menu, productId);
-            if (product) actions.openProduct(product);
-          }}
+          onPickSection={select}
+          onOpenPairing={actions.openPairing}
+          onOpenProduct={actions.openProduct}
         />
-      )}
 
-      <PromoPopup popup={menu.popup} busy={state.panel !== "none"} />
+        <CategorySheet
+          categories={menu.categories}
+          activeId={nav.activeId}
+          isOpen={state.panel === "categories"}
+          onClose={actions.close}
+          onPick={select}
+        />
+
+        {state.source && (
+          <ItemSheet
+            source={state.source}
+            optionIds={state.optionIds}
+            addOnIds={state.addOnIds}
+            isOpen={state.panel === "item"}
+            onClose={actions.close}
+            onSelectSize={actions.selectSize}
+            onSetBarista={actions.setBarista}
+            onSetAddOns={actions.setAddOns}
+            onOpenReference={(productId) => {
+              const product = MenuLookup.product(menu, productId);
+              if (product) actions.openProduct(product);
+            }}
+          />
+        )}
+
+        <PromoPopup popup={menu.popup} busy={state.panel !== "none"} />
+      </Suspense>
     </div>
   );
 }

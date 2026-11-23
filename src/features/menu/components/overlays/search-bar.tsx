@@ -1,8 +1,8 @@
 import { Button, Input, Label, SearchField } from "react-aria-components";
 import { useStrings } from "@/shared/i18n";
 import { Icon } from "@/shared/icons";
-import { strings } from "../../../strings";
-import { CloseButton } from "../../ui/close-button";
+import { strings } from "../../strings";
+import { CloseButton } from "../ui/close-button";
 
 interface SearchBarProps {
   query: string;

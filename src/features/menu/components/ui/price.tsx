@@ -1,5 +1,5 @@
-import { useLocale, useStrings, type Locale } from "@/shared/i18n";
-import { strings } from "../../strings";
+import { useLocale } from "@/shared/i18n";
+import { formatExtra, formatFrom, formatPrice } from "../../util/price";
 
 type PriceSize = "caption" | "small" | "body" | "heading";
 
@@ -8,18 +8,17 @@ interface BasePriceProps {
   className?: string;
 }
 
-interface StandardPriceProps extends BasePriceProps {
-  amount: number;
-}
 interface DiscountedPriceProps extends BasePriceProps {
   original: number;
   discounted: number;
+  from?: boolean;
 }
-interface AddonPriceProps extends BasePriceProps {
+
+interface ExtraPriceProps extends BasePriceProps {
   extra: number;
 }
 
-type PriceProps = StandardPriceProps | DiscountedPriceProps | AddonPriceProps;
+type PriceProps = DiscountedPriceProps | ExtraPriceProps;
 
 const STYLES = {
   root: "inline-flex flex-wrap items-baseline gap-x-1.5",
@@ -34,65 +33,31 @@ const STYLES = {
   } satisfies Record<PriceSize, string>,
 } as const;
 
-class PriceFormatter {
-  private static cache = new Map<Locale, Intl.NumberFormat>();
-
-  private static number(value: number, locale: Locale): string {
-    let formatter = this.cache.get(locale);
-    if (!formatter) {
-      formatter = new Intl.NumberFormat(locale, {
-        maximumFractionDigits: 0,
-        numberingSystem: "latn",
-      });
-      this.cache.set(locale, formatter);
-    }
-    return formatter.format(Math.round(value));
-  }
-
-  static format(
-    props: PriceProps,
-    locale: Locale,
-    labels: typeof strings.en.price
-  ): { primary: string; struckThrough?: string } {
-    if ("extra" in props) {
-      return { primary: labels.extra(this.number(props.extra, locale)) };
-    }
-    if ("discounted" in props) {
-      return {
-        primary: labels.format(this.number(props.discounted, locale)),
-        struckThrough:
-          props.original > props.discounted
-            ? labels.format(this.number(props.original, locale))
-            : undefined,
-      };
-    }
-    return { primary: labels.format(this.number(props.amount, locale)) };
-  }
-}
-
-/** A price. Pass one amount, or an original and a discounted amount to strike the original through. */
 export function Price(props: PriceProps) {
-  const { price } = useStrings(strings);
   const locale = useLocale();
-
-  const size = props.size ?? "small";
   const classes = [STYLES.root, props.className].filter(Boolean).join(" ");
-  const formatted = PriceFormatter.format(props, locale, price);
+  const primaryClass = `${STYLES.primary} ${STYLES.sizes[props.size ?? "small"]}`;
+
+  if ("extra" in props) {
+    return (
+      <span className={classes}>
+        <bdi className={primaryClass}>{formatExtra(props.extra, locale)}</bdi>
+      </span>
+    );
+  }
 
   return (
     <span className={classes}>
-      <bdi className={`${STYLES.primary} ${STYLES.sizes[size]}`}>
-        {formatted.primary}
+      <bdi className={primaryClass}>
+        {props.from
+          ? formatFrom(props.discounted, locale)
+          : formatPrice(props.discounted, locale)}
       </bdi>
-      {formatted.struckThrough && (
-        <bdi className={STYLES.struckThrough}>{formatted.struckThrough}</bdi>
+      {props.original > props.discounted && (
+        <bdi className={STYLES.struckThrough}>
+          {formatPrice(props.original, locale)}
+        </bdi>
       )}
     </span>
   );
-}
-
-/** The text of an amount in the menu's currency, for places that need a plain string, such as RollingNumber. */
-export function formatPrice(amount: number, locale: Locale): string {
-  return PriceFormatter.format({ amount }, locale, strings[locale].price)
-    .primary;
 }

@@ -1,46 +1,52 @@
-import { db } from "../config.js";
 import { readFileSync } from "node:fs";
-
+import { db } from "../config.js";
 import type {
   LocalizedText,
-  MenuAvailability,
-  MenuBadge,
-  MenuCurrency,
+  MenuAddOnDto,
+  MenuCategoryDto,
+  MenuDto,
+  MenuPairingDto,
+  MenuPriceOptionDto,
   MenuPricingType,
+  MenuProductDto,
 } from "../contracts.js";
 import { menuSchema as t } from "../features/menu/schema.js";
+type Code = string;
 
-type SeedOption = {
-  id: string;
-  name: LocalizedText | null;
-  price: number;
-  discount: number;
-  final: number;
-};
-type SeedProduct = {
-  id: string;
-  name: LocalizedText;
-  description: LocalizedText;
-  image: string;
-  availability: MenuAvailability;
-  badge: MenuBadge | null;
-  addOns: string[];
-  baristaWay: string[];
-  oftenOrderedWith: string[];
+type SeedAddOn = Omit<MenuAddOnDto, "id">;
+
+type SeedOption = Omit<MenuPriceOptionDto, "id"> & { id: Code };
+
+type SeedProduct = Omit<
+  MenuProductDto,
+  "id" | "pricing" | "addOns" | "baristaWay" | "oftenOrderedWith"
+> & {
+  id: Code;
   pricing: { type: MenuPricingType; options: SeedOption[] };
+  addOns: Code[];
+  baristaWay: Code[];
+  oftenOrderedWith: Code[];
 };
-type SeedMenu = {
-  updatedAt: string;
-  currency: MenuCurrency;
-  addOns: Record<string, { name: LocalizedText; price: number }>;
-  categories: { id: string; name: LocalizedText; products: SeedProduct[] }[];
-  signatures: string[];
-  pairings: {
-    id: string;
-    items: string[];
-    pricing: { price: number; discount: number; final: number };
-  }[];
-  popup: { enabled: boolean; image: string | null; delaySeconds: number };
+
+type SeedCategory = Omit<MenuCategoryDto, "id" | "name" | "products"> & {
+  id: Code;
+  name: LocalizedText;
+  products: SeedProduct[];
+};
+
+type SeedPairing = Omit<MenuPairingDto, "id" | "items"> & {
+  id: Code;
+  items: Code[];
+};
+
+type SeedMenu = Omit<
+  MenuDto,
+  "badges" | "categories" | "signatures" | "pairings"
+> & {
+  addOns: Record<Code, SeedAddOn>;
+  categories: SeedCategory[];
+  signatures: Code[];
+  pairings: SeedPairing[];
 };
 
 function die(message: string): never {
@@ -48,7 +54,17 @@ function die(message: string): never {
   process.exit(1);
 }
 
-function resolve(map: Map<string, number>, code: string, what: string): number {
+function readMenu(path: string): SeedMenu {
+  try {
+    return JSON.parse(readFileSync(path, "utf8")) as SeedMenu;
+  } catch (error) {
+    die(
+      `Could not read ${path}: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+}
+
+function resolve(map: Map<Code, number>, code: Code, what: string): number {
   const id = map.get(code);
   if (id === undefined) throw new Error(`Unknown ${what} code "${code}"`);
   return id;
@@ -57,7 +73,7 @@ function resolve(map: Map<string, number>, code: string, what: string): number {
 const path = process.argv[2];
 if (!path) die("Usage: npm run api:seed-menu -- <path-to-menu.json>");
 
-const menu = JSON.parse(readFileSync(path, "utf8")) as SeedMenu;
+const menu = readMenu(path);
 const allProducts = menu.categories.flatMap((c) => c.products);
 
 for (const product of allProducts) {
@@ -101,7 +117,7 @@ async function seed() {
       popupDelaySeconds: menu.popup.delaySeconds,
     });
 
-    const addOnIds = new Map<string, number>();
+    const addOnIds = new Map<Code, number>();
     let addOnPosition = 0;
     for (const [code, a] of Object.entries(menu.addOns)) {
       const [row] = await tx
@@ -116,12 +132,8 @@ async function seed() {
       addOnIds.set(code, row.id);
     }
 
-    const categoryIds = new Map<string, number>();
-    const productIds = new Map<string, number>();
-    const productRows: {
-      dbId: number;
-      product: SeedProduct;
-    }[] = [];
+    const productIds = new Map<Code, number>();
+    const productRows: { dbId: number; product: SeedProduct }[] = [];
     let categoryPosition = 0;
     for (const category of menu.categories) {
       const [cat] = await tx
@@ -132,7 +144,6 @@ async function seed() {
           position: categoryPosition++,
         })
         .returning({ id: t.categories.id });
-      categoryIds.set(category.id, cat.id);
 
       let productPosition = 0;
       for (const p of category.products) {

@@ -3,16 +3,7 @@ import { useLocale, useStrings } from "@/shared/i18n";
 import type { MenuCategoryDto } from "@api/contracts";
 import { strings } from "../../../strings";
 import { categoryId } from "../../../util/section";
-import { MenuSheet } from "../../ui/menu-sheet";
-
-interface CategorySheetProps {
-  categories: MenuCategoryDto[];
-  activeId: string;
-  isOpen: boolean;
-  onClose: () => void;
-  /** Receives the section id to jump to. */
-  onPick: (sectionId: string) => void;
-}
+import { BaseSheet } from "../base-sheet";
 
 const STYLES = {
   list: "flex flex-col gap-1",
@@ -24,16 +15,24 @@ const STYLES = {
   count: "shrink-0 text-caption font-medium tabular-nums text-navy/65",
 } as const;
 
-/** Lists the categories. Picking one jumps to its section. */
+interface CategorySheetProps {
+  categories: MenuCategoryDto[];
+  activeId: string;
+  isOpen: boolean;
+  onClose: () => void;
+  onPick: (sectionId: string) => void;
+}
+
 export function CategorySheet(props: CategorySheetProps) {
-  const s = useStrings(strings);
+  const { sheet } = useStrings(strings);
+  const shared = useStrings(strings);
   const locale = useLocale();
 
   return (
-    <MenuSheet
+    <BaseSheet
       strings={{
-        title: s.sheet.categories,
-        description: s.sheet.categoriesDescription,
+        title: sheet.categories.title,
+        description: sheet.categories.description,
       }}
       isOpen={props.isOpen}
       onClose={props.onClose}
@@ -53,13 +52,13 @@ export function CategorySheet(props: CategorySheetProps) {
               <span
                 className={`${STYLES.name} ${active ? STYLES.nameActive : STYLES.nameIdle}`}
               >
-                {category.name?.[locale] ?? s.categories.uncategorized}
+                {category.name?.[locale] ?? shared.categories.uncategorized}
               </span>
               <span className={STYLES.count}>{category.products.length}</span>
             </Button>
           );
         })}
       </div>
-    </MenuSheet>
+    </BaseSheet>
   );
 }

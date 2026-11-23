@@ -12,6 +12,7 @@ interface DrawerProps {
   strings: DrawerStrings;
   isOpen: boolean;
   hideHeader?: boolean;
+  isCloseDisabled?: boolean;
   onClose: () => void;
   children: ReactNode;
 }
@@ -21,7 +22,7 @@ const STYLES = {
   content:
     "fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[88dvh] w-full max-w-120 flex-col overflow-hidden rounded-t-sheet border-t border-sand/50 bg-cream text-charcoal outline-none md:max-w-140",
   closeButton:
-    "group absolute end-2 top-1 z-10 inline-flex size-10 items-center justify-center rounded-full outline-none transition-transform duration-interactive ease-smooth [@media(hover:hover)_and_(pointer:fine)]:active:scale-95 motion-reduce:transition-none",
+    "group absolute end-2 top-1 z-10 inline-flex size-10 items-center justify-center rounded-full outline-none transition-transform duration-interactive ease-smooth data-disabled:opacity-50 [@media(hover:hover)_and_(pointer:fine)]:active:scale-95 motion-reduce:transition-none",
   closeVisual:
     "flex size-8 items-center justify-center rounded-full bg-white text-brand ring-1 ring-black/5 transition-colors duration-interactive ease-smooth group-hover:bg-arctic motion-reduce:transition-none",
   handleRow:
@@ -50,6 +51,7 @@ export function ReviewDrawer(props: DrawerProps) {
         <VaulDrawer.Content className={STYLES.content}>
           <Button
             data-vaul-no-drag
+            isDisabled={props.isCloseDisabled}
             onPress={props.onClose}
             className={STYLES.closeButton}
           >

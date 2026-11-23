@@ -31,11 +31,10 @@ export function ReviewPage() {
   const s = useStrings(strings);
   const review = useReview();
 
-  const getValidationMessage = (v: ValidationResult): string => {
-    if (v.validationDetails.valueMissing) return s.form.validation.required;
-    if (v.validationDetails.tooShort) return s.form.validation.tooShort;
-    return s.form.validation.general;
-  };
+  const getValidationMessage = (v: ValidationResult): string =>
+    v.validationDetails.valueMissing
+      ? s.form.validation.required
+      : s.form.validation.tooShort;
 
   const getErrorMessage = (error: ErrorKey): string => {
     switch (error) {
@@ -53,6 +52,7 @@ export function ReviewPage() {
       case "INVALID_CREDENTIALS":
       case "UNAUTHORIZED":
       case "UNKNOWN":
+      case "UNAVAILABLE":
         return s.form.errors.unknown;
     }
   };
@@ -70,6 +70,7 @@ export function ReviewPage() {
       }}
       isOpen={review.isOpen}
       hideHeader={review.step === "success"}
+      isCloseDisabled={review.sending}
       onClose={review.close}
     >
       {review.step === "choices" && (
@@ -95,9 +96,7 @@ export function ReviewPage() {
 
       {review.step === "note" && (
         <form
-          onChange={() => {
-            if (review.error) review.clearError();
-          }}
+          onChange={review.onEdit}
           onSubmit={(e) => {
             e.preventDefault();
             review.submit(new FormData(e.currentTarget));

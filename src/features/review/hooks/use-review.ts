@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import type { Ok } from "@api/contracts";
 import { ROUTES, useLocation } from "@/shared/router";
-import { ApiError } from "@/shared/api/data";
-import { submitReview } from "../api/review";
+import type { ApiError } from "@/shared/api/data";
+import { submitReview, type ReviewPayload } from "../api/review";
 import { GOOGLE_REVIEW_URL } from "../data";
 
 type Step = "choices" | "note" | "success";
@@ -11,22 +12,21 @@ export function useReview() {
   const [location, setLocation] = useLocation();
   const [step, setStep] = useState<Step>("choices");
 
-  const mutation = useMutation({
+  const inFlight = useRef(false);
+
+  const mutation = useMutation<Ok, ApiError, ReviewPayload>({
     mutationFn: submitReview,
     onSuccess: () => setStep("success"),
+    onSettled: () => {
+      inFlight.current = false;
+    },
   });
 
-  const chooseNote = () => {
-    mutation.reset();
-    setStep("note");
-  };
-
   const close = () => {
+    if (inFlight.current) return;
     setStep("choices");
     mutation.reset();
-    if (location !== ROUTES.landing) {
-      setLocation(ROUTES.landing);
-    }
+    if (location !== ROUTES.landing) setLocation(ROUTES.landing);
   };
 
   const openGoogleReview = () => {
@@ -35,7 +35,9 @@ export function useReview() {
   };
 
   const submit = (formData: FormData) => {
-    if (mutation.isPending) return;
+    if (inFlight.current) return;
+
+    inFlight.current = true;
     mutation.mutate({
       message: String(formData.get("message") ?? "").trim(),
       name: String(formData.get("name") ?? "").trim(),
@@ -44,15 +46,19 @@ export function useReview() {
     });
   };
 
+  const onEdit = () => {
+    if (mutation.error) mutation.reset();
+  };
+
   return {
     isOpen: location === ROUTES.review,
     step,
-    chooseNote,
+    chooseNote: () => setStep("note"),
     close,
     openGoogleReview,
     submit,
-    clearError: mutation.reset,
+    onEdit,
     sending: mutation.isPending,
-    error: (mutation.error as ApiError | null)?.code ?? null,
+    error: mutation.error?.code ?? null,
   };
 }

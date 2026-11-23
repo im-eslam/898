@@ -15,6 +15,7 @@ const STYLES = {
 
 export function HeaderLanguageToggle(props: LanguageToggleProps) {
   const { header } = useStrings(strings);
+
   const buttonClass = [STYLES.button, props.className]
     .filter(Boolean)
     .join(" ");

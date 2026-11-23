@@ -1,17 +1,15 @@
-import { db } from "../../config.js";
 import { count, desc, ilike, inArray, or, type SQL } from "drizzle-orm";
-import type { z } from "zod";
-
-import type { ReviewDto, ReviewPageDto } from "../../contracts.js";
-import { reviews } from "./schema.js";
-import type { reviewValidation } from "./validation.js";
-
-type CreateInput = Omit<z.output<typeof reviewValidation.create>, "website">;
-type ListInput = z.output<typeof reviewValidation.list>;
+import { db } from "../../config.js";
+import type {
+  CreateReviewRequest,
+  ReviewDto,
+  ReviewListQuery,
+  ReviewPageDto,
+} from "../../contracts.js";
+import { reviews, reviewLimits } from "./schema.js";
 
 function buildSearchFilter(search?: string): SQL | undefined {
   if (!search) return undefined;
-
   const escaped = search.replace(/[\\%_]/g, "\\$&");
   const pattern = `%${escaped}%`;
   return or(
@@ -22,11 +20,15 @@ function buildSearchFilter(search?: string): SQL | undefined {
 }
 
 export const reviewsService = {
-  async create(input: CreateInput): Promise<void> {
+  async create(input: Omit<CreateReviewRequest, "website">): Promise<void> {
     await db.insert(reviews).values(input);
   },
 
-  async list({ q, page, per_page }: ListInput): Promise<ReviewPageDto> {
+  async list({
+    q,
+    page = 1,
+    per_page = reviewLimits.paging.defaultPerPage,
+  }: ReviewListQuery): Promise<ReviewPageDto> {
     const where = buildSearchFilter(q);
 
     const [{ total }] = await db
@@ -45,13 +47,16 @@ export const reviewsService = {
       .select()
       .from(reviews)
       .where(where)
-      .orderBy(desc(reviews.created_at), desc(reviews.id))
+      .orderBy(desc(reviews.createdAt), desc(reviews.id))
       .limit(per_page)
       .offset((currentPage - 1) * per_page);
 
     const items: ReviewDto[] = rows.map((row) => ({
-      ...row,
-      created_at: row.created_at.toISOString(),
+      id: row.id,
+      name: row.name,
+      contact: row.contact,
+      message: row.message,
+      created_at: row.createdAt.toISOString(),
     }));
 
     return {

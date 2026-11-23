@@ -37,6 +37,19 @@ export class MenuLookup {
     return MenuLookup.defaultOption(product)?.id ?? null;
   }
 
+  static startingOption(
+    product: MenuProductDto
+  ): MenuPriceOptionDto | undefined {
+    const [cheapest] = [...product.pricing.options].sort(
+      (a, b) => a.final - b.final
+    );
+    return cheapest;
+  }
+
+  static isMultiSize(product: MenuProductDto): boolean {
+    return product.pricing.options.length > 1;
+  }
+
   static option(
     product: MenuProductDto,
     optionId: number | null

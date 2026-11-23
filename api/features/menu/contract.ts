@@ -1,13 +1,14 @@
-import type { Ok } from "../../contracts.js";
+export const MENU_CURRENCIES = ["EGP"] as const;
+export const MENU_BADGES = ["top", "new"] as const;
+export const MENU_AVAILABILITIES = ["in_stock", "out_of_stock"] as const;
+export const MENU_PRICING_TYPES = ["single", "multiple"] as const;
 
-// ---- Menu ---------------------------------------------------------------
+export type MenuCurrency = (typeof MENU_CURRENCIES)[number];
+export type MenuBadge = (typeof MENU_BADGES)[number];
+export type MenuAvailability = (typeof MENU_AVAILABILITIES)[number];
+export type MenuPricingType = (typeof MENU_PRICING_TYPES)[number];
 
 export type LocalizedText = { en: string; ar: string };
-
-export type MenuCurrency = "EGP";
-export type MenuBadge = "top" | "new";
-export type MenuAvailability = "in_stock" | "out_of_stock";
-export type MenuPricingType = "single" | "multiple";
 
 export type MenuPriceDto = {
   price: number;
@@ -26,7 +27,6 @@ export type MenuAddOnDto = {
   price: number;
 };
 
-/** A product as it appears in another product's "often ordered" list. */
 export type MenuProductRefDto = {
   id: number;
   name: LocalizedText;
@@ -52,7 +52,6 @@ export type MenuProductDto = {
 };
 
 export type MenuCategoryDto = {
-  /** null is the group of products that have no category. */
   id: number | null;
   name: LocalizedText | null;
   products: MenuProductDto[];

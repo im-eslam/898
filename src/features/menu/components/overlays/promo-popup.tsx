@@ -25,6 +25,7 @@ export function PromoPopup(props: PromoPopupProps) {
     props.popup.enabled && props.popup.image
       ? menuImageUrl("popup", props.popup.image)
       : null;
+
   const delayMs =
     Math.max(
       0,

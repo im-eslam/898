@@ -2,10 +2,15 @@ import { Button } from "react-aria-components";
 import { useLocale, useStrings } from "@/shared/i18n";
 import { Icon } from "@/shared/icons";
 import type { MenuProductRefDto } from "@api/contracts";
-import { strings } from "../../../strings";
 import { Stock } from "../../../util/menu";
 import { Price } from "../../ui/price";
 import { ProductImage } from "../../ui/product-image";
+import { strings } from "../../../strings";
+
+interface ProductOftenOrderedProps {
+  references: MenuProductRefDto[];
+  onOpen: (productId: number) => void;
+}
 
 const STYLES = {
   root: "flex flex-col gap-2",
@@ -21,19 +26,13 @@ const STYLES = {
     "absolute inset-0 z-10 rounded-md outline-none data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-brand",
 } as const;
 
-interface ItemOftenOrderedProps {
-  references: MenuProductRefDto[];
-  onOpen: (productId: number) => void;
-}
-
-/** Products guests often order with this one. Each card opens that product. */
-export function ItemOftenOrdered(props: ItemOftenOrderedProps) {
-  const s = useStrings(strings);
+export function ProductOftenOrdered(props: ProductOftenOrderedProps) {
+  const { sheet } = useStrings(strings);
   const locale = useLocale();
 
   return (
-    <section aria-label={s.sheet.oftenOrdered} className={STYLES.root}>
-      <h3 className={STYLES.title}>{s.sheet.oftenOrdered}</h3>
+    <section aria-label={sheet.items.oftenOrdered} className={STYLES.root}>
+      <h3 className={STYLES.title}>{sheet.items.oftenOrdered}</h3>
       <div className={STYLES.rail}>
         {props.references.map((ref) => {
           const available = Stock.isAvailable(ref);
@@ -63,7 +62,7 @@ export function ItemOftenOrdered(props: ItemOftenOrderedProps) {
                 <Icon name="arrow" className={STYLES.arrow} />
               </span>
               <Button
-                aria-label={s.sheet.openItem(name)}
+                aria-label={sheet.items.openItem(name)}
                 onPress={() => props.onOpen(ref.id)}
                 className={STYLES.action}
               />
