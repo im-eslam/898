@@ -1,4 +1,4 @@
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Dialog, Modal, ModalOverlay } from "react-aria-components";
 import { useLocale, useStrings } from "@/shared/i18n";
 import type { MenuDto, MenuPairingDto, MenuProductDto } from "@api/contracts";
@@ -26,10 +26,10 @@ interface SearchPanelProps {
 
 const STYLES = {
   overlay:
-    "fixed inset-0 z-50 flex justify-center overscroll-none md:items-start md:p-6 md:pt-[8dvh] data-entering:animate-fade-in data-exiting:animate-fade-out motion-reduce:animate-none",
+    "fixed inset-0 z-50 flex justify-center overscroll-none pt-[env(safe-area-inset-top,0px)] opacity-100 transition-opacity duration-fast ease-smooth data-entering:opacity-100 data-exiting:opacity-0 md:items-start md:p-6 md:pt-[max(8dvh,env(safe-area-inset-top,0px))]",
   scrim: "pointer-events-none absolute inset-0 bg-scrim",
   modal:
-    "relative z-10 flex h-full w-full max-w-120 flex-col overflow-hidden bg-white outline-none data-entering:animate-fade-in data-exiting:animate-fade-out motion-reduce:animate-none md:h-[min(40rem,80dvh)] md:max-w-140 md:rounded-lg md:shadow-sheet",
+    "relative z-10 flex h-[100dvh] w-full max-w-120 flex-col overflow-hidden bg-white pb-[env(safe-area-inset-bottom,0px)] opacity-100 outline-none transition-opacity duration-fast ease-smooth data-entering:opacity-100 data-exiting:opacity-0 md:h-[min(40rem,80dvh)] md:max-w-140 md:rounded-lg md:shadow-sheet",
   dialog: "flex min-h-0 flex-1 flex-col outline-none",
   status: "sr-only",
 } as const;
@@ -81,6 +81,22 @@ function SearchPanel(props: SearchPanelProps) {
 
 export function SearchOverlay(props: SearchOverlayProps) {
   const { search } = useStrings(strings);
+  const { isOpen, onClose } = props;
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => document.removeEventListener("keydown", onKeyDown, true);
+  }, [isOpen, onClose]);
 
   return (
     <ModalOverlay

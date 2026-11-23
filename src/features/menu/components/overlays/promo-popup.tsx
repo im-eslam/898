@@ -13,12 +13,12 @@ interface PromoPopupProps {
 
 const STYLES = {
   overlay:
-    "fixed inset-0 z-50 flex items-center justify-center bg-scrim p-4 data-entering:animate-fade-in data-exiting:animate-fade-out motion-reduce:animate-none",
+    "fixed inset-0 z-50 flex items-center justify-center bg-scrim p-[max(1rem,env(safe-area-inset-left,0px))] pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))] pe-[max(1rem,env(safe-area-inset-right,0px))] opacity-100 transition-opacity duration-fast ease-smooth data-entering:opacity-100 data-exiting:opacity-0",
   modal:
-    "relative outline-none data-entering:animate-reveal-in data-exiting:animate-reveal-out motion-reduce:animate-none",
+    "relative translate-y-0 scale-100 opacity-100 outline-none transition-[opacity,transform] duration-base ease-smooth data-entering:translate-y-0 data-entering:scale-100 data-entering:opacity-100 data-exiting:translate-y-2 data-exiting:scale-[0.98] data-exiting:opacity-0",
   dialog: "outline-none",
   image:
-    "block h-auto max-h-[80dvh] w-auto max-w-[min(28rem,calc(100vw-2rem))] rounded-lg bg-white object-contain",
+    "block h-auto max-h-[calc(80dvh-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))] w-auto max-w-[min(28rem,calc(100vw-2rem))] rounded-lg bg-white object-contain",
   close: "absolute end-1 top-1 z-10",
 } as const;
 
@@ -71,10 +71,28 @@ export function PromoPopup(props: PromoPopupProps) {
     };
   }, [imageUrl, delayMs, configKey]);
 
-  if (!imageUrl) return null;
-
   const isOpen =
-    readyKey === configKey && dismissedKey !== configKey && !props.busy;
+    Boolean(imageUrl) &&
+    readyKey === configKey &&
+    dismissedKey !== configKey &&
+    !props.busy;
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        setDismissedKey(configKey);
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => document.removeEventListener("keydown", onKeyDown, true);
+  }, [isOpen, configKey]);
+
+  if (!imageUrl) return null;
 
   return (
     <ModalOverlay
