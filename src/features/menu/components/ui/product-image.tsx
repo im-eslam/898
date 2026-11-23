@@ -51,6 +51,8 @@ export function ProductImage(props: ProductImageProps) {
         <img
           src={src}
           alt={props.alt ?? ""}
+          width={400}
+          height={400}
           loading={props.priority ? "eager" : "lazy"}
           fetchPriority={props.priority ? "high" : undefined}
           decoding="async"

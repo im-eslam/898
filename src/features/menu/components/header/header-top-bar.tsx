@@ -32,6 +32,8 @@ export function HeaderTopBar(props: TopBarProps) {
       <img
         src={mark}
         alt=""
+        width={41}
+        height={28}
         decoding="async"
         draggable={false}
         className={STYLES.mark}
