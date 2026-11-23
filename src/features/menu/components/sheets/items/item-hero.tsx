@@ -20,10 +20,9 @@ interface BundleHeroProps {
 
 const STYLES = {
   product: {
-    root: "flex flex-col gap-3",
-    frame: "relative",
+    root: "flex w-full flex-col items-start gap-3",
+    frame: "relative w-full",
     image: "aspect-square w-full rounded-lg",
-    badge: "absolute end-2 top-2",
     description:
       "text-small font-medium text-pretty whitespace-pre-line text-navy/65",
   },
@@ -58,13 +57,8 @@ function ProductHero(props: ProductHeroProps) {
           grayscale={!available}
           className={STYLES.product.image}
         />
-        {badge && !available && (
-          <span className={STYLES.product.badge}>
-            <Badge type={badge} />
-          </span>
-        )}
       </div>
-      {badge && available && <Badge type={badge} />}
+      {badge && <Badge type={badge} />}
       {description && (
         <p className={STYLES.product.description}>{description}</p>
       )}

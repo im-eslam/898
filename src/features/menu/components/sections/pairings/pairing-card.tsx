@@ -7,6 +7,7 @@ import { Badge } from "../../ui/badge";
 import { Chevron } from "../../ui/chevron";
 import { Price } from "../../ui/price";
 import { ProductImage } from "../../ui/product-image";
+import { useTapGuard } from "../../ui/carousel";
 
 interface PairingCardProps {
   pairing: MenuPairingDto;
@@ -14,7 +15,7 @@ interface PairingCardProps {
 }
 
 const STYLES = {
-  root: "duration-fast relative flex h-full select-none touch-manipulation flex-col gap-2 rounded-lg bg-white/70 p-2 ring-1 ring-sand/60 transition-transform ease-smooth has-data-pressed:scale-[0.96]",
+  root: "duration-fast relative flex h-full touch-manipulation select-none flex-col gap-2 rounded-lg bg-white/70 p-2 ring-1 ring-sand/60 transition-transform ease-smooth has-data-pressed:scale-[0.96] [-webkit-touch-callout:none]",
   pictures: "relative flex aspect-2/1 w-full gap-1",
   picture: "min-w-0 flex-1 rounded-md",
   plus: "absolute inset-0 m-auto flex size-8 items-center justify-center rounded-full border-2 border-white bg-brand text-white",
@@ -25,13 +26,16 @@ const STYLES = {
   footer: "mt-auto flex items-center gap-2 px-2 pt-1 pb-2",
   unavailable: "opacity-60",
   action:
-    "absolute inset-0 z-10 rounded-lg outline-none data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-brand",
+    "absolute inset-0 z-10 rounded-lg outline-none select-none [-webkit-touch-callout:none] data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-brand",
 } as const;
 
 export function PairingCard(props: PairingCardProps) {
   const locale = useLocale();
+  const allowPress = useTapGuard();
 
-  const available = props.pairing.items.every((item) => Stock.isAvailable(item));
+  const available = props.pairing.items.every((item) =>
+    Stock.isAvailable(item)
+  );
   const hasSavings = props.pairing.pricing.discount > 0;
   const name = props.pairing.items.map((item) => item.name[locale]).join(" + ");
 
@@ -71,7 +75,9 @@ export function PairingCard(props: PairingCardProps) {
         ))}
       </div>
 
-      <div className={`${STYLES.footer} ${available ? "" : STYLES.unavailable}`}>
+      <div
+        className={`${STYLES.footer} ${available ? "" : STYLES.unavailable}`}
+      >
         <Price
           original={props.pairing.pricing.price}
           discounted={props.pairing.pricing.final}
@@ -79,7 +85,13 @@ export function PairingCard(props: PairingCardProps) {
         <Chevron size="m" className="ms-auto" />
       </div>
 
-      <Button aria-label={name} onPress={props.onOpen} className={STYLES.action} />
+      <Button
+        aria-label={name}
+        onPress={() => {
+          if (allowPress()) props.onOpen();
+        }}
+        className={STYLES.action}
+      />
     </div>
   );
 }

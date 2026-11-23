@@ -15,9 +15,9 @@ interface SignatureCardProps {
 }
 
 const STYLES = {
-  root: "duration-fast relative flex h-full select-none touch-manipulation flex-col gap-3 rounded-lg bg-paper p-3 transition-transform ease-smooth has-data-pressed:scale-[0.98]",
+  root: "duration-fast relative flex h-full touch-manipulation select-none flex-col gap-3 rounded-lg bg-paper p-3 transition-transform ease-smooth has-data-pressed:scale-[0.98] [-webkit-touch-callout:none]",
   frame: "relative",
-  image: "h-[min(36dvh,20rem)] w-full rounded-md",
+  image: "h-[min(30dvh,30rem)] w-full rounded-md",
   badge: "absolute end-2 top-2",
   body: "flex min-w-0 flex-col gap-1 px-1",
   name: "line-clamp-2 text-title font-bold text-balance text-charcoal",
@@ -25,12 +25,11 @@ const STYLES = {
   footer: "mt-auto flex items-center gap-2 px-1 pt-1",
   unavailable: "opacity-60",
   action:
-    "absolute inset-0 z-10 rounded-lg outline-none data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-brand",
+    "absolute inset-0 z-10 rounded-lg outline-none select-none [-webkit-touch-callout:none] data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-brand",
 } as const;
 
 export function SignatureCard(props: SignatureCardProps) {
   const locale = useLocale();
-
   const allowPress = useTapGuard();
 
   const name = props.product.name[locale];

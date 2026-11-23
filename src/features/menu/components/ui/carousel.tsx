@@ -6,14 +6,13 @@ import {
   useEffect,
   useRef,
   useState,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
 import { Button } from "react-aria-components";
 import { useLocale, useStrings } from "@/shared/i18n";
 import { strings } from "../../strings";
 
-// Cards inside a carousel ask this before opening.
-// It returns false when the touch stopped a swipe or the track moved during it.
 const TapGuardContext = createContext<() => boolean>(() => true);
 
 export function useTapGuard() {
@@ -27,6 +26,10 @@ interface CarouselProps {
   className?: string;
   children: ReactNode;
 }
+
+const FLING_PX_PER_MS = 0.6;
+const DRAG_PX = 8;
+const STALE_MS = 100;
 
 const STYLES = {
   viewport:
@@ -42,8 +45,6 @@ const STYLES = {
   },
 } as const;
 
-const IDLE_MS = 180;
-
 export function Carousel(props: CarouselProps) {
   const { carousel } = useStrings(strings);
   const locale = useLocale();
@@ -51,47 +52,51 @@ export function Carousel(props: CarouselProps) {
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const movingRef = useRef(false);
-  const idleRef = useRef<number | undefined>(undefined);
-  const pressRef = useRef({ moving: false, left: 0 });
+  const scrollRef = useRef({ left: 0, time: 0, speed: 0 });
+  const pressRef = useRef({ x: 0, y: 0, fling: false, moved: false });
 
   const items = Children.toArray(props.children);
   const [active, setActive] = useState(0);
 
-  // True while the track is scrolling, false shortly after it settles.
   const onScroll = () => {
-    movingRef.current = true;
-    window.clearTimeout(idleRef.current);
-    idleRef.current = window.setTimeout(() => {
-      movingRef.current = false;
-    }, IDLE_MS);
-  };
-
-  useEffect(() => () => window.clearTimeout(idleRef.current), []);
-
-  // Record the state at touch start. This runs before any card's press handler.
-  const onPointerDownCapture = () => {
     const viewport = viewportRef.current;
     if (!viewport) return;
+    const now = performance.now();
+    const s = scrollRef.current;
+    const elapsed = now - s.time;
+    if (elapsed > 0) {
+      s.speed = Math.abs(viewport.scrollLeft - s.left) / elapsed;
+    }
+    s.left = viewport.scrollLeft;
+    s.time = now;
+  };
+
+  const onPointerDownCapture = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const s = scrollRef.current;
+    const moving = performance.now() - s.time < STALE_MS;
     pressRef.current = {
-      moving: movingRef.current,
-      left: viewport.scrollLeft,
+      x: e.clientX,
+      y: e.clientY,
+      fling: moving && s.speed > FLING_PX_PER_MS,
+      moved: false,
     };
   };
 
-  // Called on release. Opens only if the track was still for the whole touch.
+  const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const p = pressRef.current;
+    if (
+      Math.abs(e.clientX - p.x) > DRAG_PX ||
+      Math.abs(e.clientY - p.y) > DRAG_PX
+    ) {
+      p.moved = true;
+    }
+  };
+
   const allowPress = useCallback(() => {
-    const viewport = viewportRef.current;
-    if (!viewport) return true;
-    const press = pressRef.current;
-    return (
-      !press.moving &&
-      !movingRef.current &&
-      Math.abs(viewport.scrollLeft - press.left) < 2
-    );
+    const p = pressRef.current;
+    return !p.fling && !p.moved;
   }, []);
 
-  // IntersectionObserver fires on threshold crossings, not on every scroll frame.
   useEffect(() => {
     const viewport = viewportRef.current;
     const slides = Array.from(trackRef.current?.children ?? []);
@@ -105,7 +110,11 @@ export function Carousel(props: CarouselProps) {
         }
         let best = 0;
         slides.forEach((slide, i) => {
-          if ((ratios.get(slide) ?? 0) > (ratios.get(slides[best]!) ?? 0)) {
+          const bestSlide = slides[best];
+          if (
+            bestSlide &&
+            (ratios.get(slide) ?? 0) > (ratios.get(bestSlide) ?? 0)
+          ) {
             best = i;
           }
         });
@@ -143,6 +152,7 @@ export function Carousel(props: CarouselProps) {
           className={STYLES.viewport}
           onScroll={onScroll}
           onPointerDownCapture={onPointerDownCapture}
+          onPointerMove={onPointerMove}
         >
           <div ref={trackRef} className={STYLES.track}>
             {items.map((child, i) => (
