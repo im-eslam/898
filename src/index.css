@@ -46,6 +46,8 @@
   --duration-fast: 200ms;
   --duration-base: 350ms;
   --duration-slow: 500ms;
+  --duration-sheet-exit: 300ms;
+  --ease-sheet-exit: cubic-bezier(0.32, 0.72, 0, 1);
 
   --animate-fade-in: fade-in 150ms ease-out backwards;
   --animate-fade-out: fade-out 150ms ease-in forwards;
@@ -158,16 +160,19 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    overscroll-behavior-y: none;
+    overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
     font-family: var(--font-latin);
     color: var(--color-charcoal);
   }
 
   body {
-    overscroll-behavior-y: none;
+    overscroll-behavior: none;
     background: var(--color-cream);
     font-weight: 500;
+  }
+  header {
+    padding-top: env(safe-area-inset-top, 0px);
   }
   [lang="ar"] {
     --text-title--line-height: 1.5;
@@ -189,6 +194,34 @@
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
+    touch-action: manipulation;
+  }
+  button,
+  a,
+  [role="button"],
+  [role="tab"] {
+    transition-property: transform, background-color, border-color, color;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-exit);
+  }
+  button:active,
+  a:active,
+  [role="button"]:active,
+  [role="tab"]:active {
+    transform: scale(0.98);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    button,
+    a,
+    [role="button"],
+    [role="tab"] {
+      transition-duration: 0ms;
+    }
+  }
+  input,
+  textarea,
+  select {
+    font-size: 16px;
   }
   :focus-visible {
     outline: 2px solid currentColor;

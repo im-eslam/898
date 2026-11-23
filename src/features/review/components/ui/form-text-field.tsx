@@ -43,9 +43,22 @@ export function FormTextField(props: FormTextFieldProps) {
       <Label className={STYLES.label}>{props.label}</Label>
 
       {props.kind === "textarea" ? (
-        <TextArea rows={5} className={`${STYLES.control} ${STYLES.textarea}`} />
+        <TextArea
+          rows={5}
+          enterKeyHint="done"
+          autoCapitalize="sentences"
+          autoCorrect="on"
+          className={`${STYLES.control} ${STYLES.textarea}`}
+        />
       ) : (
-        <Input autoComplete={props.autoComplete} className={STYLES.control} />
+        <Input
+          type="text"
+          enterKeyHint="next"
+          autoCapitalize="words"
+          autoCorrect="on"
+          autoComplete={props.autoComplete}
+          className={STYLES.control}
+        />
       )}
 
       <FieldError className={STYLES.error}>{props.errorMessage}</FieldError>

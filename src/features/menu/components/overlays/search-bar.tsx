@@ -35,7 +35,15 @@ export function SearchBar(props: SearchBarProps) {
       >
         <Label className={STYLES.fieldLabel}>{search.label}</Label>
         <Icon name="search" className={STYLES.fieldIcon} />
-        <Input placeholder={search.placeholder} className={STYLES.input} />
+        <Input
+          type="search"
+          inputMode="search"
+          enterKeyHint="search"
+          autoCapitalize="none"
+          autoCorrect="off"
+          placeholder={search.placeholder}
+          className={STYLES.input}
+        />
         <Button aria-label={search.clear} className={STYLES.clear}>
           <Icon name="close" className="size-4" />
         </Button>
