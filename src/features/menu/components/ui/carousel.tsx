@@ -13,10 +13,11 @@ interface CarouselProps {
 
 const STYLES = {
   root: "relative",
-  viewport: "overflow-hidden",
-  track: "flex touch-pan-y gap-3 [&>*]:min-w-0 [&>*]:shrink-0",
+  viewport: "touch-pan-y overflow-hidden",
+  track: "flex gap-3 [&>*]:min-w-0 [&>*]:shrink-0",
   dots: "mt-3 flex items-center justify-center gap-1.5",
-  dot: "h-1.5 rounded-full transition-all duration-fast ease-smooth motion-reduce:transition-none",
+  dot: "flex size-11 shrink-0 items-center justify-center rounded-full outline-none",
+  dotIndicator: "h-1.5 rounded-full transition-all duration-fast ease-smooth",
   dotActive: "w-4 bg-brand",
   dotInactive: "w-1.5 bg-sand data-hovered:bg-taupe",
 } as const;
@@ -58,6 +59,7 @@ export function Carousel(props: CarouselProps) {
       role="region"
       aria-roledescription="carousel"
       aria-labelledby={props.labelledBy}
+      dir={locale === "ar" ? "rtl" : "ltr"}
       className={rootClass}
     >
       <div ref={viewportRef} className={STYLES.viewport}>
@@ -72,10 +74,15 @@ export function Carousel(props: CarouselProps) {
               aria-label={carousel.slide(index + 1)}
               aria-current={index === selected ? "true" : undefined}
               onPress={() => api?.scrollTo(index)}
-              className={`${STYLES.dot} ${
-                index === selected ? STYLES.dotActive : STYLES.dotInactive
-              }`}
-            />
+              className={STYLES.dot}
+            >
+              <span
+                aria-hidden="true"
+                className={`${STYLES.dotIndicator} ${
+                  index === selected ? STYLES.dotActive : STYLES.dotInactive
+                }`}
+              />
+            </Button>
           ))}
         </div>
       )}
