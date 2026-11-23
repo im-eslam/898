@@ -4,12 +4,12 @@ import { LandingPage } from "@/features/landing/";
 import { ReviewPage } from "@/features/review/";
 import { ROUTES, Route, Switch } from "@/shared/router";
 
-const MenuPage = lazy(() =>
-  import("@/features/menu/").then((m) => ({ default: m.MenuPage }))
-);
-
 const MissingPage = lazy(() =>
   import("@/features/states/missing/").then((m) => ({ default: m.MissingPage }))
+);
+
+const MenuPage = lazy(() =>
+  import("@/features/menu/").then((m) => ({ default: m.MenuPage }))
 );
 
 export default function App() {
@@ -24,7 +24,9 @@ export default function App() {
             <LandingPage />
           </Route>
           <Route path={ROUTES.menu}>
-            <MenuPage />
+            <Suspense fallback={<LoadingPage kind="menu" />}>
+              <MenuPage />
+            </Suspense>
           </Route>
           <Route>
             <MissingPage />
