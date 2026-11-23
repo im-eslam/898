@@ -13,7 +13,7 @@ interface ChoiceCardProps {
 }
 
 const STYLES = {
-  card: "group flex min-h-16 w-full items-center gap-4 rounded-lg border border-white/50 bg-white/80 px-4 py-3 text-start outline-none transition duration-interactive ease-smooth data-focused:ring-2 data-focused:ring-brand data-hovered:border-brand data-hovered:bg-white [@media(hover:hover)_and_(pointer:fine)]:data-pressed:scale-[0.98]",
+  card: "group flex min-h-16 w-full items-center gap-4 rounded-lg border border-white/50 bg-white/80 px-4 py-3 text-start outline-none touch-manipulation select-none [-webkit-user-select:none] [-webkit-touch-callout:none] active:transform-none transition duration-interactive ease-smooth data-focused:ring-2 data-focused:ring-brand data-hovered:border-brand data-hovered:bg-white",
   bubble:
     "flex size-11 shrink-0 items-center justify-center rounded-full bg-arctic/60 text-brand transition-colors duration-interactive ease-smooth group-data-hovered:bg-arctic",
   icon: "size-6",

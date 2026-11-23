@@ -30,7 +30,6 @@
     "bcryptjs": "^3.0.3",
     "dotenv": "^18.0.10",
     "drizzle-orm": "^0.45.4",
-    "embla-carousel-react": "^8.6.0",
     "hono": "^4.13.19",
     "pino": "^10.4.0",
     "react": "^19.3.1",

@@ -15,7 +15,7 @@ interface SignatureCardProps {
 }
 
 const STYLES = {
-  root: "duration-fast relative flex h-full touch-manipulation select-none flex-col gap-3 rounded-lg bg-paper p-3 transition-transform ease-smooth has-data-pressed:scale-[0.98] [-webkit-touch-callout:none]",
+  root: "relative flex h-full touch-manipulation select-none [-webkit-user-select:none] [-webkit-touch-callout:none] flex-col gap-3 rounded-lg bg-paper p-3",
   frame: "relative",
   image: "h-[min(30dvh,30rem)] w-full rounded-md",
   badge: "absolute end-2 top-2",
@@ -25,7 +25,7 @@ const STYLES = {
   footer: "mt-auto flex items-center gap-2 px-1 pt-1",
   unavailable: "opacity-60",
   action:
-    "absolute inset-0 z-10 rounded-lg outline-none select-none [-webkit-touch-callout:none] data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-brand",
+    "absolute inset-0 z-10 rounded-lg outline-none select-none [-webkit-touch-callout:none] active:transform-none data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-brand",
 } as const;
 
 export function SignatureCard(props: SignatureCardProps) {

@@ -13,12 +13,6 @@ import { Button } from "react-aria-components";
 import { useLocale, useStrings } from "@/shared/i18n";
 import { strings } from "../../strings";
 
-const TapGuardContext = createContext<() => boolean>(() => true);
-
-export function useTapGuard() {
-  return useContext(TapGuardContext);
-}
-
 interface CarouselProps {
   labelledBy: string;
   itemClassName: string;
@@ -30,6 +24,8 @@ interface CarouselProps {
 const FLING_PX_PER_MS = 0.6;
 const DRAG_PX = 8;
 const STALE_MS = 100;
+
+const TapGuardContext = createContext<() => boolean>(() => true);
 
 const STYLES = {
   viewport:
@@ -44,6 +40,10 @@ const STYLES = {
     light: { dot: "text-paper", on: "w-5 bg-paper", off: "w-1.5 bg-paper/35" },
   },
 } as const;
+
+export function useTapGuard() {
+  return useContext(TapGuardContext);
+}
 
 export function Carousel(props: CarouselProps) {
   const { carousel } = useStrings(strings);

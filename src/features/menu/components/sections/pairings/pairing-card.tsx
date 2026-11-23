@@ -15,7 +15,7 @@ interface PairingCardProps {
 }
 
 const STYLES = {
-  root: "duration-fast relative flex h-full touch-manipulation select-none flex-col gap-2 rounded-lg bg-white/70 p-2 ring-1 ring-sand/60 transition-transform ease-smooth has-data-pressed:scale-[0.96] [-webkit-touch-callout:none]",
+  root: "relative flex h-full touch-manipulation select-none [-webkit-user-select:none] [-webkit-touch-callout:none] flex-col gap-2 rounded-lg bg-white/70 p-2 ring-1 ring-sand/60",
   pictures: "relative flex aspect-2/1 w-full gap-1",
   picture: "min-w-0 flex-1 rounded-md",
   plus: "absolute inset-0 m-auto flex size-8 items-center justify-center rounded-full border-2 border-white bg-brand text-white",
@@ -26,7 +26,7 @@ const STYLES = {
   footer: "mt-auto flex items-center gap-2 px-2 pt-1 pb-2",
   unavailable: "opacity-60",
   action:
-    "absolute inset-0 z-10 rounded-lg outline-none select-none [-webkit-touch-callout:none] data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-brand",
+    "absolute inset-0 z-10 rounded-lg outline-none select-none [-webkit-touch-callout:none] active:transform-none data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-brand",
 } as const;
 
 export function PairingCard(props: PairingCardProps) {

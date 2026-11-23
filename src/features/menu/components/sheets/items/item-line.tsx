@@ -72,8 +72,7 @@ const STYLES = {
     baristaBox:
       "duration-base flex size-6 shrink-0 items-center justify-center rounded-sm border-2 border-taupe/60 transition-colors group-data-selected:border-white/80 group-data-selected:bg-white group-data-selected:text-brand",
     label: "pb-2 text-body font-bold",
-    row:
-      "group duration-base flex min-h-14 w-full items-center gap-4 border-b-[0.5px] border-sand/30 py-2 text-start transition-colors outline-none last:border-b-0 data-disabled:opacity-50 data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-paper",
+    row: "group duration-base flex min-h-14 w-full items-center gap-4 border-b-[0.5px] border-sand/30 py-2 text-start transition-colors outline-none last:border-b-0 data-disabled:opacity-50 data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-paper",
     box: "duration-base flex size-6 shrink-0 items-center justify-center rounded-sm border-2 border-taupe/60 transition-colors group-data-selected:border-brand group-data-selected:bg-brand group-data-selected:text-white",
     name: "min-w-0 flex-1 text-body font-medium group-data-selected:font-semibold",
     tick: "size-4 scale-50 opacity-0 transition-[opacity,transform] duration-fast group-data-selected:scale-100 group-data-selected:opacity-100",
@@ -166,7 +165,14 @@ function AddOns(props: AddOnsProps) {
 
   const baristaIds = props.product.baristaWay.map((addOn) => addOn.id);
   const hasBarista = baristaIds.length > 0;
-  const hasAddOns = props.product.addOns.length > 0;
+  const selectableAddOns = [
+    ...props.product.addOns,
+    ...props.product.baristaWay,
+  ].filter(
+    (addOn, index, list) =>
+      list.findIndex((candidate) => candidate.id === addOn.id) === index
+  );
+  const hasAddOns = selectableAddOns.length > 0;
 
   if (!hasBarista && !hasAddOns) return null;
 
@@ -198,14 +204,14 @@ function AddOns(props: AddOnsProps) {
 
       {hasAddOns && (
         <CheckboxGroup
-          value={props.product.addOns
+          value={selectableAddOns
             .filter((addOn) => props.addOnIds.includes(addOn.id))
             .map((addOn) => String(addOn.id))}
           onChange={(values) => props.onAddOns(values.map((v) => Number(v)))}
           isDisabled={props.disabled}
         >
           <Label className={STYLES.addOns.label}>{itemSheet.addOns}</Label>
-          {props.product.addOns.map((addOn) => (
+          {selectableAddOns.map((addOn) => (
             <Checkbox
               key={addOn.id}
               value={String(addOn.id)}

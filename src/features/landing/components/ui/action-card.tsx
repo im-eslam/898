@@ -24,7 +24,7 @@ type ActionCardProps = ActionCardInternalProps | ActionCardExternalProps;
 
 const STYLES = {
   card: {
-    base: "group flex min-h-16 w-full items-center gap-4 rounded-lg border px-4 py-3 touch-manipulation transition duration-fast ease-smooth active:scale-[0.98] [@media(hover:hover)_and_(pointer:fine)]:active:scale-95",
+    base: "group flex min-h-16 w-full items-center gap-4 rounded-lg border px-4 py-3 touch-manipulation select-none [-webkit-user-select:none] [-webkit-touch-callout:none] transition duration-fast ease-smooth active:transform-none",
     tone: {
       standard:
         "border-paper/50 bg-paper/80 text-navy [@media(hover:hover)_and_(pointer:fine)]:hover:border-brand [@media(hover:hover)_and_(pointer:fine)]:hover:bg-paper",
