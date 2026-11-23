@@ -3,11 +3,7 @@ import { Button } from "react-aria-components";
 import { useLocale, useStrings } from "@/shared/i18n";
 import type { MenuCategoryDto, MenuProductDto } from "@api/contracts";
 import { strings } from "../../../strings";
-import {
-  CATEGORY_PREVIEW_COUNT,
-  REVEAL_MAX_STEPS,
-  REVEAL_STEP_MS,
-} from "../../../data";
+import { CATEGORY_PREVIEW_COUNT } from "../../../data";
 import { categoryId, categoryName } from "../../../util/section";
 import { SectionHeading } from "../../ui/section-heading";
 import { ProductCard } from "./product-card";
@@ -18,8 +14,7 @@ interface ProductsSectionProps {
 }
 
 const STYLES = {
-  section:
-    "scroll-mt-[calc(7rem+env(safe-area-inset-top,0px))] py-6",
+  section: "scroll-mt-[calc(7rem+env(safe-area-inset-top,0px))] py-6",
   inner: "mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 md:px-6",
   grid: "grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3",
   reveal: "animate-reveal-in",
@@ -58,7 +53,7 @@ export function ProductsSection(props: ProductsSectionProps) {
                 key={product.id}
                 className={STYLES.reveal}
                 style={{
-                  animationDelay: `${Math.min(index, REVEAL_MAX_STEPS) * REVEAL_STEP_MS}ms`,
+                  animationDelay: `${Math.min(index, 6) * 40}ms`,
                 }}
               >
                 <ProductCard

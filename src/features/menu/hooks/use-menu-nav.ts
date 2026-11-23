@@ -1,9 +1,34 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useScrollSpy } from "@raddix/use-scroll-spy";
-import { PIN_FALLBACK_MS, SCROLL_SPY_OPTIONS } from "../data";
+
+const FALLBACK_HEADER_PX = 104;
+const USER_SCROLL_EVENTS = ["wheel", "touchmove", "keydown"] as const;
+
+function useHeaderHeight(): number {
+  const [height, setHeight] = useState(FALLBACK_HEADER_PX);
+
+  useEffect(() => {
+    const header = document.querySelector("header");
+    if (!header) return;
+    const update = () =>
+      setHeight(Math.round(header.getBoundingClientRect().height));
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+
+  return height;
+}
 
 export function useMenuNav(sectionIds: string[]) {
-  const spiedId = useScrollSpy(sectionIds, SCROLL_SPY_OPTIONS);
+  const headerHeight = useHeaderHeight();
+  const spyOptions = useMemo<IntersectionObserverInit>(
+    () => ({ rootMargin: `-${headerHeight}px 0px -65% 0px` }),
+    [headerHeight]
+  );
+  const spiedId = useScrollSpy(sectionIds, spyOptions);
+
   const [pinnedId, setPinnedId] = useState<string | null>(null);
   const [atBottom, setAtBottom] = useState(false);
 
@@ -30,12 +55,13 @@ export function useMenuNav(sectionIds: string[]) {
     if (pinnedId === null) return;
 
     const release = () => setPinnedId(null);
-    window.addEventListener("scrollend", release);
-    const timer = window.setTimeout(release, PIN_FALLBACK_MS);
-
+    for (const type of USER_SCROLL_EVENTS) {
+      window.addEventListener(type, release, { passive: true });
+    }
     return () => {
-      window.removeEventListener("scrollend", release);
-      window.clearTimeout(timer);
+      for (const type of USER_SCROLL_EVENTS) {
+        window.removeEventListener(type, release);
+      }
     };
   }, [pinnedId]);
 

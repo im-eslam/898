@@ -165,13 +165,7 @@ function AddOns(props: AddOnsProps) {
 
   const baristaIds = props.product.baristaWay.map((addOn) => addOn.id);
   const hasBarista = baristaIds.length > 0;
-  const selectableAddOns = [
-    ...props.product.addOns,
-    ...props.product.baristaWay,
-  ].filter(
-    (addOn, index, list) =>
-      list.findIndex((candidate) => candidate.id === addOn.id) === index
-  );
+  const selectableAddOns = MenuLookup.addOnOptions(props.product);
   const hasAddOns = selectableAddOns.length > 0;
 
   if (!hasBarista && !hasAddOns) return null;

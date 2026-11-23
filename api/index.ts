@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server";
 import { type Context, Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
+import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import { secureHeaders } from "hono/secure-headers";
@@ -16,6 +17,7 @@ class Api {
   readonly app = new Hono();
 
   constructor() {
+    this.app.use("*", compress());
     this.app.use("*", secureHeaders(), this.logRequests);
     this.app.use("/api/*", this.allowCors(), this.limitBody());
     this.app.route("/api", healthApi.routes);

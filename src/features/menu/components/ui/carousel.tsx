@@ -1,8 +1,8 @@
 import {
   Children,
-  createContext,
+  cloneElement,
+  isValidElement,
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,
@@ -21,11 +21,17 @@ interface CarouselProps {
   children: ReactNode;
 }
 
+interface CarouselSlideProps {
+  canOpen: () => boolean;
+  className: string;
+  children: ReactNode;
+}
+
+type CardGuard = { canOpen?: () => boolean };
+
 const FLING_PX_PER_MS = 0.6;
 const DRAG_PX = 8;
 const STALE_MS = 100;
-
-const TapGuardContext = createContext<() => boolean>(() => true);
 
 const STYLES = {
   viewport:
@@ -41,8 +47,18 @@ const STYLES = {
   },
 } as const;
 
-export function useTapGuard() {
-  return useContext(TapGuardContext);
+// Injects the tap guard into the card. cloneElement runs in this component's
+// render, so the guard arrives as a prop and is only read later, in the card's
+// press handler, not during the carousel's render.
+function CarouselSlide(props: CarouselSlideProps) {
+  const child = props.children;
+  return (
+    <div className={props.className}>
+      {isValidElement<CardGuard>(child)
+        ? cloneElement(child, { canOpen: props.canOpen })
+        : child}
+    </div>
+  );
 }
 
 export function Carousel(props: CarouselProps) {
@@ -139,49 +155,51 @@ export function Carousel(props: CarouselProps) {
   };
 
   return (
-    <TapGuardContext.Provider value={allowPress}>
+    <div
+      role="region"
+      aria-roledescription="carousel"
+      aria-labelledby={props.labelledBy}
+      dir={locale === "ar" ? "rtl" : "ltr"}
+      className={props.className}
+    >
       <div
-        role="region"
-        aria-roledescription="carousel"
-        aria-labelledby={props.labelledBy}
-        dir={locale === "ar" ? "rtl" : "ltr"}
-        className={props.className}
+        ref={viewportRef}
+        className={STYLES.viewport}
+        onScroll={onScroll}
+        onPointerDownCapture={onPointerDownCapture}
+        onPointerMove={onPointerMove}
       >
-        <div
-          ref={viewportRef}
-          className={STYLES.viewport}
-          onScroll={onScroll}
-          onPointerDownCapture={onPointerDownCapture}
-          onPointerMove={onPointerMove}
-        >
-          <div ref={trackRef} className={STYLES.track}>
-            {items.map((child, i) => (
-              <div key={i} className={`${STYLES.item} ${props.itemClassName}`}>
-                {child}
-              </div>
-            ))}
-          </div>
+        <div ref={trackRef} className={STYLES.track}>
+          {items.map((child, i) => (
+            <CarouselSlide
+              key={i}
+              canOpen={allowPress}
+              className={`${STYLES.item} ${props.itemClassName}`}
+            >
+              {child}
+            </CarouselSlide>
+          ))}
         </div>
-
-        {items.length > 1 && (
-          <div className={STYLES.dots}>
-            {items.map((_, i) => (
-              <Button
-                key={i}
-                aria-label={carousel.slide(i + 1)}
-                aria-current={i === active ? "true" : undefined}
-                onPress={() => goTo(i)}
-                className={`${STYLES.dot} ${tone.dot}`}
-              >
-                <span
-                  aria-hidden="true"
-                  className={`${STYLES.bar} ${i === active ? tone.on : tone.off}`}
-                />
-              </Button>
-            ))}
-          </div>
-        )}
       </div>
-    </TapGuardContext.Provider>
+
+      {items.length > 1 && (
+        <div className={STYLES.dots}>
+          {items.map((_, i) => (
+            <Button
+              key={i}
+              aria-label={carousel.slide(i + 1)}
+              aria-current={i === active ? "true" : undefined}
+              onPress={() => goTo(i)}
+              className={`${STYLES.dot} ${tone.dot}`}
+            >
+              <span
+                aria-hidden="true"
+                className={`${STYLES.bar} ${i === active ? tone.on : tone.off}`}
+              />
+            </Button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

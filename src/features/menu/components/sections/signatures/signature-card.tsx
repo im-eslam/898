@@ -6,12 +6,12 @@ import { Badge } from "../../ui/badge";
 import { Chevron } from "../../ui/chevron";
 import { Price } from "../../ui/price";
 import { ProductImage } from "../../ui/product-image";
-import { useTapGuard } from "../../ui/carousel";
 
 interface SignatureCardProps {
   product: MenuProductDto;
   priority?: boolean;
   onOpen: () => void;
+  canOpen?: () => boolean;
 }
 
 const STYLES = {
@@ -30,7 +30,6 @@ const STYLES = {
 
 export function SignatureCard(props: SignatureCardProps) {
   const locale = useLocale();
-  const allowPress = useTapGuard();
 
   const name = props.product.name[locale];
   const description = props.product.description[locale];
@@ -79,7 +78,7 @@ export function SignatureCard(props: SignatureCardProps) {
       <Button
         aria-label={name}
         onPress={() => {
-          if (allowPress()) props.onOpen();
+          if (props.canOpen?.() ?? true) props.onOpen();
         }}
         className={STYLES.action}
       />

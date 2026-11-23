@@ -6,6 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
     />
+
     <meta
       name="theme-color"
       media="(prefers-color-scheme: light)"
@@ -17,6 +18,7 @@
       content="#f3ebdd"
     />
     <meta name="color-scheme" content="light" />
+
     <title>898 Coffee</title>
     <meta
       name="description"
@@ -31,6 +33,13 @@
       href="/fav/favicon-32.png"
     />
     <link rel="apple-touch-icon" href="/fav/apple-touch-icon.png" />
+
+    <link
+      rel="preload"
+      href="/api/menu"
+      as="fetch"
+      crossorigin="use-credentials"
+    />
   </head>
   <body>
     <div id="root"></div>

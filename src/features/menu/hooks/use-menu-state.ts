@@ -75,12 +75,9 @@ export function menuReducer(state: MenuState, action: MenuAction): MenuState {
     case "setAddOns": {
       const line = state.source && MenuLookup.lines(state.source)[action.index];
       if (!line) return state;
-      const selectableAddOnIds = [...line.addOns, ...line.baristaWay]
-        .filter(
-          (addOn, index, list) =>
-            list.findIndex((candidate) => candidate.id === addOn.id) === index
-        )
-        .map((addOn) => addOn.id);
+      const selectableAddOnIds = MenuLookup.addOnOptions(line).map(
+        (addOn) => addOn.id
+      );
       const ids = Selection.withAddOns(
         state.addOnIds[action.index] ?? [],
         selectableAddOnIds,

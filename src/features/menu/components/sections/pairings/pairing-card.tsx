@@ -7,11 +7,11 @@ import { Badge } from "../../ui/badge";
 import { Chevron } from "../../ui/chevron";
 import { Price } from "../../ui/price";
 import { ProductImage } from "../../ui/product-image";
-import { useTapGuard } from "../../ui/carousel";
 
 interface PairingCardProps {
   pairing: MenuPairingDto;
   onOpen: () => void;
+  canOpen?: () => boolean;
 }
 
 const STYLES = {
@@ -31,7 +31,6 @@ const STYLES = {
 
 export function PairingCard(props: PairingCardProps) {
   const locale = useLocale();
-  const allowPress = useTapGuard();
 
   const available = props.pairing.items.every((item) =>
     Stock.isAvailable(item)
@@ -88,7 +87,7 @@ export function PairingCard(props: PairingCardProps) {
       <Button
         aria-label={name}
         onPress={() => {
-          if (allowPress()) props.onOpen();
+          if (props.canOpen?.() ?? true) props.onOpen();
         }}
         className={STYLES.action}
       />

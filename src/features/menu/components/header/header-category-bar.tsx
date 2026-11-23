@@ -40,14 +40,17 @@ export function HeaderCategoryBar(props: CategoryBarProps) {
   const tabListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const tab = tabListRef.current?.querySelector<HTMLElement>(
+    const list = tabListRef.current;
+    const tab = list?.querySelector<HTMLElement>(
       `[data-key="${CSS.escape(props.activeId)}"]`
     );
-    tab?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
+    if (!list || !tab) return;
+
+    const listBox = list.getBoundingClientRect();
+    const tabBox = tab.getBoundingClientRect();
+    const offset =
+      tabBox.left + tabBox.width / 2 - (listBox.left + listBox.width / 2);
+    list.scrollBy({ left: offset, behavior: "smooth" });
   }, [props.activeId]);
 
   return (

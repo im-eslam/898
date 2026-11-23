@@ -233,3 +233,8 @@
 [data-vaul-overlay] {
   transition-duration: var(--ease-smooth) !important;
 }
+body:has([data-vaul-drawer][data-state="closed"]):not(
+    :has([data-vaul-drawer][data-state="open"])
+  ) {
+  pointer-events: auto !important;
+}

@@ -61,6 +61,13 @@ export class MenuLookup {
   static lines(source: MenuProductDto | MenuPairingDto): MenuProductDto[] {
     return "items" in source ? source.items : [source];
   }
+
+  static addOnOptions(line: MenuProductDto): MenuAddOnDto[] {
+    return [...line.addOns, ...line.baristaWay].filter(
+      (addOn, index, list) =>
+        list.findIndex((candidate) => candidate.id === addOn.id) === index
+    );
+  }
 }
 
 export class Pricing {
