@@ -29,7 +29,6 @@ export function CategorySheet(props: CategorySheetProps) {
 
   return (
     <BaseSheet
-      variant="handle"
       title={categorySheet.title}
       description={categorySheet.description}
       isOpen={props.isOpen}

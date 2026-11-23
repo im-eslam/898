@@ -204,16 +204,16 @@
   transition-timing-function: var(--ease-smooth) !important;
 }
 [data-vaul-drawer][data-state="closed"] {
-  transition-duration: var(--duration-fast) !important;
-  transition-timing-function: var(--ease-exit) !important;
-}
-[data-vaul-overlay][data-state="closed"] {
-  transition-duration: var(--duration-fast) !important;
+  transition-duration: var(--duration-sheet-exit) !important;
+  transition-timing-function: var(--ease-sheet-exit) !important;
+  pointer-events: none;
 }
 [data-vaul-overlay] {
   transition-duration: var(--duration-base) !important;
+  transition-timing-function: var(--ease-smooth) !important;
 }
-[data-vaul-overlay][data-state="closed"],
-[data-vaul-drawer][data-state="closed"] {
-  pointer-events: none !important;
+[data-vaul-overlay][data-state="closed"] {
+  transition-duration: var(--duration-fast) !important;
+  transition-timing-function: var(--ease-exit) !important;
+  pointer-events: none;
 }

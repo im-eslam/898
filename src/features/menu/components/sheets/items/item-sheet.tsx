@@ -25,6 +25,7 @@ const STYLES = {
   total:
     "flex h-14 w-full items-center justify-center rounded-full bg-brand px-4 text-heading font-bold text-white tabular-nums",
   unavailable: "opacity-50",
+  sections: "flex flex-col gap-6",
 } as const;
 
 export function ItemSheet(props: ItemSheetProps) {
@@ -35,7 +36,8 @@ export function ItemSheet(props: ItemSheetProps) {
   const lines = MenuLookup.lines(props.source);
   const available = lines.every((line) => Stock.isAvailable(line));
   const title = lines.map((line) => line.name[locale]).join(" + ");
-  const oftenOrdered = "items" in props.source ? [] : props.source.oftenOrderedWith;
+  const oftenOrdered =
+    "items" in props.source ? [] : props.source.oftenOrderedWith;
   const total =
     "items" in props.source
       ? Pricing.pairing(props.source, props.optionIds, props.addOnIds)
@@ -58,7 +60,6 @@ export function ItemSheet(props: ItemSheetProps) {
 
   return (
     <BaseSheet
-      variant="topBar"
       title={title}
       description={itemSheet.description}
       isOpen={props.isOpen}
@@ -66,28 +67,30 @@ export function ItemSheet(props: ItemSheetProps) {
       onClose={props.onClose}
       footer={footer}
     >
-      <ItemHero source={props.source} available={available} />
+      <div className={STYLES.sections}>
+        <ItemHero source={props.source} available={available} />
 
-      {lines.map((line, index) => (
-        <ItemLine
-          key={line.id}
-          product={line}
-          showHeader={isBundle}
-          optionId={props.optionIds[index] ?? null}
-          addOnIds={props.addOnIds[index] ?? []}
-          disabled={!available}
-          onSelectSize={(optionId) => props.onSelectSize(index, optionId)}
-          onBarista={(on) => props.onSetBarista(index, on)}
-          onAddOns={(ids) => props.onSetAddOns(index, ids)}
-        />
-      ))}
+        {lines.map((line, index) => (
+          <ItemLine
+            key={line.id}
+            product={line}
+            showHeader={isBundle}
+            optionId={props.optionIds[index] ?? null}
+            addOnIds={props.addOnIds[index] ?? []}
+            disabled={!available}
+            onSelectSize={(optionId) => props.onSelectSize(index, optionId)}
+            onBarista={(on) => props.onSetBarista(index, on)}
+            onAddOns={(ids) => props.onSetAddOns(index, ids)}
+          />
+        ))}
 
-      {oftenOrdered.length > 0 && (
-        <ItemOftenOrdered
-          references={oftenOrdered}
-          onOpen={props.onOpenReference}
-        />
-      )}
+        {oftenOrdered.length > 0 && (
+          <ItemOftenOrdered
+            references={oftenOrdered}
+            onOpen={props.onOpenReference}
+          />
+        )}
+      </div>
     </BaseSheet>
   );
 }
