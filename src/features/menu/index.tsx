@@ -1,15 +1,16 @@
+import { memo, useCallback } from "react";
 import { ErrorPage } from "@/features/states/error/";
 import { LoadingPage } from "@/features/states/loading/";
 import { setLocale, useLocale, useStrings } from "@/shared/i18n";
 import type { MenuDto } from "@api/contracts";
-import { Header as MenuHeader } from "./components/header/header";
+import { Header as MenuHeaderComponent } from "./components/header/header";
 import { CategorySheet } from "./components/sheets/categories/category-sheet";
 import { ItemSheet } from "./components/sheets/items/item-sheet";
 import { SearchOverlay } from "./components/overlays/search-overlay";
 import { PromoPopup } from "./components/overlays/promo-popup";
-import { PairingsSection } from "./components/sections/pairings/pairings-section";
-import { ProductsSection } from "./components/sections/products/products-section";
-import { SignaturesSection } from "./components/sections/signatures/signatures-section";
+import { PairingsSection as PairingsSectionComponent } from "./components/sections/pairings/pairings-section";
+import { ProductsSection as ProductsSectionComponent } from "./components/sections/products/products-section";
+import { SignaturesSection as SignaturesSectionComponent } from "./components/sections/signatures/signatures-section";
 import { useMenu } from "./hooks/use-menu";
 import { useData } from "./hooks/use-data";
 import { strings } from "./strings";
@@ -19,6 +20,11 @@ import { categoryId } from "./util/section";
 interface MenuReadyProps {
   menu: MenuDto;
 }
+
+const MenuHeader = memo(MenuHeaderComponent);
+const SignaturesSection = memo(SignaturesSectionComponent);
+const PairingsSection = memo(PairingsSectionComponent);
+const ProductsSection = memo(ProductsSectionComponent);
 
 const STYLES = {
   page: "min-h-dvh pb-10",
@@ -31,6 +37,10 @@ function MenuReady(props: MenuReadyProps) {
   const direction = locale === "ar" ? "rtl" : "ltr";
 
   const { tabs, activeId, select, panels } = useMenu(props.menu);
+  const toggleLanguage = useCallback(
+    () => setLocale(locale === "en" ? "ar" : "en"),
+    [locale]
+  );
 
   return (
     <div dir={direction} className={STYLES.page}>
@@ -41,7 +51,7 @@ function MenuReady(props: MenuReadyProps) {
         onSelect={select}
         onSearch={panels.actions.openSearch}
         onCategories={panels.actions.openCategories}
-        onToggleLanguage={() => setLocale(locale === "en" ? "ar" : "en")}
+        onToggleLanguage={toggleLanguage}
       />
 
       <main>

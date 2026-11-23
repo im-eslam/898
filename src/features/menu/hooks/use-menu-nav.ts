@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useScrollSpy } from "@raddix/use-scroll-spy";
 import { PIN_FALLBACK_MS, SCROLL_SPY_OPTIONS } from "../data";
 
@@ -39,12 +39,12 @@ export function useMenuNav(sectionIds: string[]) {
     };
   }, [pinnedId]);
 
-  const select = (sectionId: string) => {
+  const select = useCallback((sectionId: string) => {
     setPinnedId(sectionId);
     document
       .getElementById(sectionId)
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  }, []);
 
   const lastId = sectionIds[sectionIds.length - 1] ?? "";
   const activeId =

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import type { MenuDto } from "@api/contracts";
 import { sectionIds } from "../util/section";
 import { useMenuNav } from "./use-menu-nav";
@@ -10,11 +10,13 @@ export function useMenu(menu: MenuDto) {
   const nav = useMenuNav(ids);
   const panels = useMenuState();
   const tabs = useMenuTabs(menu);
+  const close = panels.actions.close;
+  const navSelect = nav.select;
 
-  const select = (sectionId: string) => {
-    panels.actions.close();
-    nav.select(sectionId);
-  };
+  const select = useCallback((sectionId: string) => {
+    close();
+    navSelect(sectionId);
+  }, [close, navSelect]);
 
   return {
     tabs,
