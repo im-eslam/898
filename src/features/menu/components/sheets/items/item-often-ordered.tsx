@@ -1,13 +1,13 @@
 import { Button } from "react-aria-components";
 import { useLocale, useStrings } from "@/shared/i18n";
-import { Icon } from "@/shared/icons";
 import type { MenuProductRefDto } from "@api/contracts";
+import { strings } from "../../../strings";
 import { Stock } from "../../../util/menu";
+import { Chevron } from "../../ui/chevron";
 import { Price } from "../../ui/price";
 import { ProductImage } from "../../ui/product-image";
-import { strings } from "../../../strings";
 
-interface ProductOftenOrderedProps {
+interface ItemOftenOrderedProps {
   references: MenuProductRefDto[];
   onOpen: (productId: number) => void;
 }
@@ -21,18 +21,17 @@ const STYLES = {
   name: "line-clamp-2 min-h-[2lh] text-caption font-medium text-balance",
   nameUnavailable: "text-navy/60",
   footer: "flex items-center justify-between gap-1",
-  arrow: "size-3 text-navy/40",
   action:
     "absolute inset-0 z-10 rounded-md outline-none data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-brand",
 } as const;
 
-export function ProductOftenOrdered(props: ProductOftenOrderedProps) {
-  const { sheet } = useStrings(strings);
+export function ItemOftenOrdered(props: ItemOftenOrderedProps) {
+  const { itemSheet } = useStrings(strings);
   const locale = useLocale();
 
   return (
-    <section aria-label={sheet.items.oftenOrdered} className={STYLES.root}>
-      <h3 className={STYLES.title}>{sheet.items.oftenOrdered}</h3>
+    <section aria-label={itemSheet.oftenOrdered} className={STYLES.root}>
+      <h3 className={STYLES.title}>{itemSheet.oftenOrdered}</h3>
       <div className={STYLES.rail}>
         {props.references.map((ref) => {
           const available = Stock.isAvailable(ref);
@@ -59,10 +58,10 @@ export function ProductOftenOrdered(props: ProductOftenOrderedProps) {
                     size="caption"
                   />
                 )}
-                <Icon name="arrow" className={STYLES.arrow} />
+                <Chevron size="s" />
               </span>
               <Button
-                aria-label={sheet.items.openItem(name)}
+                aria-label={itemSheet.openItem(name)}
                 onPress={() => props.onOpen(ref.id)}
                 className={STYLES.action}
               />

@@ -21,11 +21,7 @@ export function SignaturesSection(props: SignaturesSectionProps) {
   const titleId = `${SIGNATURES_ID}-title`;
 
   return (
-    <section
-      id={SIGNATURES_ID}
-      aria-labelledby={titleId}
-      className={STYLES.section}
-    >
+    <section id={SIGNATURES_ID} aria-labelledby={titleId} className={STYLES.section}>
       <div className={STYLES.inner}>
         <div className={STYLES.head}>
           <SectionHeading id={titleId} section="signatures" light />

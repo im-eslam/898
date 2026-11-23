@@ -8,7 +8,7 @@ import {
   REVEAL_MAX_STEPS,
   REVEAL_STEP_MS,
 } from "../../../data";
-import { categoryId } from "../../../util/section";
+import { categoryId, categoryName } from "../../../util/section";
 import { SectionHeading } from "../../ui/section-heading";
 import { ProductCard } from "./product-card";
 
@@ -27,17 +27,15 @@ const STYLES = {
 } as const;
 
 export function ProductsSection(props: ProductsSectionProps) {
-  const { categories } = useStrings(strings);
-
+  const { categories, products } = useStrings(strings);
   const locale = useLocale();
-  const { category } = props;
-  const id = categoryId(category);
-  const title = category.name?.[locale] ?? categories.uncategorized;
 
+  const id = categoryId(props.category);
+  const title = categoryName(props.category, locale, categories.uncategorized);
   const [showAll, setShowAll] = useState(false);
 
-  const preview = category.products.slice(0, CATEGORY_PREVIEW_COUNT);
-  const rest = category.products.slice(CATEGORY_PREVIEW_COUNT);
+  const preview = props.category.products.slice(0, CATEGORY_PREVIEW_COUNT);
+  const rest = props.category.products.slice(CATEGORY_PREVIEW_COUNT);
 
   return (
     <section id={id} aria-labelledby={`${id}-title`} className={STYLES.section}>
@@ -71,7 +69,7 @@ export function ProductsSection(props: ProductsSectionProps) {
 
           {!showAll && rest.length > 0 && (
             <Button onPress={() => setShowAll(true)} className={STYLES.showAll}>
-              {categories.showAll(title, category.products.length)}
+              {products.showAll(title, props.category.products.length)}
             </Button>
           )}
         </div>

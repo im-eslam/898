@@ -1,5 +1,7 @@
 import { Button } from "react-aria-components";
+import { useStrings } from "@/shared/i18n";
 import { Icon } from "@/shared/icons";
+import { strings } from "../../strings";
 
 interface CloseButtonProps {
   onPress: () => void;
@@ -14,10 +16,13 @@ const STYLES = {
 } as const;
 
 export function CloseButton(props: CloseButtonProps) {
+  const { common } = useStrings(strings);
+
   return (
     <Button
+      aria-label={common.close}
       onPress={props.onPress}
-      className={`${STYLES.root} ${props.className ?? ""}`}
+      className={[STYLES.root, props.className].filter(Boolean).join(" ")}
     >
       <span className={STYLES.surface}>
         <Icon name="close" className={STYLES.icon} />

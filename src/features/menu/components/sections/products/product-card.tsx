@@ -1,9 +1,9 @@
 import { Button } from "react-aria-components";
 import { useLocale } from "@/shared/i18n";
-import { Icon } from "@/shared/icons";
 import type { MenuProductDto } from "@api/contracts";
 import { MenuLookup, Stock } from "../../../util/menu";
 import { Badge } from "../../ui/badge";
+import { Chevron } from "../../ui/chevron";
 import { Price } from "../../ui/price";
 import { ProductImage } from "../../ui/product-image";
 
@@ -20,7 +20,6 @@ const STYLES = {
   description: "line-clamp-2 text-caption font-medium text-navy/65",
   footer: "mt-auto flex items-center justify-between gap-2 pt-1",
   unavailable: "opacity-60",
-  arrow: "size-4 shrink-0 text-navy/40",
   badge: "absolute end-4 -top-2.5",
   action:
     "absolute inset-0 z-10 rounded-lg outline-none data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-brand",
@@ -59,7 +58,7 @@ export function ProductCard(props: ProductCardProps) {
               from={MenuLookup.isMultiSize(props.product)}
             />
           )}
-          <Icon name="arrow" className={STYLES.arrow} />
+          <Chevron size="s" />
         </div>
       </div>
 
@@ -69,11 +68,7 @@ export function ProductCard(props: ProductCardProps) {
         </div>
       )}
 
-      <Button
-        aria-label={name}
-        onPress={props.onOpen}
-        className={STYLES.action}
-      />
+      <Button aria-label={name} onPress={props.onOpen} className={STYLES.action} />
     </div>
   );
 }

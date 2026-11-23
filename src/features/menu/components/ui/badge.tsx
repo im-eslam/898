@@ -1,5 +1,5 @@
-import { Icon } from "@/shared/icons";
 import { useLocale, useStrings } from "@/shared/i18n";
+import { Icon } from "@/shared/icons";
 import { strings } from "../../strings";
 import { formatSavings } from "../../util/price";
 

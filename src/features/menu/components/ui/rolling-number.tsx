@@ -3,6 +3,14 @@ interface RollingNumberProps {
   className?: string;
 }
 
+interface DigitSlotProps {
+  digit: number;
+}
+
+interface NumberGroupProps {
+  text: string;
+}
+
 const DIGITS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const STYLES = {
@@ -17,7 +25,9 @@ const STYLES = {
   srOnly: "sr-only",
 } as const;
 
-function DigitSlot(props: { digit: number }) {
+const isDigit = (char: string) => /\d/.test(char);
+
+function DigitSlot(props: DigitSlotProps) {
   return (
     <span className={STYLES.slot}>
       <span
@@ -34,21 +44,26 @@ function DigitSlot(props: { digit: number }) {
   );
 }
 
-function NumberGroup(props: { text: string }) {
+function NumberGroup(props: NumberGroupProps) {
   const chars = [...props.text];
-  let place = chars.filter((char) => /\d/.test(char)).length;
+  const digitCount = chars.filter(isDigit).length;
+  let digitsSeen = 0;
 
   return (
     <span dir="ltr" className={STYLES.numberGroup}>
-      {chars.map((char, index) =>
-        /\d/.test(char) ? (
-          <DigitSlot key={`d${--place}`} digit={Number(char)} />
-        ) : (
-          <span key={`s${chars.length - index}`} className={STYLES.plain}>
-            {char}
-          </span>
-        )
-      )}
+      {chars.map((char, index) => {
+        if (!isDigit(char)) {
+          return (
+            <span key={`sep-${index}`} className={STYLES.plain}>
+              {char}
+            </span>
+          );
+        }
+
+        digitsSeen += 1;
+        const placeValue = digitCount - digitsSeen;
+        return <DigitSlot key={`digit-${placeValue}`} digit={Number(char)} />;
+      })}
     </span>
   );
 }

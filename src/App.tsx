@@ -15,7 +15,7 @@ const MissingPage = lazy(() =>
 export default function App() {
   return (
     <>
-      <Suspense fallback={<LoadingPage kind="menu" />}>
+      <Suspense fallback={<LoadingPage kind="spinner" />}>
         <Switch>
           <Route path={ROUTES.landing}>
             <LandingPage />

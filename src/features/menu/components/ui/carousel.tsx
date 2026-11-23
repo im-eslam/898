@@ -5,8 +5,7 @@ import { useLocale, useStrings } from "@/shared/i18n";
 import { strings } from "../../strings";
 
 interface CarouselProps {
-  label?: string;
-  labelledBy?: string;
+  labelledBy: string;
   dots?: boolean;
   children: ReactNode;
   className?: string;
@@ -23,8 +22,8 @@ const STYLES = {
 } as const;
 
 export function Carousel(props: CarouselProps) {
-  const locale = useLocale();
   const { carousel } = useStrings(strings);
+  const locale = useLocale();
   const [viewportRef, api] = useEmblaCarousel({
     align: "start",
     containScroll: "trimSnaps",
@@ -58,7 +57,6 @@ export function Carousel(props: CarouselProps) {
     <div
       role="region"
       aria-roledescription="carousel"
-      aria-label={props.label}
       aria-labelledby={props.labelledBy}
       className={rootClass}
     >

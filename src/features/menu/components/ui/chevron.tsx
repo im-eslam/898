@@ -9,6 +9,7 @@ interface ChevronProps {
 
 const STYLES = {
   root: "flex shrink-0 items-center justify-center rounded-full bg-mist text-brand",
+  icon: "rtl:rotate-180",
   sizes: {
     s: { root: "size-6", icon: "size-3" },
     m: { root: "size-7", icon: "size-4" },
@@ -21,10 +22,11 @@ export function Chevron(props: ChevronProps) {
   const rootClass = [STYLES.root, look.root, props.className]
     .filter(Boolean)
     .join(" ");
+  const iconClass = [look.icon, STYLES.icon].join(" ");
 
   return (
     <span aria-hidden="true" className={rootClass}>
-      <Icon name="arrow" className={look.icon} />
+      <Icon name="arrow" className={iconClass} />
     </span>
   );
 }

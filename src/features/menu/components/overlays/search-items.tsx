@@ -9,10 +9,48 @@ import type {
 } from "@api/contracts";
 import { strings } from "../../strings";
 import { MenuLookup, Stock } from "../../util/menu";
-import { categoryId } from "../../util/section";
+import { categoryId, categoryName } from "../../util/section";
 import { Badge } from "../ui/badge";
 import { Price } from "../ui/price";
 import { ProductImage } from "../ui/product-image";
+
+interface SearchItemsProps {
+  query: string;
+  deferredQuery: string;
+  total: number;
+  categories: MenuCategoryDto[];
+  pairings: MenuPairingDto[];
+  products: MenuProductDto[];
+  onPickSection: (sectionId: string) => void;
+  onOpenPairing: (pairing: MenuPairingDto) => void;
+  onOpenProduct: (product: MenuProductDto) => void;
+}
+
+interface ResultGroupProps {
+  title: string;
+  children: ReactNode;
+}
+
+interface ResultRowProps {
+  variant: "compact" | "rich";
+  onPress: () => void;
+  children: ReactNode;
+}
+
+interface CategoryRowProps {
+  category: MenuCategoryDto;
+  onPress: () => void;
+}
+
+interface PairingRowProps {
+  pairing: MenuPairingDto;
+  onPress: () => void;
+}
+
+interface ProductRowProps {
+  product: MenuProductDto;
+  onPress: () => void;
+}
 
 const STYLES = {
   results: "min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6",
@@ -47,19 +85,7 @@ const STYLES = {
   unavailable: "opacity-60",
 } as const;
 
-interface SearchResultsProps {
-  query: string;
-  deferredQuery: string;
-  total: number | undefined;
-  categories: MenuCategoryDto[];
-  pairings: MenuPairingDto[];
-  products: MenuProductDto[];
-  onPickSection: (sectionId: string) => void;
-  onOpenPairing: (pairing: MenuPairingDto) => void;
-  onOpenProduct: (product: MenuProductDto) => void;
-}
-
-function ResultGroup(props: { title: string; children: ReactNode }) {
+function ResultGroup(props: ResultGroupProps) {
   return (
     <section>
       <h2 className={STYLES.group.heading}>{props.title}</h2>
@@ -68,11 +94,7 @@ function ResultGroup(props: { title: string; children: ReactNode }) {
   );
 }
 
-function ResultRow(props: {
-  variant: "compact" | "rich";
-  onPress: () => void;
-  children: ReactNode;
-}) {
+function ResultRow(props: ResultRowProps) {
   const size =
     props.variant === "compact" ? STYLES.row.compact : STYLES.row.rich;
 
@@ -85,17 +107,14 @@ function ResultRow(props: {
   );
 }
 
-function CategoryRow(props: {
-  category: MenuCategoryDto;
-  onPress: () => void;
-}) {
-  const s = useStrings(strings);
+function CategoryRow(props: CategoryRowProps) {
+  const { categories } = useStrings(strings);
   const locale = useLocale();
 
   return (
     <ResultRow variant="compact" onPress={props.onPress}>
       <span className={STYLES.category.name}>
-        {props.category.name?.[locale] ?? s.categories.uncategorized}
+        {categoryName(props.category, locale, categories.uncategorized)}
       </span>
       <span className={STYLES.category.count}>
         {props.category.products.length}
@@ -104,7 +123,7 @@ function CategoryRow(props: {
   );
 }
 
-function PairingRow(props: { pairing: MenuPairingDto; onPress: () => void }) {
+function PairingRow(props: PairingRowProps) {
   const locale = useLocale();
   const available = props.pairing.items.every((item) =>
     Stock.isAvailable(item)
@@ -136,7 +155,7 @@ function PairingRow(props: { pairing: MenuPairingDto; onPress: () => void }) {
   );
 }
 
-function ProductRow(props: { product: MenuProductDto; onPress: () => void }) {
+function ProductRow(props: ProductRowProps) {
   const locale = useLocale();
   const available = Stock.isAvailable(props.product);
   const option = MenuLookup.startingOption(props.product);
@@ -172,7 +191,7 @@ function ProductRow(props: { product: MenuProductDto; onPress: () => void }) {
   );
 }
 
-export function SearchResults(props: SearchResultsProps) {
+export function SearchItems(props: SearchItemsProps) {
   const { search } = useStrings(strings);
 
   const message =

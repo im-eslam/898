@@ -8,6 +8,38 @@ function arabicItemsCount(count: number): string {
 }
 
 const en = {
+  common: {
+    close: "Close",
+  },
+  page: {
+    title: "Menu",
+  },
+  header: {
+    back: "Back to home",
+    search: "Search the menu",
+    categories: "Browse categories",
+    language: {
+      label: "ع",
+      lang: "ar",
+      switch: "Switch to Arabic",
+    },
+  },
+  sections: {
+    signatures: {
+      title: "Signatures",
+      sub: "Our most loved picks",
+    },
+    pairings: {
+      title: "Pairings",
+      sub: "Better together, for less",
+    },
+  },
+  categories: {
+    uncategorized: "More",
+  },
+  products: {
+    showAll: (name: string, count: number) => `Show all ${name} (${count})`,
+  },
   carousel: {
     slide: (number: number) => `Go to slide ${number}`,
   },
@@ -22,30 +54,6 @@ const en = {
     extra: (amount: string) => `+${amount} EGP`,
     from: (amount: string) => `From ${amount}`,
   },
-  sections: {
-    signatures: {
-      title: "Signatures",
-      sub: "Our most loved picks",
-    },
-    pairings: {
-      title: "Pairings",
-      sub: "Better together, for less",
-    },
-  },
-  header: {
-    back: "Back to home",
-    search: "Search the menu",
-    categories: "Browse categories",
-    language: {
-      label: "ع",
-      lang: "ar",
-      switch: "Switch to Arabic",
-    },
-  },
-  categories: {
-    uncategorized: "More",
-    showAll: (name: string, count: number) => `Show all ${name} (${count})`,
-  },
   search: {
     label: "Search the menu",
     placeholder: "Search drinks, food and offers",
@@ -57,28 +65,57 @@ const en = {
     groupOffers: "Offers",
     groupItems: "Items",
   },
-  page: {
-    title: "Menu",
+  promo: {
+    label: "Offer",
   },
-  sheet: {
-    items: {
-      description: "Item details and options",
-      outOfStock: "Out of stock",
-      oftenOrdered: "Often ordered with",
-      openItem: (name: string) => `Open ${name}`,
-      size: "Size",
-      baristaWay: "The barista's way",
-      baristaSub: "Made the way our barista recommends",
-      addOns: "Add-ons",
-    },
-    categories: {
-      title: "Categories",
-      description: "Jump to a section of the menu",
-    },
+  categorySheet: {
+    title: "Categories",
+    description: "Jump to a section of the menu",
+  },
+  itemSheet: {
+    description: "Item details and options",
+    openItem: (name: string) => `Open ${name}`,
+    oftenOrdered: "Often ordered with",
+    size: "Size",
+    baristaWay: "The barista's way",
+    baristaSub: "Made the way our barista recommends",
+    addOns: "Add-ons",
   },
 };
 
 const ar: typeof en = {
+  common: {
+    close: "إغلاق",
+  },
+  page: {
+    title: "القائمة",
+  },
+  header: {
+    back: "رجوع للرئيسية",
+    search: "ابحث في القائمة",
+    categories: "تصفح الأقسام",
+    language: {
+      label: "En",
+      lang: "en",
+      switch: "التبديل إلى الإنجليزية",
+    },
+  },
+  sections: {
+    signatures: {
+      title: "اختياراتنا المميزة",
+      sub: "الأكثر حبًا لدى ضيوفنا",
+    },
+    pairings: {
+      title: "ثنائياتنا",
+      sub: "أطيب معًا وبسعر أقل",
+    },
+  },
+  categories: {
+    uncategorized: "أخرى",
+  },
+  products: {
+    showAll: (name, count) => `عرض كل ${name} (${count})`,
+  },
   carousel: {
     slide: (number) => `الانتقال إلى الشريحة ${number}`,
   },
@@ -93,30 +130,6 @@ const ar: typeof en = {
     extra: (amount) => `+${amount} ج.م`,
     from: (amount) => `من ${amount}`,
   },
-  sections: {
-    signatures: {
-      title: "اختياراتنا المميزة",
-      sub: "الأكثر حبًا لدى ضيوفنا",
-    },
-    pairings: {
-      title: "ثنائياتنا",
-      sub: "أطيب معًا وبسعر أقل",
-    },
-  },
-  header: {
-    back: "رجوع للرئيسية",
-    search: "ابحث في القائمة",
-    categories: "تصفح الأقسام",
-    language: {
-      label: "En",
-      lang: "en",
-      switch: "التبديل إلى الإنجليزية",
-    },
-  },
-  categories: {
-    uncategorized: "أخرى",
-    showAll: (name, count) => `عرض كل ${name} (${count})`,
-  },
   search: {
     label: "ابحث في القائمة",
     placeholder: "ابحث عن مشروب أو طعام أو عرض",
@@ -128,24 +141,21 @@ const ar: typeof en = {
     groupOffers: "العروض",
     groupItems: "الأصناف",
   },
-  page: {
-    title: "القائمة",
+  promo: {
+    label: "عرض",
   },
-  sheet: {
-    items: {
-      description: "تفاصيل الصنف وخياراته",
-      outOfStock: "غير متوفر",
-      oftenOrdered: "يُطلب غالبًا مع",
-      openItem: (name) => `افتح ${name}`,
-      size: "الحجم",
-      baristaWay: "طريقة الباريستا",
-      baristaSub: "يُحضّر كما يوصي الباريستا",
-      addOns: "إضافات",
-    },
-    categories: {
-      title: "الأقسام",
-      description: "انتقل إلى قسم من القائمة",
-    },
+  categorySheet: {
+    title: "الأقسام",
+    description: "انتقل إلى قسم من القائمة",
+  },
+  itemSheet: {
+    description: "تفاصيل الصنف وخياراته",
+    openItem: (name) => `افتح ${name}`,
+    oftenOrdered: "يُطلب غالبًا مع",
+    size: "الحجم",
+    baristaWay: "طريقة الباريستا",
+    baristaSub: "يُحضّر كما يوصي الباريستا",
+    addOns: "إضافات",
   },
 };
 

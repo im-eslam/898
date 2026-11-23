@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Dialog, Modal, ModalOverlay } from "react-aria-components";
+import { useStrings } from "@/shared/i18n";
 import type { MenuDto } from "@api/contracts";
+import { strings } from "../../strings";
 import { menuImageUrl } from "../../util/image";
 import { CloseButton } from "../ui/close-button";
 
@@ -21,6 +23,8 @@ const STYLES = {
 } as const;
 
 export function PromoPopup(props: PromoPopupProps) {
+  const { promo } = useStrings(strings);
+
   const imageUrl =
     props.popup.enabled && props.popup.image
       ? menuImageUrl("popup", props.popup.image)
@@ -82,7 +86,7 @@ export function PromoPopup(props: PromoPopupProps) {
       className={STYLES.overlay}
     >
       <Modal className={STYLES.modal}>
-        <Dialog className={STYLES.dialog}>
+        <Dialog aria-label={promo.label} className={STYLES.dialog}>
           <img
             src={imageUrl}
             alt=""

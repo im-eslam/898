@@ -2,7 +2,7 @@ import { Button } from "react-aria-components";
 import { useLocale, useStrings } from "@/shared/i18n";
 import type { MenuCategoryDto } from "@api/contracts";
 import { strings } from "../../../strings";
-import { categoryId } from "../../../util/section";
+import { categoryId, categoryName } from "../../../util/section";
 import { BaseSheet } from "../base-sheet";
 
 const STYLES = {
@@ -24,16 +24,14 @@ interface CategorySheetProps {
 }
 
 export function CategorySheet(props: CategorySheetProps) {
-  const { sheet } = useStrings(strings);
-  const shared = useStrings(strings);
+  const { categories, categorySheet } = useStrings(strings);
   const locale = useLocale();
 
   return (
     <BaseSheet
-      strings={{
-        title: sheet.categories.title,
-        description: sheet.categories.description,
-      }}
+      variant="handle"
+      title={categorySheet.title}
+      description={categorySheet.description}
       isOpen={props.isOpen}
       onClose={props.onClose}
     >
@@ -52,7 +50,7 @@ export function CategorySheet(props: CategorySheetProps) {
               <span
                 className={`${STYLES.name} ${active ? STYLES.nameActive : STYLES.nameIdle}`}
               >
-                {category.name?.[locale] ?? shared.categories.uncategorized}
+                {categoryName(category, locale, categories.uncategorized)}
               </span>
               <span className={STYLES.count}>{category.products.length}</span>
             </Button>

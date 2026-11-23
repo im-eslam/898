@@ -1,3 +1,4 @@
+import type { Locale } from "@/shared/i18n";
 import type { MenuCategoryDto, MenuDto } from "@api/contracts";
 
 export const SIGNATURES_ID = "signatures";
@@ -5,6 +6,14 @@ export const PAIRINGS_ID = "pairings";
 
 export function categoryId(category: MenuCategoryDto): string {
   return category.id === null ? "category-other" : `category-${category.id}`;
+}
+
+export function categoryName(
+  category: MenuCategoryDto,
+  locale: Locale,
+  fallback: string
+): string {
+  return category.name?.[locale] ?? fallback;
 }
 
 export function sectionIds(menu: MenuDto): string[] {

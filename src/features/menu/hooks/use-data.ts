@@ -5,7 +5,7 @@ import { MENU_STALE_TIME_MS } from "../data";
 
 export const MENU_QUERY_KEY = ["menu"] as const;
 
-export function useMenuQuery() {
+export function useData() {
   const query = useQuery({
     queryKey: MENU_QUERY_KEY,
     queryFn: fetchMenu,
@@ -13,14 +13,10 @@ export function useMenuQuery() {
     retry: 1,
   });
 
-  const isNetworkError =
-    query.error instanceof ApiError &&
-    (query.error.code === "NETWORK" || query.error.code === "TIMEOUT");
-
   return {
     menu: query.data,
     isError: query.isError,
-    isNetworkError,
+    errorCode: query.error instanceof ApiError ? query.error.code : undefined,
     retry: () => void query.refetch(),
   };
 }

@@ -10,13 +10,13 @@ interface BaseSectionHeadingProps {
 interface BuiltInSectionHeadingProps extends BaseSectionHeadingProps {
   section: "signatures" | "pairings";
 }
+
 interface CustomSectionHeadingProps extends BaseSectionHeadingProps {
   title: string;
   sub?: string;
 }
 
-type SectionHeadingProps =
-  BuiltInSectionHeadingProps | CustomSectionHeadingProps;
+type SectionHeadingProps = BuiltInSectionHeadingProps | CustomSectionHeadingProps;
 
 const STYLES = {
   root: "flex flex-col gap-1",

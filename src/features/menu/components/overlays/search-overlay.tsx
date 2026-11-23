@@ -5,11 +5,19 @@ import type { MenuDto, MenuPairingDto, MenuProductDto } from "@api/contracts";
 import { strings } from "../../strings";
 import { matchMenu } from "../../util/search";
 import { SearchBar } from "./search-bar";
-import { SearchResults } from "./search-item";
+import { SearchItems } from "./search-items";
 
 interface SearchOverlayProps {
   menu: MenuDto;
   isOpen: boolean;
+  onClose: () => void;
+  onPickSection: (sectionId: string) => void;
+  onOpenPairing: (pairing: MenuPairingDto) => void;
+  onOpenProduct: (product: MenuProductDto) => void;
+}
+
+interface SearchPanelProps {
+  menu: MenuDto;
   onClose: () => void;
   onPickSection: (sectionId: string) => void;
   onOpenPairing: (pairing: MenuPairingDto) => void;
@@ -38,11 +46,8 @@ function useMenuSearch(menu: MenuDto) {
   return { query, setQuery, deferredQuery, data };
 }
 
-type SearchPanelProps = Omit<SearchOverlayProps, "isOpen">;
-
 function SearchPanel(props: SearchPanelProps) {
-  const { search: searchS } = useStrings(strings);
-
+  const { search: searchStrings } = useStrings(strings);
   const search = useMenuSearch(props.menu);
   const hasQuery = search.query.trim() !== "";
   const total = search.data.total;
@@ -56,10 +61,10 @@ function SearchPanel(props: SearchPanelProps) {
       />
 
       <p aria-live="polite" className={STYLES.status}>
-        {hasQuery ? searchS.itemsCount(total) : ""}
+        {hasQuery ? searchStrings.itemsCount(total) : ""}
       </p>
 
-      <SearchResults
+      <SearchItems
         query={search.query}
         deferredQuery={search.deferredQuery}
         total={total}

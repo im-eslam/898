@@ -4,6 +4,7 @@ import { Icon } from "@/shared/icons";
 import type { MenuPairingDto } from "@api/contracts";
 import { Stock } from "../../../util/menu";
 import { Badge } from "../../ui/badge";
+import { Chevron } from "../../ui/chevron";
 import { Price } from "../../ui/price";
 import { ProductImage } from "../../ui/product-image";
 
@@ -23,7 +24,6 @@ const STYLES = {
     "flex min-w-0 flex-col px-2 text-small font-semibold text-balance text-charcoal",
   footer: "mt-auto flex items-center gap-2 px-2 pt-1 pb-2",
   unavailable: "opacity-60",
-  arrow: "ms-auto size-4 shrink-0 text-navy/40",
   action:
     "absolute inset-0 z-10 rounded-lg outline-none data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-brand",
 } as const;
@@ -31,9 +31,7 @@ const STYLES = {
 export function PairingCard(props: PairingCardProps) {
   const locale = useLocale();
 
-  const available = props.pairing.items.every((item) =>
-    Stock.isAvailable(item)
-  );
+  const available = props.pairing.items.every((item) => Stock.isAvailable(item));
   const hasSavings = props.pairing.pricing.discount > 0;
   const name = props.pairing.items.map((item) => item.name[locale]).join(" + ");
 
@@ -73,21 +71,15 @@ export function PairingCard(props: PairingCardProps) {
         ))}
       </div>
 
-      <div
-        className={`${STYLES.footer} ${available ? "" : STYLES.unavailable}`}
-      >
+      <div className={`${STYLES.footer} ${available ? "" : STYLES.unavailable}`}>
         <Price
           original={props.pairing.pricing.price}
           discounted={props.pairing.pricing.final}
         />
-        <Icon name="arrow" className={STYLES.arrow} />
+        <Chevron size="m" className="ms-auto" />
       </div>
 
-      <Button
-        aria-label={name}
-        onPress={props.onOpen}
-        className={STYLES.action}
-      />
+      <Button aria-label={name} onPress={props.onOpen} className={STYLES.action} />
     </div>
   );
 }

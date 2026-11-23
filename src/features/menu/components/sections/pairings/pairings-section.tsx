@@ -21,11 +21,7 @@ export function PairingsSection(props: PairingsSectionProps) {
   const titleId = `${PAIRINGS_ID}-title`;
 
   return (
-    <section
-      id={PAIRINGS_ID}
-      aria-labelledby={titleId}
-      className={STYLES.section}
-    >
+    <section id={PAIRINGS_ID} aria-labelledby={titleId} className={STYLES.section}>
       <div className={STYLES.inner}>
         <div className={STYLES.head}>
           <SectionHeading id={titleId} section="pairings" />

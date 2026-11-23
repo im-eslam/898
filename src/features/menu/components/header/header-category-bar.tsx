@@ -37,7 +37,6 @@ const STYLES = {
 
 export function HeaderCategoryBar(props: CategoryBarProps) {
   const { header } = useStrings(strings);
-
   const tabListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
