@@ -18,7 +18,8 @@ interface MenuHeaderProps {
 }
 
 const STYLES = {
-  header: "sticky top-0 z-40 border-b border-sand/40 bg-cream",
+  header:
+    "sticky top-0 z-40 border-b border-sand/40 bg-cream pt-[env(safe-area-inset-top,0px)]",
   topRow: "mx-auto flex h-14 w-full max-w-5xl items-center gap-1",
 } as const;
 

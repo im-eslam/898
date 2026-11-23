@@ -10,7 +10,7 @@ const styles = {
   code: "text-[clamp(5rem,30vw,8rem)] leading-none font-bold tracking-tight text-brand",
   title: "mt-5 text-title font-bold text-charcoal text-balance",
   message: "mt-3 max-w-xs text-body text-taupe text-balance",
-  link: "mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-brand px-6 text-small font-bold text-white transition-colors duration-base ease-smooth hover:bg-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand motion-reduce:transition-none",
+  link: "mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-brand px-6 text-small font-bold text-white transition-colors duration-base ease-smooth [@media(hover:hover)_and_(pointer:fine)]:hover:bg-navy active:bg-navy/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
 } as const;
 
 export function MissingPage() {

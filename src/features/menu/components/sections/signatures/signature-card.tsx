@@ -14,7 +14,7 @@ interface SignatureCardProps {
 }
 
 const STYLES = {
-  root: "duration-fast relative flex h-full flex-col gap-3 rounded-lg bg-paper p-3 transition-transform ease-smooth has-data-pressed:scale-[0.96] motion-reduce:transition-none sm:p-4",
+  root: "duration-fast relative flex h-full select-none touch-manipulation flex-col gap-3 rounded-lg bg-paper p-3 transition-transform ease-smooth has-data-pressed:scale-[0.96] sm:p-4",
   frame: "relative",
   image: "aspect-square w-full rounded-md",
   badge: "absolute end-2 bottom-2",

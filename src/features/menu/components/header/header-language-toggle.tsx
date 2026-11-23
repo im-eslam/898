@@ -10,7 +10,7 @@ interface LanguageToggleProps {
 const STYLES = {
   button: "group flex h-12 shrink-0 items-center justify-center rounded-full",
   surface:
-    "flex h-10 min-w-12 items-center justify-center rounded-full border border-sand bg-paper px-3.5 text-small font-bold text-charcoal transition-colors duration-fast ease-smooth group-data-hovered:border-taupe group-data-hovered:bg-white motion-reduce:transition-none",
+    "flex h-10 min-w-12 items-center justify-center rounded-full border border-sand bg-paper px-3.5 text-small font-bold text-charcoal transition-colors duration-fast ease-smooth group-data-hovered:border-taupe group-data-hovered:bg-white",
 } as const;
 
 export function HeaderLanguageToggle(props: LanguageToggleProps) {

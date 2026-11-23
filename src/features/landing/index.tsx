@@ -13,7 +13,8 @@ const STYLES = {
   main: "relative isolate",
   container:
     "relative mx-auto flex min-h-dvh w-full max-w-md flex-col gap-8 px-6 pt-6 pb-[max(2.5rem,env(safe-area-inset-bottom))]",
-  languageToggle: "absolute end-6 top-6 z-10",
+  languageToggle:
+    "absolute end-6 z-10 top-[max(1.5rem,env(safe-area-inset-top,0px))]",
   nav: "flex flex-1 flex-col gap-6",
   stack: "flex flex-col gap-3",
 } as const;

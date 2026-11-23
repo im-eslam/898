@@ -24,29 +24,34 @@ type ActionCardProps = ActionCardInternalProps | ActionCardExternalProps;
 
 const STYLES = {
   card: {
-    base: "group flex min-h-16 w-full items-center gap-4 rounded-lg border px-4 py-3 transition duration-fast ease-smooth [@media(hover:hover)_and_(pointer:fine)]:active:scale-95 motion-reduce:transition-none",
+    base: "group flex min-h-16 w-full items-center gap-4 rounded-lg border px-4 py-3 touch-manipulation transition duration-fast ease-smooth active:scale-[0.98] [@media(hover:hover)_and_(pointer:fine)]:active:scale-95",
     tone: {
       standard:
-        "border-paper/50 bg-paper/80 text-navy hover:border-brand hover:bg-paper",
-      featured: "border-transparent bg-brand text-paper hover:border-arctic",
+        "border-paper/50 bg-paper/80 text-navy [@media(hover:hover)_and_(pointer:fine)]:hover:border-brand [@media(hover:hover)_and_(pointer:fine)]:hover:bg-paper",
+      featured:
+        "border-transparent bg-brand text-paper [@media(hover:hover)_and_(pointer:fine)]:hover:border-arctic",
       social:
-        "border-paper/50 bg-paper/80 text-navy hover:border-brand hover:bg-paper",
+        "border-paper/50 bg-paper/80 text-navy [@media(hover:hover)_and_(pointer:fine)]:hover:border-brand [@media(hover:hover)_and_(pointer:fine)]:hover:bg-paper",
     } satisfies Record<ActionCardTone, string>,
   },
   bubble: {
-    base: "duration-fast flex size-11 shrink-0 items-center justify-center rounded-full transition-colors ease-smooth motion-reduce:transition-none",
+    base: "duration-fast flex size-11 shrink-0 items-center justify-center rounded-full transition-colors ease-smooth",
     tone: {
-      standard: "bg-arctic/60 text-brand group-hover:bg-arctic",
+      standard:
+        "bg-arctic/60 text-brand [@media(hover:hover)_and_(pointer:fine)]:group-hover:bg-arctic",
       featured: "bg-paper text-brand",
       social: "bg-brand text-paper",
     } satisfies Record<ActionCardTone, string>,
   },
   arrow: {
-    base: "duration-fast size-5 shrink-0 transition-transform ease-smooth group-hover:translate-x-1 motion-reduce:transition-none rtl:group-hover:-translate-x-1",
+    base: "duration-fast size-5 shrink-0 transition-transform ease-smooth [@media(hover:hover)_and_(pointer:fine)]:group-hover:translate-x-1 rtl:-scale-x-100 rtl:[@media(hover:hover)_and_(pointer:fine)]:group-hover:-translate-x-1",
     tone: {
-      standard: "text-navy/40 group-hover:text-brand",
-      featured: "text-paper/80 group-hover:text-paper",
-      social: "text-navy/40 group-hover:text-brand",
+      standard:
+        "text-navy/40 [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-brand",
+      featured:
+        "text-paper/80 [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-paper",
+      social:
+        "text-navy/40 [@media(hover:hover)_and_(pointer:fine)]:group-hover:text-brand",
     } satisfies Record<ActionCardTone, string>,
   },
   text: {

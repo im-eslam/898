@@ -15,7 +15,7 @@ const STYLES = {
   frame: "relative overflow-hidden bg-arctic/40",
   grayscale: "grayscale",
   photo:
-    "absolute inset-0 size-full object-cover transition-opacity duration-base ease-smooth motion-reduce:transition-none",
+    "absolute inset-0 size-full object-cover transition-opacity duration-base ease-smooth",
   shown: "opacity-100",
   hidden: "opacity-0",
   placeholder: "absolute inset-0 flex items-center justify-center text-navy/20",

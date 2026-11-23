@@ -13,7 +13,7 @@ interface ProductCardProps {
 }
 
 const STYLES = {
-  root: "duration-fast relative flex h-full gap-3 rounded-lg bg-paper p-3 ring-1 ring-sand/40 transition-transform ease-smooth has-data-pressed:scale-[0.96] motion-reduce:transition-none",
+  root: "duration-fast relative flex h-full select-none touch-manipulation gap-3 rounded-lg bg-paper p-3 ring-1 ring-sand/40 transition-transform ease-smooth has-data-pressed:scale-[0.96]",
   image: "size-24 shrink-0 rounded-md",
   body: "flex min-w-0 flex-1 flex-col gap-0.5",
   name: "line-clamp-2 text-body font-semibold text-balance text-charcoal",

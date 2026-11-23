@@ -57,26 +57,26 @@ const STYLES = {
     label: "text-body font-bold",
     options: "grid auto-cols-fr grid-flow-col gap-2",
     option:
-      "duration-base flex min-h-12 flex-col items-center justify-center rounded-full border border-sand/70 px-2 py-1 text-center transition-colors outline-none data-disabled:opacity-50 data-focus-visible:outline-2 data-focus-visible:outline-offset-2 data-focus-visible:outline-brand data-hovered:bg-arctic/30 data-selected:border-brand data-selected:bg-brand data-selected:text-white motion-reduce:transition-none",
+      "duration-base flex min-h-12 flex-col items-center justify-center rounded-full border border-sand/70 px-2 py-1 text-center transition-colors outline-none data-disabled:opacity-50 data-focus-visible:outline-2 data-focus-visible:outline-offset-2 data-focus-visible:outline-brand data-hovered:bg-arctic/30 data-selected:border-brand data-selected:bg-brand data-selected:text-white",
     name: "text-small font-medium",
   },
   addOns: {
     root: "flex flex-col gap-4",
     barista:
-      "group duration-base flex min-h-14 w-full items-center gap-3 rounded-lg border-2 border-taupe bg-transparent px-4 py-2 text-start text-charcoal transition-[background-color,border-color,color] outline-none data-disabled:opacity-50 data-focus-visible:outline-2 data-focus-visible:outline-offset-2 data-focus-visible:outline-brand data-hovered:bg-sand/20 data-selected:border-brand data-selected:bg-brand data-selected:text-white motion-reduce:transition-none",
+      "group duration-base flex min-h-14 w-full items-center gap-3 rounded-lg border-2 border-taupe bg-transparent px-4 py-2 text-start text-charcoal transition-[background-color,border-color,color] outline-none data-disabled:opacity-50 data-focus-visible:outline-2 data-focus-visible:outline-offset-2 data-focus-visible:outline-brand data-hovered:bg-sand/20 data-selected:border-brand data-selected:bg-brand data-selected:text-white",
     baristaIcon: "size-6 shrink-0",
     baristaText: "flex min-w-0 flex-1 flex-col",
     baristaTitle: "text-small font-bold",
     baristaSub:
       "text-caption font-medium text-taupe group-data-selected:text-white/80",
     baristaBox:
-      "duration-base flex size-6 shrink-0 items-center justify-center rounded-sm border-2 border-taupe/60 transition-colors group-data-selected:border-white/80 group-data-selected:bg-white group-data-selected:text-brand motion-reduce:transition-none",
+      "duration-base flex size-6 shrink-0 items-center justify-center rounded-sm border-2 border-taupe/60 transition-colors group-data-selected:border-white/80 group-data-selected:bg-white group-data-selected:text-brand",
     label: "pb-2 text-body font-bold",
     row:
-      "group duration-base flex min-h-14 w-full items-center gap-4 border-b-[0.5px] border-sand/30 py-2 text-start transition-colors outline-none last:border-b-0 data-disabled:opacity-50 data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-paper motion-reduce:transition-none",
-    box: "duration-base flex size-6 shrink-0 items-center justify-center rounded-sm border-2 border-taupe/60 transition-colors group-data-selected:border-brand group-data-selected:bg-brand group-data-selected:text-white motion-reduce:transition-none",
+      "group duration-base flex min-h-14 w-full items-center gap-4 border-b-[0.5px] border-sand/30 py-2 text-start transition-colors outline-none last:border-b-0 data-disabled:opacity-50 data-focus-visible:outline-2 data-focus-visible:outline-brand data-hovered:bg-paper",
+    box: "duration-base flex size-6 shrink-0 items-center justify-center rounded-sm border-2 border-taupe/60 transition-colors group-data-selected:border-brand group-data-selected:bg-brand group-data-selected:text-white",
     name: "min-w-0 flex-1 text-body font-medium group-data-selected:font-semibold",
-    tick: "size-4 scale-50 opacity-0 transition-[opacity,transform] duration-fast group-data-selected:scale-100 group-data-selected:opacity-100 motion-reduce:transition-none",
+    tick: "size-4 scale-50 opacity-0 transition-[opacity,transform] duration-fast group-data-selected:scale-100 group-data-selected:opacity-100",
   },
 } as const;
 

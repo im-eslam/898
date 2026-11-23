@@ -11,7 +11,7 @@ interface CloseButtonProps {
 const STYLES = {
   root: "group flex size-12 items-center justify-center rounded-full outline-none",
   surface:
-    "duration-fast flex size-8 items-center justify-center rounded-full bg-white/85 text-navy ring-1 ring-arctic transition-colors ease-smooth group-data-hovered:bg-white motion-reduce:transition-none",
+    "duration-fast flex size-8 items-center justify-center rounded-full bg-white/85 text-navy ring-1 ring-arctic transition-colors ease-smooth group-data-hovered:bg-white",
   icon: "size-4",
 } as const;
 

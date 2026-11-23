@@ -14,7 +14,7 @@ interface PairingCardProps {
 }
 
 const STYLES = {
-  root: "relative flex h-full flex-col gap-2 rounded-lg bg-white/70 p-2 ring-1 ring-sand/60",
+  root: "duration-fast relative flex h-full select-none touch-manipulation flex-col gap-2 rounded-lg bg-white/70 p-2 ring-1 ring-sand/60 transition-transform ease-smooth has-data-pressed:scale-[0.96]",
   pictures: "relative flex aspect-2/1 w-full gap-1",
   picture: "min-w-0 flex-1 rounded-md",
   plus: "absolute inset-0 m-auto flex size-8 items-center justify-center rounded-full border-2 border-white bg-brand text-white",

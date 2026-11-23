@@ -1,4 +1,4 @@
-import { FLIP_IN_RTL, PATHS, type IconName } from "./data";
+import { PATHS, type IconName } from "./data";
 
 interface IconProps {
   name: IconName;
@@ -8,8 +8,7 @@ interface IconProps {
 }
 
 function Icon({ name, size = 24, strokeWidth = 1.8, className }: IconProps) {
-  const flip = FLIP_IN_RTL.has(name) ? "rtl:-scale-x-100" : "";
-  const classes = [flip, className].filter(Boolean).join(" ");
+  const classes = [className].filter(Boolean).join(" ");
 
   return (
     <svg

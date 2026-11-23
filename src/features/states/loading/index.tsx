@@ -16,18 +16,12 @@ const LIQUID_FILL_CSS = `
   .animate-liquid-fill {
     animation: liquid-fill 2.5s var(--ease-smooth, ease-in-out) infinite;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .animate-liquid-fill {
-      animation: none;
-      clip-path: inset(0 0 0 0);
-    }
-  }
 `;
 
 const styles = {
   spinner: {
     root: "fixed inset-0 isolate flex items-center justify-center",
-    ring: "size-10 animate-spin rounded-full border-4 border-brand/20 border-t-brand motion-reduce:animate-[spin_3s_linear_infinite]",
+    ring: "size-10 animate-spin rounded-full border-4 border-brand/20 border-t-brand",
     label: "sr-only",
   },
   menu: {
@@ -37,7 +31,7 @@ const styles = {
     cupWrapper: "relative mb-8 flex size-32 items-center justify-center",
     cupBase: "absolute inset-0 text-brand/20",
     cupFill:
-      "absolute inset-0 text-brand animate-liquid-fill motion-reduce:animate-none motion-reduce:[clip-path:inset(0_0_0_0)]",
+      "absolute inset-0 text-brand animate-liquid-fill",
     title: "text-title font-bold text-charcoal text-balance",
     description: "mt-3 max-w-sm text-body text-taupe text-balance",
   },

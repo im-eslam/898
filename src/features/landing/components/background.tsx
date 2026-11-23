@@ -55,6 +55,8 @@ const PATTERN_URL = `url("data:image/svg+xml,${encodeURIComponent(TILE_SVG)}")`;
 
 const ROOT_STYLE = {
   backgroundColor: CONFIG.colors.base,
+  contain: "strict",
+  transform: "translateZ(0)",
 } as const;
 
 const band_STYLE = {

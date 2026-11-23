@@ -10,7 +10,8 @@ interface SignaturesSectionProps {
 }
 
 const STYLES = {
-  section: "scroll-mt-28 rounded-b-sheet bg-navy py-8",
+  section:
+    "scroll-mt-[calc(7rem+env(safe-area-inset-top,0px))] rounded-b-sheet bg-navy py-8",
   inner: "mx-auto flex w-full max-w-5xl flex-col gap-4",
   head: "px-4 md:px-6",
   carousel: "px-4 md:px-6",

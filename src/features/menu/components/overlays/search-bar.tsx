@@ -19,7 +19,7 @@ const STYLES = {
   input:
     "h-12 w-full appearance-none rounded-full border border-arctic bg-paper ps-12 pe-11 text-body outline-none transition-colors duration-fast placeholder:text-navy/55 focus:bg-white data-focus-visible:border-navy [&::-webkit-search-cancel-button]:hidden",
   clear:
-    "absolute end-1 flex size-10 items-center justify-center rounded-full outline-none group-data-empty:hidden data-hovered:bg-paper data-pressed:bg-arctic data-focus-visible:outline-2 data-focus-visible:outline-brand",
+    "absolute end-1 flex size-11 items-center justify-center rounded-full outline-none touch-manipulation group-data-empty:hidden data-hovered:bg-paper data-pressed:bg-arctic data-focus-visible:outline-2 data-focus-visible:outline-brand",
 } as const;
 
 export function SearchBar(props: SearchBarProps) {

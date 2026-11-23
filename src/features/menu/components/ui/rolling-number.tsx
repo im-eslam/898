@@ -20,7 +20,7 @@ const STYLES = {
   numberGroup: "inline-flex",
   slot: "inline-block h-[1lh] overflow-clip",
   column:
-    "flex flex-col transition-transform duration-300 ease-smooth motion-reduce:transition-none",
+    "flex flex-col transition-transform duration-300 ease-smooth",
   digit: "block h-[1lh]",
   srOnly: "sr-only",
 } as const;

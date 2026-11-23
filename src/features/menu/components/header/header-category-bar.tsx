@@ -23,16 +23,16 @@ const STYLES = {
   row: "mx-auto flex h-12 w-full max-w-5xl items-center",
   menuSlot: "shrink-0 ps-1 md:ps-3",
   iconButton:
-    "flex size-12 shrink-0 items-center justify-center rounded-full text-charcoal transition-colors duration-fast ease-smooth data-hovered:bg-sand/40 data-pressed:bg-sand/60 motion-reduce:transition-none",
+    "flex size-12 shrink-0 items-center justify-center rounded-full text-charcoal transition-colors duration-fast ease-smooth data-hovered:bg-sand/40 data-pressed:bg-sand/60",
   icon: "size-5",
   nav: "relative h-12 min-w-0 flex-1",
   tabs: "flex h-full w-full items-center",
   tabList:
-    "no-scrollbar relative flex h-12 w-full touch-pan-x items-center gap-1 overflow-x-auto overscroll-x-contain px-4 [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)]",
-  tab: "group relative flex h-10 shrink-0 cursor-pointer items-center justify-center rounded-full px-4 text-small text-charcoal/70 outline-none data-hovered:text-charcoal data-selected:text-cream",
+    "no-scrollbar relative flex h-12 w-full touch-pan-x items-center gap-1 overflow-x-auto overscroll-x-contain px-4 [mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] rtl:[mask-image:linear-gradient(to_left,transparent,black_16px,black_calc(100%-16px),transparent)]",
+  tab: "group relative flex h-11 shrink-0 cursor-pointer items-center justify-center rounded-full px-4 text-small text-charcoal/70 outline-none touch-manipulation data-hovered:text-charcoal data-selected:text-cream",
   tabText: "relative z-10 font-medium group-data-selected:font-semibold",
   indicator:
-    "absolute inset-0 z-0 rounded-full bg-brand transition-[translate,width] duration-base ease-smooth motion-reduce:transition-none",
+    "absolute inset-0 z-0 rounded-full bg-brand transition-[translate,width] duration-base ease-smooth",
 } as const;
 
 export function HeaderCategoryBar(props: CategoryBarProps) {

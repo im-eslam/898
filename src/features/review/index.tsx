@@ -10,21 +10,21 @@ import { strings } from "./strings";
 import { useReview } from "./hooks/use-review";
 
 const STYLES = {
-  choices: "flex flex-col gap-3 pb-4 animate-reveal-in",
-  form: "flex flex-col gap-5 pb-2 animate-reveal-in",
+  choices: "flex flex-col gap-3 pb-4",
+  form: "flex flex-col gap-5 pb-2",
   error:
     "text-small rounded-md border border-error/30 bg-error/10 px-4 py-3 font-bold text-error",
   submit:
-    "text-small mt-2 min-h-12 rounded-full bg-brand px-6 text-center font-bold text-white outline-none transition duration-interactive ease-smooth data-focus-visible:ring-2 data-focus-visible:ring-brand data-focus-visible:ring-offset-2 data-hovered:bg-brand/90 [@media(hover:hover)_and_(pointer:fine)]:data-pressed:scale-[0.98] data-disabled:opacity-50 data-disabled:transition-none motion-reduce:transition-none",
+    "text-small mt-2 min-h-12 rounded-full bg-brand px-6 text-center font-bold text-white outline-none transition duration-interactive ease-smooth data-focus-visible:ring-2 data-focus-visible:ring-brand data-focus-visible:ring-offset-2 data-hovered:bg-brand/90 [@media(hover:hover)_and_(pointer:fine)]:data-pressed:scale-[0.98] data-disabled:opacity-50 data-disabled:transition-none",
   honeypot: "sr-only",
   success:
-    "flex flex-col items-center gap-4 py-8 text-center animate-reveal-in",
+    "flex flex-col items-center gap-4 py-8 text-center",
   successBubble:
     "flex size-16 items-center justify-center rounded-full bg-success text-white",
   successIcon: "size-8",
   successMessage: "text-heading mt-2 font-bold text-navy text-balance",
   successButton:
-    "text-small mt-4 min-h-12 w-full rounded-full bg-brand px-8 text-center font-bold text-white outline-none transition duration-interactive ease-smooth data-focus-visible:ring-2 data-focus-visible:ring-brand data-focus-visible:ring-offset-2 data-hovered:bg-brand/90 [@media(hover:hover)_and_(pointer:fine)]:data-pressed:scale-[0.98] motion-reduce:transition-none",
+    "text-small mt-4 min-h-12 w-full rounded-full bg-brand px-8 text-center font-bold text-white outline-none transition duration-interactive ease-smooth data-focus-visible:ring-2 data-focus-visible:ring-brand data-focus-visible:ring-offset-2 data-hovered:bg-brand/90 [@media(hover:hover)_and_(pointer:fine)]:data-pressed:scale-[0.98]",
 } as const;
 
 export function ReviewPage() {

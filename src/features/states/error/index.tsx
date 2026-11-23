@@ -15,7 +15,7 @@ const styles = {
   title: "mt-5 text-title font-bold text-charcoal text-balance",
   message: "mt-3 max-w-xs text-body text-taupe text-balance",
   button:
-    "mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-brand px-8 text-small font-bold text-white transition-colors duration-base ease-smooth hover:bg-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand data-pressed:opacity-80 motion-reduce:transition-none",
+    "mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-brand px-8 text-small font-bold text-white transition-colors duration-base ease-smooth [@media(hover:hover)_and_(pointer:fine)]:hover:bg-navy active:bg-navy/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand data-pressed:opacity-80",
 } as const;
 
 export function ErrorPage(props: ErrorPageProps) {

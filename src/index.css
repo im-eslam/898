@@ -46,7 +46,7 @@
   --duration-fast: 200ms;
   --duration-base: 350ms;
   --duration-slow: 500ms;
-  --duration-sheet-exit: 300ms;
+  --duration-sheet-exit: 200ms;
   --ease-sheet-exit: cubic-bezier(0.32, 0.72, 0, 1);
 
   --animate-fade-in: fade-in 150ms ease-out backwards;
@@ -210,14 +210,6 @@
   [role="tab"]:active {
     transform: scale(0.98);
   }
-  @media (prefers-reduced-motion: reduce) {
-    button,
-    a,
-    [role="button"],
-    [role="tab"] {
-      transition-duration: 0ms;
-    }
-  }
   input,
   textarea,
   select {
@@ -235,18 +227,22 @@
 [data-vaul-drawer] {
   transition-duration: var(--duration-slow) !important;
   transition-timing-function: var(--ease-smooth) !important;
+  animation-duration: var(--duration-slow) !important;
 }
 [data-vaul-drawer][data-state="closed"] {
   transition-duration: var(--duration-sheet-exit) !important;
   transition-timing-function: var(--ease-sheet-exit) !important;
+  animation-duration: var(--duration-sheet-exit) !important;
   pointer-events: none;
 }
 [data-vaul-overlay] {
   transition-duration: var(--duration-base) !important;
   transition-timing-function: var(--ease-smooth) !important;
+  animation-duration: var(--duration-base) !important;
 }
 [data-vaul-overlay][data-state="closed"] {
   transition-duration: var(--duration-fast) !important;
   transition-timing-function: var(--ease-exit) !important;
+  animation-duration: var(--duration-fast) !important;
   pointer-events: none;
 }
