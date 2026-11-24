@@ -15,7 +15,6 @@ export interface TabDefinition {
   Component: ComponentType;
 }
 
-// The order here is the order of the navigation.
 export const TABS: readonly TabDefinition[] = [
   { id: "review", icon: "star", strings: reviewStrings, Component: ReviewTab },
   { id: "menu", icon: "cup", strings: menuStrings, Component: MenuTab },

@@ -66,18 +66,10 @@ export function LoginPage() {
 
   const getErrorMessage = (error: ErrorKey): string => {
     switch (error) {
-      case "UNAUTHORIZED":
+      case "INVALID_CREDENTIALS":
         return s.errors.invalidCredentials;
-      case "INVALID_INPUT":
-        return s.errors.invalidInput;
       case "PAYLOAD_TOO_LARGE":
         return s.errors.tooLarge;
-      case "NOT_FOUND":
-      case "HTTP_ERROR":
-      case "INTERNAL_ERROR":
-      case "UNAVAILABLE":
-      case "UNKNOWN":
-        return s.errors.server;
       case "NETWORK":
         return s.errors.network;
       case "TIMEOUT":

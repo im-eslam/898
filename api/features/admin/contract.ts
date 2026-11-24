@@ -1,12 +1,25 @@
 import type { Ok } from "../../contracts.js";
 
-export type AdminDto = { id: number; username: string; language: string };
+export const ADMIN_LANGUAGES = ["en", "ar"] as const;
+export type AdminLanguage = (typeof ADMIN_LANGUAGES)[number];
+
+export const ADMIN_LIMITS = {
+  username: { min: 3, max: 50, pattern: /^[a-zA-Z0-9._\-]{3,50}$/ },
+  password: { min: 10, max: 72 },
+} as const;
+
+export type AdminDto = {
+  id: number;
+  username: string;
+  language: AdminLanguage;
+};
 
 export type LoginRequest = { username: string; password: string };
 export type UpdateAccountRequest = {
-  currentPassword: string;
+  currentPassword?: string;
   username?: string;
   newPassword?: string;
+  language?: AdminLanguage;
 };
 
 export type LoginResponse = { ok: true; user: AdminDto };

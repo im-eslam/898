@@ -1,47 +1,72 @@
 import bcrypt from "bcryptjs";
-import { and, eq, gt, lt } from "drizzle-orm";
+import { and, eq, gt, lt, ne } from "drizzle-orm";
 import { createHash, randomBytes } from "node:crypto";
 import { db, logger } from "../../config.js";
 import { AppError, type AdminDto } from "../../contracts.js";
-import { adminLimits, sessions, users } from "./schema.js";
+import {
+  ADMIN_LANGUAGES,
+  ADMIN_LIMITS,
+  type AdminLanguage,
+} from "./contract.js";
+import { sessions, users } from "./schema.js";
 
 const log = logger.child({ scope: "admin" });
 
 const BCRYPT_ROUNDS = 12;
 const UNKNOWN_USER_HASH = bcrypt.hashSync("not-a-real-password", BCRYPT_ROUNDS);
 
+export const SESSION_TTL_MS = 2 * 60 * 60 * 1000;
+
 const hashToken = (token: string): string =>
   createHash("sha256").update(token).digest("hex");
 
-function assertValidNewAdmin(username: string, password: string): void {
-  if (!/^[a-zA-Z0-9._-]{3,50}$/.test(username)) {
-    throw new Error(
-      "Username must be 3-50 characters: letters, digits, dot, underscore, dash."
-    );
-  }
+function toAdminLanguage(value: string): AdminLanguage {
+  return (ADMIN_LANGUAGES as readonly string[]).includes(value)
+    ? (value as AdminLanguage)
+    : "en";
+}
 
-  const passwordMatchesUsername =
-    password.toLowerCase() === username.toLowerCase();
-  if (
-    password.length < 10 ||
-    password.length > adminLimits.password.max ||
-    passwordMatchesUsername
-  ) {
-    throw new Error(
-      `Password must be 10-${adminLimits.password.max} characters and must not equal the username.`
+function toAdminDto(row: {
+  id: number;
+  username: string;
+  language: string;
+}): AdminDto {
+  return {
+    id: row.id,
+    username: row.username,
+    language: toAdminLanguage(row.language),
+  };
+}
+
+export function assertValidUsername(username: string): void {
+  if (!ADMIN_LIMITS.username.pattern.test(username)) {
+    throw new AppError(
+      "INVALID_INPUT",
+      "Username must be 3-50 characters: letters, digits, dot, underscore, dash."
     );
   }
 }
 
-// Postgres reports a unique-constraint violation with SQLSTATE 23505. Drizzle may
-// wrap the driver error, so check the cause as well.
+export function assertValidPassword(password: string, username: string): void {
+  const { min, max } = ADMIN_LIMITS.password;
+  const bytes = new TextEncoder().encode(password).length;
+  if (
+    password.length < min ||
+    bytes > max ||
+    password.toLowerCase() === username.toLowerCase()
+  ) {
+    throw new AppError(
+      "INVALID_INPUT",
+      `Password must be ${min}-${max} bytes and must not equal the username.`
+    );
+  }
+}
+
 function isUniqueViolation(error: unknown): boolean {
   const direct = (error as { code?: unknown } | null)?.code;
   const wrapped = (error as { cause?: { code?: unknown } } | null)?.cause?.code;
   return direct === "23505" || wrapped === "23505";
 }
-
-export const SESSION_TTL_MS = 2 * 60 * 60 * 1000;
 
 export const adminService = {
   async verifyCredentials(
@@ -59,7 +84,7 @@ export const adminService = {
       .catch(() => false);
     if (!user || !valid) return null;
 
-    return { id: user.id, username: user.username, language: user.language };
+    return toAdminDto(user);
   },
 
   async startSession(adminId: number): Promise<string> {
@@ -83,7 +108,7 @@ export const adminService = {
   },
 
   async findAdminByToken(token: string): Promise<AdminDto | null> {
-    const [admin] = await db
+    const [row] = await db
       .select({
         id: users.id,
         username: users.username,
@@ -99,7 +124,7 @@ export const adminService = {
       )
       .limit(1);
 
-    return admin ?? null;
+    return row ? toAdminDto(row) : null;
   },
 
   async endSession(token: string): Promise<void> {
@@ -114,9 +139,9 @@ export const adminService = {
       .from(users)
       .where(eq(users.username, next))
       .limit(1);
-      
+
     if (taken && taken.id !== adminId)
-      throw new AppError("INVALID_INPUT", "Username is already taken");
+      throw new AppError("USERNAME_TAKEN", "Username is already taken");
 
     try {
       await db
@@ -125,31 +150,73 @@ export const adminService = {
         .where(eq(users.id, adminId));
     } catch (error) {
       if (isUniqueViolation(error))
-        throw new AppError("INVALID_INPUT", "Username is already taken");
+        throw new AppError("USERNAME_TAKEN", "Username is already taken");
       throw error;
     }
 
     log.info({ userId: adminId, username: next }, "Admin username changed");
   },
 
-  async createOrUpdateAdmin(username: string, password: string): Promise<void> {
-    assertValidNewAdmin(username, password);
+  async updateLanguage(
+    adminId: number,
+    language: AdminLanguage
+  ): Promise<void> {
+    await db.update(users).set({ language }).where(eq(users.id, adminId));
+  },
 
+  async updatePassword(
+    adminId: number,
+    password: string,
+    keepToken?: string
+  ): Promise<void> {
     const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
-    const [user] = await db
-      .insert(users)
-      .values({ username: username.toLowerCase(), passwordHash })
-      .onConflictDoUpdate({ target: users.username, set: { passwordHash } })
-      .returning({ id: users.id });
+    await db.update(users).set({ passwordHash }).where(eq(users.id, adminId));
 
+    const sessionOwner = eq(sessions.userId, adminId);
     const revoked = await db
       .delete(sessions)
-      .where(eq(sessions.userId, user.id))
+      .where(
+        keepToken
+          ? and(sessionOwner, ne(sessions.tokenHash, hashToken(keepToken)))
+          : sessionOwner
+      )
       .returning({ tokenHash: sessions.tokenHash });
 
     log.info(
-      { username: username.toLowerCase(), sessionsRevoked: revoked.length },
-      "Admin saved"
+      { userId: adminId, sessionsRevoked: revoked.length },
+      "Admin password changed"
     );
+  },
+
+  async findAdminIdByUsername(username: string): Promise<number | null> {
+    const [row] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.username, username.toLowerCase()))
+      .limit(1);
+    return row?.id ?? null;
+  },
+
+  async createAdmin(username: string, password: string): Promise<AdminDto> {
+    assertValidUsername(username);
+    assertValidPassword(password, username);
+
+    const normalized = username.toLowerCase();
+    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+
+    let row: { id: number; language: string };
+    try {
+      [row] = await db
+        .insert(users)
+        .values({ username: normalized, passwordHash })
+        .returning({ id: users.id, language: users.language });
+    } catch (error) {
+      if (isUniqueViolation(error))
+        throw new AppError("USERNAME_TAKEN", "Username is already taken");
+      throw error;
+    }
+
+    log.info({ userId: row.id, username: normalized }, "Admin created");
+    return toAdminDto({ ...row, username: normalized });
   },
 } as const;

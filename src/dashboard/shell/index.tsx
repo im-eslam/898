@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Toaster } from "react-hot-toast";
 import logo from "@/assets/mark.svg";
 import { useLocale, useStrings } from "@/shared/i18n";
 import { useSignOut } from "../hooks/use-sign-out";
@@ -35,6 +36,7 @@ export function DashboardShell() {
 
   return (
     <div className={STYLES.root}>
+      <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
       <aside className={STYLES.aside}>
         <div className={STYLES.brand}>
           <img src={logo} alt="" className={STYLES.logo} />

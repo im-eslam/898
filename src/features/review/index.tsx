@@ -17,8 +17,7 @@ const STYLES = {
   submit:
     "text-small mt-2 min-h-12 rounded-full bg-brand px-6 text-center font-bold text-white outline-none transition duration-interactive ease-smooth data-focus-visible:ring-2 data-focus-visible:ring-brand data-focus-visible:ring-offset-2 data-hovered:bg-brand/90 [@media(hover:hover)_and_(pointer:fine)]:data-pressed:scale-[0.98] data-disabled:opacity-50 data-disabled:transition-none",
   honeypot: "sr-only",
-  success:
-    "flex flex-col items-center gap-4 py-8 text-center",
+  success: "flex flex-col items-center gap-4 py-8 text-center",
   successBubble:
     "flex size-16 items-center justify-center rounded-full bg-success text-white",
   successIcon: "size-8",
@@ -48,11 +47,7 @@ export function ReviewPage() {
       case "HTTP_ERROR":
       case "INTERNAL_ERROR":
         return s.form.errors.server;
-      case "NOT_FOUND":
-      case "INVALID_CREDENTIALS":
-      case "UNAUTHORIZED":
-      case "UNKNOWN":
-      case "UNAVAILABLE":
+      default:
         return s.form.errors.unknown;
     }
   };

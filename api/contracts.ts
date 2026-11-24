@@ -4,7 +4,7 @@ import type { HealthRoutes } from "./features/health/contract.js";
 import type { MenuRoutes } from "./features/menu/contract.js";
 import type { ReviewsRoutes } from "./features/reviews/contract.js";
 
-export type * from "./features/admin/contract.js";
+export * from "./features/admin/contract.js";
 export type * from "./features/menu/contract.js";
 export type * from "./features/reviews/contract.js";
 
@@ -13,6 +13,7 @@ export const ERROR_STATUS = {
   INVALID_CREDENTIALS: 401,
   UNAUTHORIZED: 401,
   NOT_FOUND: 404,
+  USERNAME_TAKEN: 409,
   PAYLOAD_TOO_LARGE: 413,
   HTTP_ERROR: 500,
   INTERNAL_ERROR: 500,

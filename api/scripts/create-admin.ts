@@ -1,4 +1,8 @@
-import { adminService } from "../features/admin/service.js";
+import {
+  adminService,
+  assertValidPassword,
+  assertValidUsername,
+} from "../features/admin/service.js";
 
 function die(message: string): never {
   console.error(message);
@@ -8,11 +12,21 @@ function die(message: string): never {
 const [username, password] = process.argv.slice(2);
 
 if (!username || !password)
-  die("Usage: npm run api:admin -- <username> <password>");
+  die("Usage: npm run db:admin -- <username> <password>");
 
 try {
-  await adminService.createOrUpdateAdmin(username, password);
-  console.info(`Admin "${username.toLowerCase()}" saved.`);
+  assertValidUsername(username);
+  assertValidPassword(password, username);
+
+  const existingId = await adminService.findAdminIdByUsername(username);
+  if (existingId !== null) {
+    await adminService.updatePassword(existingId, password);
+    console.info(`Password reset for "${username.toLowerCase()}".`);
+  } else {
+    await adminService.createAdmin(username, password);
+    console.info(`Admin "${username.toLowerCase()}" created.`);
+  }
+  process.exit(0);
 } catch (error) {
   die(error instanceof Error ? error.message : "Could not save admin.");
 }

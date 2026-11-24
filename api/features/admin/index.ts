@@ -11,8 +11,12 @@ import {
   type MeResponse,
   type Ok,
 } from "../../contracts.js";
-import { adminLimits } from "./schema.js";
-import { adminService, SESSION_TTL_MS } from "./service.js";
+import { ADMIN_LANGUAGES, ADMIN_LIMITS } from "./contract.js";
+import {
+  adminService,
+  assertValidPassword,
+  SESSION_TTL_MS,
+} from "./service.js";
 
 export type AdminEnv = { Variables: { admin: AdminDto; token: string } };
 
@@ -27,23 +31,36 @@ const COOKIE_OPTIONS = {
 };
 
 const loginBody = z.object({
-  username: z.string().trim().max(adminLimits.username.max),
-  password: z.string().min(1).max(adminLimits.password.max),
+  username: z.string().trim().max(ADMIN_LIMITS.username.max),
+  password: z.string().min(1).max(ADMIN_LIMITS.password.max),
 });
 
-const usernamePattern = /^[a-zA-Z0-9._-]{3,50}$/;
-
-// Strict: unknown keys are rejected rather than ignored. At least one change is required.
 const updateAccountBody = z
   .strictObject({
-    currentPassword: z.string().min(1).max(adminLimits.password.max),
-    username: z.string().trim().regex(usernamePattern).optional(),
-    newPassword: z.string().min(10).max(adminLimits.password.max).optional(),
+    currentPassword: z
+      .string()
+      .min(1)
+      .max(ADMIN_LIMITS.password.max)
+      .optional(),
+    username: z.string().trim().regex(ADMIN_LIMITS.username.pattern).optional(),
+    newPassword: z
+      .string()
+      .min(ADMIN_LIMITS.password.min)
+      .max(ADMIN_LIMITS.password.max)
+      .optional(),
+    language: z.enum(ADMIN_LANGUAGES).optional(),
   })
   .refine(
-    (body) => body.username !== undefined || body.newPassword !== undefined,
+    (body) =>
+      body.username !== undefined ||
+      body.newPassword !== undefined ||
+      body.language !== undefined,
     "Nothing to update"
   );
+
+const rejectInvalid = (result: { success: boolean }) => {
+  if (!result.success) throw new AppError("INVALID_INPUT", "Invalid input");
+};
 
 const requireAdmin = createMiddleware<AdminEnv>(async (c, next) => {
   const token = getCookie(c, SESSION_COOKIE);
@@ -100,57 +117,60 @@ routes.get("/admin/me", requireAdmin, (c) =>
 routes.patch(
   "/admin/me",
   requireAdmin,
-  zValidator("json", updateAccountBody, (result) => {
-    if (!result.success) throw new AppError("INVALID_INPUT", "Invalid input");
-  }),
+  zValidator("json", updateAccountBody, rejectInvalid),
   async (c) => {
     const admin = c.get("admin");
-    const { currentPassword, username, newPassword } = c.req.valid("json");
+    const token = c.get("token");
+    const { currentPassword, username, newPassword, language } =
+      c.req.valid("json");
 
     const nextUsername = username?.toLowerCase() ?? admin.username;
     const usernameChanged = nextUsername !== admin.username;
+    const passwordChanged = newPassword !== undefined;
+    const languageChanged =
+      language !== undefined && language !== admin.language;
 
-    if (newPassword && newPassword.toLowerCase() === nextUsername)
-      throw new AppError(
-        "INVALID_INPUT",
-        "Password must not match the username"
-      );
+    if (usernameChanged || passwordChanged) {
+      if (!currentPassword)
+        throw new AppError("INVALID_INPUT", "Current password is required");
 
-    const verified = await adminService.verifyCredentials(
-      admin.username,
-      currentPassword
-    );
-    if (!verified)
-      throw new AppError(
-        "INVALID_CREDENTIALS",
-        "Current password is incorrect"
+      const verified = await adminService.verifyCredentials(
+        admin.username,
+        currentPassword
       );
+      if (!verified)
+        throw new AppError(
+          "INVALID_CREDENTIALS",
+          "Current password is incorrect"
+        );
+    }
+
+    if (newPassword !== undefined)
+      assertValidPassword(newPassword, nextUsername);
 
     if (usernameChanged)
       await adminService.changeUsername(admin.id, nextUsername);
-
-    if (newPassword) {
-      await adminService.createOrUpdateAdmin(nextUsername, newPassword);
-
-      const token = await adminService.startSession(admin.id);
-      setCookie(c, SESSION_COOKIE, token, {
-        ...COOKIE_OPTIONS,
-        maxAge: SESSION_TTL_MS / 1000,
-      });
-    }
+    if (language !== undefined && languageChanged)
+      await adminService.updateLanguage(admin.id, language);
+    if (newPassword !== undefined)
+      await adminService.updatePassword(admin.id, newPassword, token);
 
     log.info(
       {
         userId: admin.id,
-        username: nextUsername,
         usernameChanged,
-        passwordChanged: Boolean(newPassword),
+        passwordChanged,
+        languageChanged,
         ip: clientIp(c),
       },
       "Account updated"
     );
 
-    const user: AdminDto = { ...admin, username: nextUsername };
+    const user: AdminDto = {
+      id: admin.id,
+      username: nextUsername,
+      language: language ?? admin.language,
+    };
     return c.json({ ok: true, user } satisfies MeResponse);
   }
 );
