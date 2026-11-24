@@ -12,6 +12,10 @@ const MenuPage = lazy(() =>
   import("@/features/menu/").then((m) => ({ default: m.MenuPage }))
 );
 
+const DashboardPage = lazy(() =>
+  import("@/dashboard/").then((m) => ({ default: m.DashboardPage }))
+);
+
 export default function App() {
   return (
     <>
@@ -27,6 +31,9 @@ export default function App() {
             <Suspense fallback={<LoadingPage kind="menu" />}>
               <MenuPage />
             </Suspense>
+          </Route>
+          <Route path={ROUTES.dashboard}>
+            <DashboardPage />
           </Route>
           <Route>
             <MissingPage />
