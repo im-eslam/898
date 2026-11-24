@@ -31,6 +31,20 @@ const loginBody = z.object({
   password: z.string().min(1).max(adminLimits.password.max),
 });
 
+const usernamePattern = /^[a-zA-Z0-9._-]{3,50}$/;
+
+// Strict: unknown keys are rejected rather than ignored. At least one change is required.
+const updateAccountBody = z
+  .strictObject({
+    currentPassword: z.string().min(1).max(adminLimits.password.max),
+    username: z.string().trim().regex(usernamePattern).optional(),
+    newPassword: z.string().min(10).max(adminLimits.password.max).optional(),
+  })
+  .refine(
+    (body) => body.username !== undefined || body.newPassword !== undefined,
+    "Nothing to update"
+  );
+
 const requireAdmin = createMiddleware<AdminEnv>(async (c, next) => {
   const token = getCookie(c, SESSION_COOKIE);
   const admin = token ? await adminService.findAdminByToken(token) : null;
@@ -81,6 +95,64 @@ routes.post("/admin/logout", requireAdmin, async (c) => {
 
 routes.get("/admin/me", requireAdmin, (c) =>
   c.json({ ok: true, user: c.get("admin") } satisfies MeResponse)
+);
+
+routes.patch(
+  "/admin/me",
+  requireAdmin,
+  zValidator("json", updateAccountBody, (result) => {
+    if (!result.success) throw new AppError("INVALID_INPUT", "Invalid input");
+  }),
+  async (c) => {
+    const admin = c.get("admin");
+    const { currentPassword, username, newPassword } = c.req.valid("json");
+
+    const nextUsername = username?.toLowerCase() ?? admin.username;
+    const usernameChanged = nextUsername !== admin.username;
+
+    if (newPassword && newPassword.toLowerCase() === nextUsername)
+      throw new AppError(
+        "INVALID_INPUT",
+        "Password must not match the username"
+      );
+
+    const verified = await adminService.verifyCredentials(
+      admin.username,
+      currentPassword
+    );
+    if (!verified)
+      throw new AppError(
+        "INVALID_CREDENTIALS",
+        "Current password is incorrect"
+      );
+
+    if (usernameChanged)
+      await adminService.changeUsername(admin.id, nextUsername);
+
+    if (newPassword) {
+      await adminService.createOrUpdateAdmin(nextUsername, newPassword);
+
+      const token = await adminService.startSession(admin.id);
+      setCookie(c, SESSION_COOKIE, token, {
+        ...COOKIE_OPTIONS,
+        maxAge: SESSION_TTL_MS / 1000,
+      });
+    }
+
+    log.info(
+      {
+        userId: admin.id,
+        username: nextUsername,
+        usernameChanged,
+        passwordChanged: Boolean(newPassword),
+        ip: clientIp(c),
+      },
+      "Account updated"
+    );
+
+    const user: AdminDto = { ...admin, username: nextUsername };
+    return c.json({ ok: true, user } satisfies MeResponse);
+  }
 );
 
 export const adminApi = { routes, requireAdmin } as const;
