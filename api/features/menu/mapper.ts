@@ -8,8 +8,12 @@ import type {
   MenuProductDto,
   MenuProductRefDto,
 } from "../../contracts.js";
-import { MENU_BADGES } from "./contract.js";
-import type { MenuRows } from "./service.js";
+import {
+  MENU_BADGES,
+  type AdminMenuState,
+  type MenuCurrency,
+} from "./contract.js";
+import type { AdminRows, MenuRows } from "./service.js";
 
 type RawCategory = MenuRows["categories"][number];
 type RawProduct = MenuRows["uncategorized"][number];
@@ -117,5 +121,81 @@ export function mapMenu(rows: MenuRows): MenuDto {
       image: rows.settings.popupImage,
       delaySeconds: rows.settings.popupDelaySeconds,
     },
+  };
+}
+
+function groupBy<T>(items: T[], key: (item: T) => number): Map<number, T[]> {
+  const groups = new Map<number, T[]>();
+  for (const item of items) {
+    const k = key(item);
+    groups.set(k, [...(groups.get(k) ?? []), item]);
+  }
+  return groups;
+}
+
+export function mapAdminState(rows: AdminRows): AdminMenuState {
+  const settings = rows.settings;
+  const currency: MenuCurrency = settings?.currency ?? "EGP";
+
+  const options = groupBy(rows.options, (o) => o.productId);
+  const addOnLinks = groupBy(rows.addOnLinks, (l) => l.productId);
+  const baristaLinks = groupBy(rows.baristaLinks, (l) => l.productId);
+  const relatedLinks = groupBy(rows.relatedLinks, (l) => l.productId);
+  const pairingItems = groupBy(rows.pairingItems, (i) => i.pairingId);
+
+  return {
+    updatedAt: settings?.updatedAt.toISOString() ?? null,
+    currency,
+    badges: [...MENU_BADGES],
+    popup: {
+      enabled: settings?.popupEnabled ?? false,
+      image: settings?.popupImage ?? null,
+      delaySeconds: settings?.popupDelaySeconds ?? 1,
+    },
+    categories: rows.categories.map((c) => ({
+      id: c.id,
+      name: { en: c.nameEn, ar: c.nameAr },
+      position: c.position,
+    })),
+    addOns: rows.addOns.map((a) => ({
+      id: a.id,
+      name: { en: a.nameEn, ar: a.nameAr },
+      price: a.price,
+      position: a.position,
+    })),
+    products: rows.products.map((p) => ({
+      id: p.id,
+      categoryId: p.categoryId,
+      position: p.position,
+      name: { en: p.nameEn, ar: p.nameAr },
+      description: { en: p.descriptionEn, ar: p.descriptionAr },
+      image: p.image,
+      isAvailable: p.availability === "in_stock",
+      badge: p.badge,
+      pricing: {
+        type: p.pricingType,
+        options: (options.get(p.id) ?? []).map((o) => ({
+          name:
+            o.nameEn !== null && o.nameAr !== null
+              ? { en: o.nameEn, ar: o.nameAr }
+              : null,
+          price: o.price,
+          discount: o.discount,
+        })),
+      },
+      addOnIds: (addOnLinks.get(p.id) ?? []).map((l) => l.addOnId),
+      baristaWayAddOnIds: (baristaLinks.get(p.id) ?? []).map((l) => l.addOnId),
+      oftenOrderedWithIds: (relatedLinks.get(p.id) ?? []).map(
+        (l) => l.relatedProductId
+      ),
+    })),
+    signatures: rows.signatures.map((s) => s.productId),
+    pairings: rows.pairings.map((pairing) => ({
+      id: pairing.id,
+      position: pairing.position,
+      productIds: (pairingItems.get(pairing.id) ?? []).map((i) => i.productId),
+      price: pairing.price,
+      discount: pairing.discount,
+    })),
   };
 }

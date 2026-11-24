@@ -49,13 +49,21 @@ class Api {
   }
 
   private limitBody() {
-    return bodyLimit({
-      maxSize: 16 * 1024,
-      onError: (c) => {
-        const error = new AppError("PAYLOAD_TOO_LARGE", "Payload too large");
-        return c.json(error.toBody(), error.status);
-      },
-    });
+    const onError = (c: Context) => {
+      const error = new AppError("PAYLOAD_TOO_LARGE", "Payload too large");
+      return c.json(error.toBody(), error.status);
+    };
+    const small = bodyLimit({ maxSize: 16 * 1024, onError });
+    const menu = bodyLimit({ maxSize: 64 * 1024, onError });
+    const upload = bodyLimit({ maxSize: 6 * 1024 * 1024, onError });
+
+    return (c: Context, next: () => Promise<void>) => {
+      if (!c.req.path.startsWith("/api/admin/menu")) return small(c, next);
+      const multipart = c.req
+        .header("content-type")
+        ?.startsWith("multipart/form-data");
+      return (multipart ? upload : menu)(c, next);
+    };
   }
 
   private readonly logRequests = async (

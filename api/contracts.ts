@@ -1,9 +1,10 @@
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import type { AdminRoutes } from "./features/admin/contract.js";
 import type { HealthRoutes } from "./features/health/contract.js";
-import type { MenuRoutes } from "./features/menu/contract.js";
+import type { MenuAdminRoutes, MenuRoutes } from "./features/menu/contract.js";
 import type { ReviewsRoutes } from "./features/reviews/contract.js";
 import { ADMIN_ERRORS } from "./features/admin/contract.js";
+import { MENU_ERRORS } from "./features/menu/contract.js";
 
 export * from "./features/admin/contract.js";
 export type * from "./features/menu/contract.js";
@@ -22,6 +23,7 @@ const BASE_ERRORS = {
 export const ERROR_STATUS = {
   ...BASE_ERRORS,
   ...ADMIN_ERRORS,
+  ...MENU_ERRORS,
 } satisfies Record<string, ContentfulStatusCode>;
 
 export type ErrorCode = keyof typeof ERROR_STATUS;
@@ -34,7 +36,7 @@ export class AppError extends Error {
 
   constructor(
     code: ErrorCode,
-    message: string = code,
+    message: string = String(code),
     status: ContentfulStatusCode = ERROR_STATUS[code]
   ) {
     super(message);
@@ -60,7 +62,7 @@ type RouteContract = {
 type RouteMap<T extends Record<string, RouteContract>> = T;
 
 export type ApiRouteMap = RouteMap<
-  HealthRoutes & AdminRoutes & ReviewsRoutes & MenuRoutes
+  HealthRoutes & AdminRoutes & ReviewsRoutes & MenuRoutes & MenuAdminRoutes
 >;
 
 export type ApiRoute = keyof ApiRouteMap;

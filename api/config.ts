@@ -28,6 +28,7 @@ export const env = (() => {
       PORT: z.coerce.number().int().default(3000),
       COOKIE_SECURE: z.enum(["0", "1"]).optional(),
       COOKIE_SAMESITE: z.enum(["Strict", "Lax", "None"]).default("Strict"),
+      MENU_IMAGE_DIR: z.string().min(1).default("public/menu"),
       LOG_LEVEL: z
         .enum(["fatal", "error", "warn", "info", "debug", "trace"])
         .default("info"),
