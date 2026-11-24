@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { AdminDto } from "@api/contracts";
-import { ApiError } from "@/shared/api/data";
+import { ApiError } from "@/shared/api/";
 import { requestSession } from "../api/auth";
 
 export const sessionKey = ["admin", "session"] as const;

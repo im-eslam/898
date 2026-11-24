@@ -1,4 +1,8 @@
+import type { ApiErrorCode } from "@api/contracts";
 import type { Localized } from "@/shared/i18n";
+
+export type LoginErrorKey =
+  ApiErrorCode<"POST /api/admin/login"> | "NETWORK" | "TIMEOUT" | "UNKNOWN";
 
 const en = {
   heading: "Admin sign in",
@@ -15,14 +19,16 @@ const en = {
     submitting: "Signing in…",
   },
   errors: {
-    invalidCredentials: "Wrong username or password.",
-    network: "No internet connection. Check your network and try again.",
-    timeout: "Signing in took too long. Please try again.",
-    invalidInput: "Please check your username and password and try again.",
-    tooLarge:
+    INVALID_CREDENTIALS: "Wrong username or password.",
+    PAYLOAD_TOO_LARGE:
       "The information you entered is too long. Please shorten it and try again.",
-    server: "We couldn't sign you in right now. Please try again later.",
-  },
+    INTERNAL_ERROR:
+      "We couldn't sign you in right now. Please try again later.",
+    HTTP_ERROR: "We couldn't sign you in right now. Please try again later.",
+    NETWORK: "No internet connection. Check your network and try again.",
+    TIMEOUT: "Signing in took too long. Please try again.",
+    UNKNOWN: "We couldn't sign you in right now. Please try again later.",
+  } satisfies Record<LoginErrorKey, string>,
 };
 
 const ar: typeof en = {
@@ -40,13 +46,14 @@ const ar: typeof en = {
     submitting: "جارٍ تسجيل الدخول…",
   },
   errors: {
-    invalidCredentials: "اسم المستخدم أو كلمة المرور غير صحيحة.",
-    network: "لا يوجد اتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.",
-    timeout: "استغرق تسجيل الدخول وقتاً طويلاً. حاول مرة أخرى.",
-    invalidInput:
-      "يرجى التحقق من اسم المستخدم وكلمة المرور والمحاولة مرة أخرى.",
-    tooLarge: "المعلومات المدخلة طويلة جداً. يرجى تقصيرها والمحاولة مرة أخرى.",
-    server: "تعذّر تسجيل دخولك الآن. حاول مرة أخرى لاحقاً.",
+    INVALID_CREDENTIALS: "اسم المستخدم أو كلمة المرور غير صحيحة.",
+    PAYLOAD_TOO_LARGE:
+      "المعلومات المدخلة طويلة جداً. يرجى تقصيرها والمحاولة مرة أخرى.",
+    INTERNAL_ERROR: "تعذّر تسجيل دخولك الآن. حاول مرة أخرى لاحقاً.",
+    HTTP_ERROR: "تعذّر تسجيل دخولك الآن. حاول مرة أخرى لاحقاً.",
+    NETWORK: "لا يوجد اتصال بالإنترنت. تحقق من الشبكة وحاول مرة أخرى.",
+    TIMEOUT: "استغرق تسجيل الدخول وقتاً طويلاً. حاول مرة أخرى.",
+    UNKNOWN: "تعذّر تسجيل دخولك الآن. حاول مرة أخرى لاحقاً.",
   },
 };
 

@@ -7,7 +7,7 @@ import {
   type ApiRoute,
   type ErrorCode,
 } from "@api/contracts";
-import { ApiError, TIMEOUT_MS, type ErrorKey } from "./data";
+import { ApiError, TIMEOUT_MS, type ApiErrorKey, type ErrorKey } from "./data";
 
 type Options<R extends ApiRoute> = {
   query?: ApiQuery<R>;
@@ -100,4 +100,4 @@ async function api<R extends ApiRoute>(
   }
 }
 
-export { ApiError, type ErrorKey, api };
+export { ApiError, type ApiErrorKey, type ErrorKey, api };

@@ -1,154 +1,118 @@
+import type { FormEvent } from "react";
+import { Button, Form } from "react-aria-components";
 import toast from "react-hot-toast";
-import { ADMIN_LIMITS, type AdminDto } from "@api/contracts";
-import type { ErrorKey } from "@/shared/api";
+import { ADMIN_LANGUAGES, type AdminDto } from "@api/contracts";
 import { useStrings } from "@/shared/i18n";
 import { useSession } from "../../hooks/use-session";
-import {
-  type SettingsSection,
-  useTabSettings,
-} from "../../hooks/use-tab-settings";
-import { LanguageField } from "./components/language-field";
-import { PasswordField } from "./components/password-field";
-import { SettingsCard } from "./components/settings-card";
-import { TextField } from "./components/text-field";
+import { LanguageInput } from "./components/language-input";
+import { PasswordInput } from "./components/password-input";
+import { TextInput } from "./components/text-input";
+import { useAccountForm, type AccountField } from "./hooks/use-account-form";
 import { strings } from "./strings";
 
 const STYLES = {
-  page: "flex w-full max-w-2xl flex-col gap-6",
+  page: "mx-auto flex w-full max-w-md flex-col items-center text-center",
   title: "text-title font-bold text-balance text-navy",
+  description: "mt-2 text-body text-balance text-navy/80",
+  form: "mt-8 flex w-full flex-col gap-8 text-start",
+  error:
+    "text-small rounded-md border border-error/30 bg-error/10 px-4 py-3 font-bold text-error",
+  submit:
+    "inline-flex min-h-12 w-full items-center justify-center rounded-full bg-brand px-6 text-small font-bold text-white transition-colors ease-smooth [@media(hover:hover)_and_(pointer:fine)]:hover:bg-navy active:bg-navy/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand data-disabled:opacity-50",
 } as const;
 
-type ToastStrings = (typeof strings.en)["toast"];
-
-function saveErrorMessage(messages: ToastStrings, code: ErrorKey | null) {
-  switch (code) {
-    case "INVALID_CREDENTIALS":
-      return messages.invalidCredentials;
-    case "USERNAME_TAKEN":
-      return messages.usernameTaken;
-    case "INVALID_INPUT":
-      return messages.invalidInput;
-    case "UNAUTHORIZED":
-      return messages.unauthorized;
-    case "NETWORK":
-      return messages.network;
-    case "TIMEOUT":
-      return messages.timeout;
-    default:
-      return messages.server;
-  }
-}
-
-function SettingsPanel({ admin }: { admin: AdminDto }) {
+export function SettingsTab() {
   const s = useStrings(strings);
-  const settings = useTabSettings(admin);
-  const { values, setField, isDirty, isSaving } = settings;
 
-  const handleSave = async (section: SettingsSection) => {
-    const result = await settings.save(section);
-    if (result.ok) toast.success(s.toast.saved[section]);
-    else toast.error(saveErrorMessage(s.toast, result.code));
-  };
-
-  const cardProps = (section: SettingsSection) => ({
-    isDisabled: !isDirty[section],
-    isSaving,
-    saveLabel: s.actions.save,
-    savingLabel: s.actions.saving,
-    onSave: () => void handleSave(section),
-  });
+  const { admin } = useSession();
+  if (!admin) return null;
 
   return (
     <section className={STYLES.page}>
       <h1 className={STYLES.title}>{s.title}</h1>
-
-      <SettingsCard title={s.sections.language} {...cardProps("language")}>
-        <LanguageField
-          label={s.fields.language}
-          options={s.languages}
-          value={values.language}
-          onChange={(language) => setField("language", language)}
-        />
-      </SettingsCard>
-
-      <SettingsCard title={s.sections.username} {...cardProps("username")}>
-        <TextField
-          name="username"
-          label={s.fields.username}
-          description={s.hints.username}
-          value={values.username}
-          onChange={(username) => setField("username", username)}
-          isRequired
-          minLength={ADMIN_LIMITS.username.min}
-          maxLength={ADMIN_LIMITS.username.max}
-          pattern={ADMIN_LIMITS.username.pattern.source}
-          autoComplete="username"
-          spellCheck="false"
-        />
-        <PasswordField
-          name="usernameCurrentPassword"
-          label={s.fields.usernameCurrentPassword}
-          description={s.hints.usernameCurrentPassword}
-          showLabel={s.showPassword}
-          hideLabel={s.hidePassword}
-          value={values.usernameCurrentPassword}
-          onChange={(usernameCurrentPassword) =>
-            setField("usernameCurrentPassword", usernameCurrentPassword)
-          }
-          isRequired
-          autoComplete="current-password"
-        />
-      </SettingsCard>
-
-      <SettingsCard title={s.sections.password} {...cardProps("password")}>
-        <PasswordField
-          name="currentPassword"
-          label={s.fields.currentPassword}
-          description={s.hints.currentPassword}
-          showLabel={s.showPassword}
-          hideLabel={s.hidePassword}
-          value={values.currentPassword}
-          onChange={(currentPassword) =>
-            setField("currentPassword", currentPassword)
-          }
-          isRequired
-          autoComplete="current-password"
-        />
-        <PasswordField
-          name="newPassword"
-          label={s.fields.newPassword}
-          description={s.hints.newPassword}
-          showLabel={s.showPassword}
-          hideLabel={s.hidePassword}
-          value={values.newPassword}
-          onChange={(newPassword) => setField("newPassword", newPassword)}
-          isRequired
-          minLength={ADMIN_LIMITS.password.min}
-          maxLength={ADMIN_LIMITS.password.max}
-          autoComplete="new-password"
-        />
-        <PasswordField
-          name="confirmPassword"
-          label={s.fields.confirmPassword}
-          showLabel={s.showPassword}
-          hideLabel={s.hidePassword}
-          value={values.confirmPassword}
-          onChange={(confirmPassword) =>
-            setField("confirmPassword", confirmPassword)
-          }
-          isRequired
-          autoComplete="new-password"
-          validate={(value) =>
-            value === values.newPassword || s.validation.passwordMismatch
-          }
-        />
-      </SettingsCard>
+      <p className={STYLES.description}>{s.description}</p>
+      <SettingsForm admin={admin} />
     </section>
   );
 }
 
-export function SettingsTab() {
-  const { admin } = useSession();
-  if (!admin) return null;
-  return <SettingsPanel admin={admin} />;
+function SettingsForm({ admin }: { admin: AdminDto }) {
+  const s = useStrings(strings);
+  const form = useAccountForm(admin);
+
+  const getErrorMessage = (code: string): string =>
+    Object.hasOwn(s.errors, code)
+      ? s.errors[code as keyof typeof s.errors]
+      : s.errors.UNKNOWN;
+
+  const fieldError = (field: AccountField): string | undefined =>
+    form.failedField === field && form.errorCode
+      ? getErrorMessage(form.errorCode)
+      : undefined;
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const sent = form.save(() => toast.success(s.form.saved));
+    if (!sent) toast(s.form.noChanges);
+  };
+
+  return (
+    <Form onSubmit={handleSubmit} className={STYLES.form}>
+      <LanguageInput
+        label={s.account.language.label}
+        value={form.draft.language}
+        options={ADMIN_LANGUAGES}
+        labels={{ en: s.account.language.en, ar: s.account.language.ar }}
+        onChange={(language) => form.update({ language })}
+      />
+
+      <TextInput
+        name="username"
+        label={s.account.username}
+        hint={s.account.usernameHint}
+        value={form.draft.username}
+        onChange={(username) => form.update({ username })}
+        autoComplete="username"
+        error={fieldError("username")}
+      />
+
+      <PasswordInput
+        name="newPassword"
+        label={s.password.new}
+        hint={s.password.newHint}
+        value={form.draft.newPassword}
+        onChange={(newPassword) => form.update({ newPassword })}
+        autoComplete="new-password"
+        showLabel={s.password.show}
+        hideLabel={s.password.hide}
+        error={fieldError("newPassword")}
+      />
+
+      <PasswordInput
+        name="currentPassword"
+        label={s.current.label}
+        hint={s.current.hint}
+        value={form.draft.currentPassword}
+        onChange={(currentPassword) => form.update({ currentPassword })}
+        autoComplete="current-password"
+        showLabel={s.password.show}
+        hideLabel={s.password.hide}
+        error={fieldError("currentPassword")}
+      />
+
+      {form.generalError && (
+        <p role="alert" className={STYLES.error}>
+          {getErrorMessage(form.generalError)}
+        </p>
+      )}
+
+      <Button
+        type="submit"
+        isDisabled={form.isPending}
+        className={STYLES.submit}
+      >
+        {form.isPending ? s.actions.saving : s.actions.save}
+      </Button>
+    </Form>
+  );
 }

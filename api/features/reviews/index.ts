@@ -69,7 +69,7 @@ const deleteBody = z.object({
 });
 
 const rejectInvalid = (result: { success: boolean }) => {
-  if (!result.success) throw new AppError("INVALID_INPUT", "Invalid input");
+  if (!result.success) throw new AppError("INVALID_INPUT");
 };
 
 const routes = new Hono<AdminEnv>();

@@ -1,4 +1,8 @@
+import type { ApiErrorCode } from "@api/contracts";
 import type { Localized } from "@/shared/i18n";
+
+export type ReviewErrorKey =
+  ApiErrorCode<"POST /api/review"> | "NETWORK" | "TIMEOUT" | "UNKNOWN";
 
 const en = {
   common: {
@@ -32,17 +36,19 @@ const en = {
       send: "Send Feedback",
       sending: "Sending…",
     },
-    errors: {
-      unknown: "Something went wrong. Please try again.",
-      network:
-        "No internet connection. Please check your network and try again.",
-      invalidInput: "Please check your message and try again.",
-      timeout:
-        "The request took too long, so we can't confirm your feedback was sent. Close this window and send again only if you're sure it didn't go through.",
-      server:
-        "We couldn't send your feedback right now. Please try again later.",
-    },
   },
+  errors: {
+    INVALID_INPUT: "Please check your message and try again.",
+    PAYLOAD_TOO_LARGE: "Your message is too large. Please shorten it.",
+    INTERNAL_ERROR:
+      "We couldn't send your feedback right now. Please try again later.",
+    HTTP_ERROR:
+      "We couldn't send your feedback right now. Please try again later.",
+    NETWORK: "No internet connection. Please check your network and try again.",
+    TIMEOUT:
+      "The request took too long, so we can't confirm your feedback was sent. Close this window and send again only if you're sure it didn't go through.",
+    UNKNOWN: "Something went wrong. Please try again.",
+  } satisfies Record<ReviewErrorKey, string>,
   success: {
     title: "Feedback sent",
     message: "Thank you! We truly value your thoughts.",
@@ -81,19 +87,21 @@ const ar: typeof en = {
       send: "إرسال الملاحظات",
       sending: "جارٍ الإرسال…",
     },
-    errors: {
-      unknown: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
-      network:
-        "لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة والمحاولة مرة أخرى.",
-      invalidInput: "يرجى مراجعة رسالتك والمحاولة مرة أخرى.",
-      timeout:
-        "استغرق الطلب وقتًا أطول من المتوقع، لذلك لا نستطيع التأكد من وصول ملاحظاتك. أغلق هذه النافذة وأعد الإرسال فقط إذا كنت متأكدًا أنها لم تصل.",
-      server: "تعذر إرسال ملاحظاتك الآن. يرجى المحاولة لاحقًا.",
-    },
+  },
+  errors: {
+    INVALID_INPUT: "يرجى مراجعة رسالتك والمحاولة مرة أخرى.",
+    PAYLOAD_TOO_LARGE: "رسالتك طويلة جداً. يرجى اختصارها.",
+    INTERNAL_ERROR: "تعذر إرسال ملاحظاتك الآن. يرجى المحاولة لاحقاً.",
+    HTTP_ERROR: "تعذر إرسال ملاحظاتك الآن. يرجى المحاولة لاحقاً.",
+    NETWORK:
+      "لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة والمحاولة مرة أخرى.",
+    TIMEOUT:
+      "استغرق الطلب وقتاً أطول من المتوقع، لذلك لا نستطيع التأكد من وصول ملاحظاتك. أغلق هذه النافذة وأعد الإرسال فقط إذا كنت متأكداً أنها لم تصل.",
+    UNKNOWN: "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
   },
   success: {
     title: "تم إرسال الملاحظات",
-    message: "شكرًا لك! نحن نقدر ملاحظاتك جداً.",
+    message: "شكراً لك! نحن نقدر ملاحظاتك جداً.",
   },
 };
 

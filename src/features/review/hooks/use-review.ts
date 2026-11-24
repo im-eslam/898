@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import type { Ok } from "@api/contracts";
 import { ROUTES, useLocation } from "@/shared/router";
-import type { ApiError } from "@/shared/api/data";
+import type { ApiError } from "@/shared/api/";
 import { submitReview, type ReviewPayload } from "../api/review";
 import { GOOGLE_REVIEW_URL } from "../data";
 

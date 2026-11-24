@@ -5,18 +5,17 @@ import { createMiddleware } from "hono/factory";
 import { z } from "zod";
 import { clientIp, env, logger } from "../../config.js";
 import {
+  ADMIN_LANGUAGES,
   AppError,
+  ERROR_STATUS,
   type AdminDto,
+  type ErrorCode,
   type LoginResponse,
   type MeResponse,
   type Ok,
 } from "../../contracts.js";
-import { ADMIN_LANGUAGES, ADMIN_LIMITS } from "./contract.js";
-import {
-  adminService,
-  assertValidPassword,
-  SESSION_TTL_MS,
-} from "./service.js";
+import { ADMIN_LIMITS } from "./schema.js";
+import { adminService, findPasswordError, SESSION_TTL_MS } from "./service.js";
 
 export type AdminEnv = { Variables: { admin: AdminDto; token: string } };
 
@@ -39,14 +38,18 @@ const updateAccountBody = z
   .strictObject({
     currentPassword: z
       .string()
-      .min(1)
-      .max(ADMIN_LIMITS.password.max)
+      .min(1, "CURRENT_PASSWORD_REQUIRED")
+      .max(ADMIN_LIMITS.password.max, "PASSWORD_TOO_LONG")
       .optional(),
-    username: z.string().trim().regex(ADMIN_LIMITS.username.pattern).optional(),
+    username: z
+      .string()
+      .trim()
+      .regex(ADMIN_LIMITS.username.pattern, "USERNAME_INVALID")
+      .optional(),
     newPassword: z
       .string()
-      .min(ADMIN_LIMITS.password.min)
-      .max(ADMIN_LIMITS.password.max)
+      .min(ADMIN_LIMITS.password.min, "PASSWORD_TOO_SHORT")
+      .max(ADMIN_LIMITS.password.max, "PASSWORD_TOO_LONG")
       .optional(),
     language: z.enum(ADMIN_LANGUAGES).optional(),
   })
@@ -55,17 +58,25 @@ const updateAccountBody = z
       body.username !== undefined ||
       body.newPassword !== undefined ||
       body.language !== undefined,
-    "Nothing to update"
+    "NOTHING_TO_UPDATE"
   );
 
-const rejectInvalid = (result: { success: boolean }) => {
-  if (!result.success) throw new AppError("INVALID_INPUT", "Invalid input");
+const rejectInvalid = (result: {
+  success: boolean;
+  error?: { issues: { message: string }[] };
+}) => {
+  if (result.success) return;
+  const message = result.error?.issues[0]?.message ?? "";
+  const code = Object.hasOwn(ERROR_STATUS, message)
+    ? (message as ErrorCode)
+    : "INVALID_INPUT";
+  throw new AppError(code);
 };
 
 const requireAdmin = createMiddleware<AdminEnv>(async (c, next) => {
   const token = getCookie(c, SESSION_COOKIE);
   const admin = token ? await adminService.findAdminByToken(token) : null;
-  if (!token || !admin) throw new AppError("UNAUTHORIZED", "Unauthorized");
+  if (!token || !admin) throw new AppError("UNAUTHORIZED");
 
   c.set("admin", admin);
   c.set("token", token);
@@ -77,8 +88,7 @@ const routes = new Hono<AdminEnv>();
 routes.post(
   "/admin/login",
   zValidator("json", loginBody, (result) => {
-    if (!result.success)
-      throw new AppError("INVALID_CREDENTIALS", "Invalid credentials");
+    if (!result.success) throw new AppError("INVALID_CREDENTIALS");
   }),
   async (c) => {
     const { username, password } = c.req.valid("json");
@@ -87,7 +97,7 @@ routes.post(
     const admin = await adminService.verifyCredentials(username, password);
     if (!admin) {
       log.warn({ username, ip }, "Login failed");
-      const error = new AppError("INVALID_CREDENTIALS", "Invalid credentials");
+      const error = new AppError("INVALID_CREDENTIALS");
       return c.json(error.toBody(), error.status);
     }
 
@@ -131,27 +141,25 @@ routes.patch(
       language !== undefined && language !== admin.language;
 
     if (usernameChanged || passwordChanged) {
-      if (!currentPassword)
-        throw new AppError("INVALID_INPUT", "Current password is required");
+      if (!currentPassword) throw new AppError("CURRENT_PASSWORD_REQUIRED");
 
       const verified = await adminService.verifyCredentials(
         admin.username,
         currentPassword
       );
-      if (!verified)
-        throw new AppError(
-          "INVALID_CREDENTIALS",
-          "Current password is incorrect"
-        );
+      if (!verified) throw new AppError("WRONG_CURRENT_PASSWORD");
     }
 
-    if (newPassword !== undefined)
-      assertValidPassword(newPassword, nextUsername);
+    if (newPassword !== undefined) {
+      const passwordError = findPasswordError(newPassword, nextUsername);
+      if (passwordError) throw new AppError(passwordError);
+    }
 
-    if (usernameChanged)
-      await adminService.changeUsername(admin.id, nextUsername);
-    if (language !== undefined && languageChanged)
-      await adminService.updateLanguage(admin.id, language);
+    if (usernameChanged) {
+      const changed = await adminService.changeUsername(admin.id, nextUsername);
+      if (!changed) throw new AppError("USERNAME_TAKEN");
+    }
+    if (languageChanged) await adminService.updateLanguage(admin.id, language);
     if (newPassword !== undefined)
       await adminService.updatePassword(admin.id, newPassword, token);
 

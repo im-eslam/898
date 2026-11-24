@@ -6,11 +6,8 @@ import { healthService } from "./service.js";
 const routes = new Hono();
 
 routes.get("/health", async (c) => {
-  if (await healthService.checkDatabase()) {
-    return c.json({ ok: true, database: "up" } satisfies HealthResponse);
-  }
-  const error = new AppError("UNAVAILABLE", "Database unavailable");
-  return c.json(error.toBody(), error.status);
+  if (!(await healthService.checkDatabase())) throw new AppError("UNAVAILABLE");
+  return c.json({ ok: true, database: "up" } satisfies HealthResponse);
 });
 
 export const healthApi = { routes } as const;

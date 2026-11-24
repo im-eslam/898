@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ApiError } from "@/shared/api/data";
+import { ApiError } from "@/shared/api/";
 import { fetchMenu } from "../api/menu";
 import { MENU_STALE_TIME_MS } from "../data";
 

@@ -32,13 +32,19 @@ export type ReviewListResponse = ReviewPageDto & { ok: true };
 export type DeleteReviewsResponse = { ok: true; deleted: number };
 
 export type ReviewsRoutes = {
-  "POST /api/review": { body: CreateReviewRequest; response: Ok };
+  "POST /api/review": {
+    body: CreateReviewRequest;
+    response: Ok;
+    errors: "INVALID_INPUT" | "PAYLOAD_TOO_LARGE";
+  };
   "GET /api/admin/reviews": {
     query: ReviewListQuery;
     response: ReviewListResponse;
+    errors: "UNAUTHORIZED" | "INVALID_INPUT";
   };
   "POST /api/admin/reviews/delete": {
     body: DeleteReviewsRequest;
     response: DeleteReviewsResponse;
+    errors: "UNAUTHORIZED" | "PAYLOAD_TOO_LARGE" | "INVALID_INPUT";
   };
 };

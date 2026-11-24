@@ -1,5 +1,9 @@
 import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
-import { ADMIN_LIMITS } from "./contract.js";
+
+export const ADMIN_LIMITS = {
+  username: { min: 3, max: 50, pattern: /^[a-zA-Z0-9._-]{3,50}$/ },
+  password: { min: 10, max: 72 },
+} as const;
 
 export const users = pgTable("admin_users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),

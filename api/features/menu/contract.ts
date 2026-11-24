@@ -80,5 +80,5 @@ export type MenuDto = {
 export type MenuResponse = MenuDto & { ok: true };
 
 export type MenuRoutes = {
-  "GET /api/menu": { response: MenuResponse };
+  "GET /api/menu": { response: MenuResponse; errors: "NOT_FOUND" };
 };

@@ -3,21 +3,25 @@ import type { AdminRoutes } from "./features/admin/contract.js";
 import type { HealthRoutes } from "./features/health/contract.js";
 import type { MenuRoutes } from "./features/menu/contract.js";
 import type { ReviewsRoutes } from "./features/reviews/contract.js";
+import { ADMIN_ERRORS } from "./features/admin/contract.js";
 
 export * from "./features/admin/contract.js";
 export type * from "./features/menu/contract.js";
 export type * from "./features/reviews/contract.js";
 
-export const ERROR_STATUS = {
-  INVALID_INPUT: 422,
-  INVALID_CREDENTIALS: 401,
-  UNAUTHORIZED: 401,
-  NOT_FOUND: 404,
-  USERNAME_TAKEN: 409,
-  PAYLOAD_TOO_LARGE: 413,
-  HTTP_ERROR: 500,
+const BASE_ERRORS = {
   INTERNAL_ERROR: 500,
+  HTTP_ERROR: 500,
+  NOT_FOUND: 404,
+  PAYLOAD_TOO_LARGE: 413,
+  INVALID_INPUT: 422,
+  UNAUTHORIZED: 401,
   UNAVAILABLE: 503,
+} as const satisfies Record<string, ContentfulStatusCode>;
+
+export const ERROR_STATUS = {
+  ...BASE_ERRORS,
+  ...ADMIN_ERRORS,
 } satisfies Record<string, ContentfulStatusCode>;
 
 export type ErrorCode = keyof typeof ERROR_STATUS;
@@ -30,7 +34,7 @@ export class AppError extends Error {
 
   constructor(
     code: ErrorCode,
-    message: string,
+    message: string = code,
     status: ContentfulStatusCode = ERROR_STATUS[code]
   ) {
     super(message);
@@ -46,10 +50,18 @@ export class AppError extends Error {
 
 export type Ok = { ok: true };
 
-export type ApiRouteMap = HealthRoutes &
-  AdminRoutes &
-  ReviewsRoutes &
-  MenuRoutes;
+type RouteContract = {
+  body?: unknown;
+  query?: unknown;
+  response: unknown;
+  errors: ErrorCode;
+};
+
+type RouteMap<T extends Record<string, RouteContract>> = T;
+
+export type ApiRouteMap = RouteMap<
+  HealthRoutes & AdminRoutes & ReviewsRoutes & MenuRoutes
+>;
 
 export type ApiRoute = keyof ApiRouteMap;
 export type ApiResponse<R extends ApiRoute> = ApiRouteMap[R]["response"];
@@ -63,3 +75,5 @@ export type ApiQuery<R extends ApiRoute> = ApiRouteMap[R] extends {
 }
   ? Q
   : never;
+export type ApiErrorCode<R extends ApiRoute> =
+  "INTERNAL_ERROR" | "HTTP_ERROR" | ApiRouteMap[R]["errors"];

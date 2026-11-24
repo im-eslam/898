@@ -1,8 +1,10 @@
-import type { ErrorCode } from "@api/contracts";
+import type { ApiErrorCode, ApiRoute, ErrorCode } from "@api/contracts";
 
 export const TIMEOUT_MS = 25_000;
 
-export type ErrorKey = ErrorCode | "TIMEOUT" | "NETWORK" | "UNKNOWN";
+export type ClientErrorKey = "TIMEOUT" | "NETWORK" | "UNKNOWN";
+export type ErrorKey = ErrorCode | ClientErrorKey;
+export type ApiErrorKey<R extends ApiRoute> = ApiErrorCode<R> | ClientErrorKey;
 
 export class ApiError extends Error {
   readonly status: number;

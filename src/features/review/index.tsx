@@ -1,7 +1,6 @@
 import { Button, type ValidationResult } from "react-aria-components";
 import { useStrings } from "@/shared/i18n";
 import { Icon } from "@/shared/icons";
-import type { ErrorKey } from "@/shared/api";
 import { REVIEW_LIMITS } from "./data";
 import { ReviewDrawer } from "./components/shell/review-drawer";
 import { ChoiceCard } from "./components/ui/choice-card";
@@ -35,22 +34,10 @@ export function ReviewPage() {
       ? s.form.validation.required
       : s.form.validation.tooShort;
 
-  const getErrorMessage = (error: ErrorKey): string => {
-    switch (error) {
-      case "INVALID_INPUT":
-      case "PAYLOAD_TOO_LARGE":
-        return s.form.errors.invalidInput;
-      case "TIMEOUT":
-        return s.form.errors.timeout;
-      case "NETWORK":
-        return s.form.errors.network;
-      case "HTTP_ERROR":
-      case "INTERNAL_ERROR":
-        return s.form.errors.server;
-      default:
-        return s.form.errors.unknown;
-    }
-  };
+  const getErrorMessage = (code: string): string =>
+    Object.hasOwn(s.errors, code)
+      ? s.errors[code as keyof typeof s.errors]
+      : s.errors.UNKNOWN;
 
   return (
     <ReviewDrawer

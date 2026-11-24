@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
 import logo from "@/assets/mark.svg";
-import { useLocale, useStrings } from "@/shared/i18n";
+import { setLocale, useLocale, useStrings } from "@/shared/i18n";
+import { useSession } from "../hooks/use-session";
 import { useSignOut } from "../hooks/use-sign-out";
 import { TABS } from "../tabs";
 import { ShellNav, type NavItem } from "./components/nav";
@@ -25,6 +26,12 @@ export function DashboardShell() {
 
   const [activeId, setActiveId] = useState<string>(TABS[0]!.id);
   const { signOut, isPending: isSigningOut } = useSignOut();
+
+  const { admin } = useSession();
+  const savedLanguage = admin?.language;
+  useEffect(() => {
+    if (savedLanguage) setLocale(savedLanguage);
+  }, [savedLanguage]);
 
   const navItems: NavItem[] = TABS.map((tab) => ({
     id: tab.id,

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button, Form, Input, Label, TextField } from "react-aria-components";
 import logo from "@/assets/mark.svg";
-import type { ErrorKey } from "@/shared/api";
 import { useStrings } from "@/shared/i18n";
 import { useSignIn } from "../hooks/use-sign-in";
 import { strings } from "./strings";
@@ -64,20 +63,10 @@ export function LoginPage() {
   const { signIn, isPending, errorCode, clearError } = useSignIn();
   const [showPassword, setShowPassword] = useState(false);
 
-  const getErrorMessage = (error: ErrorKey): string => {
-    switch (error) {
-      case "INVALID_CREDENTIALS":
-        return s.errors.invalidCredentials;
-      case "PAYLOAD_TOO_LARGE":
-        return s.errors.tooLarge;
-      case "NETWORK":
-        return s.errors.network;
-      case "TIMEOUT":
-        return s.errors.timeout;
-      default:
-        return s.errors.server;
-    }
-  };
+  const getErrorMessage = (code: string): string =>
+    Object.hasOwn(s.errors, code)
+      ? s.errors[code as keyof typeof s.errors]
+      : s.errors.UNKNOWN;
 
   return (
     <main className={STYLES.page}>

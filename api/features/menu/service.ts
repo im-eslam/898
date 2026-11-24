@@ -1,6 +1,6 @@
 import { asc, isNull } from "drizzle-orm";
 import { db, logger } from "../../config.js";
-import { AppError, type MenuDto } from "../../contracts.js";
+import type { MenuDto } from "../../contracts.js";
 import { mapMenu } from "./mapper.js";
 import {
   menuCategories,
@@ -40,7 +40,7 @@ function loadRows() {
   return db.transaction(
     async (tx) => {
       const settings = await tx.query.settings.findFirst();
-      if (!settings) throw new AppError("NOT_FOUND", "Menu not found");
+      if (!settings) return null;
 
       const categories = await tx.query.categories.findMany({
         orderBy: [asc(menuCategories.position)],
@@ -92,25 +92,34 @@ function warnUncategorized(menu: MenuDto): void {
   );
 }
 
-async function build(): Promise<MenuDto> {
-  const menu = mapMenu(await loadRows());
+async function build(): Promise<MenuDto | null> {
+  const rows = await loadRows();
+  if (!rows) return null;
+
+  const menu = mapMenu(rows);
   warnUncategorized(menu);
   return menu;
 }
 
-let cache: { value: Promise<MenuDto>; expiresAt: number } | null = null;
+let cache: { value: Promise<MenuDto | null>; expiresAt: number } | null = null;
 export const MENU_CACHE_TTL_MS = 60 * 1000;
 
-export type MenuRows = Awaited<ReturnType<typeof loadRows>>;
+export type MenuRows = NonNullable<Awaited<ReturnType<typeof loadRows>>>;
 
 export const menuService = {
-  getMenu(): Promise<MenuDto> {
+  getMenu(): Promise<MenuDto | null> {
     if (cache && cache.expiresAt > Date.now()) return cache.value;
 
-    const value: Promise<MenuDto> = build().catch((error) => {
-      if (cache?.value === value) cache = null;
-      throw error;
-    });
+    const value: Promise<MenuDto | null> = build().then(
+      (menu) => {
+        if (!menu && cache?.value === value) cache = null;
+        return menu;
+      },
+      (error) => {
+        if (cache?.value === value) cache = null;
+        throw error;
+      }
+    );
     cache = { value, expiresAt: Date.now() + MENU_CACHE_TTL_MS };
     return value;
   },

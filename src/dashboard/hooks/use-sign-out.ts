@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Ok } from "@api/contracts";
-import type { ApiError } from "@/shared/api/data";
+import type { ApiError } from "@/shared/api/";
 import { requestSignOut } from "../api/auth";
 import { sessionKey } from "./use-session";
 

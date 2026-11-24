@@ -2,13 +2,9 @@ import bcrypt from "bcryptjs";
 import { and, eq, gt, lt, ne } from "drizzle-orm";
 import { createHash, randomBytes } from "node:crypto";
 import { db, logger } from "../../config.js";
-import { AppError, type AdminDto } from "../../contracts.js";
-import {
-  ADMIN_LANGUAGES,
-  ADMIN_LIMITS,
-  type AdminLanguage,
-} from "./contract.js";
-import { sessions, users } from "./schema.js";
+import type { AdminDto } from "../../contracts.js";
+import { ADMIN_LANGUAGES, type AdminLanguage } from "./contract.js";
+import { ADMIN_LIMITS, sessions, users } from "./schema.js";
 
 const log = logger.child({ scope: "admin" });
 
@@ -16,6 +12,9 @@ const BCRYPT_ROUNDS = 12;
 const UNKNOWN_USER_HASH = bcrypt.hashSync("not-a-real-password", BCRYPT_ROUNDS);
 
 export const SESSION_TTL_MS = 2 * 60 * 60 * 1000;
+
+export type PasswordRuleError =
+  "PASSWORD_TOO_SHORT" | "PASSWORD_TOO_LONG" | "PASSWORD_SAME_AS_USERNAME";
 
 const hashToken = (token: string): string =>
   createHash("sha256").update(token).digest("hex");
@@ -38,34 +37,28 @@ function toAdminDto(row: {
   };
 }
 
-export function assertValidUsername(username: string): void {
-  if (!ADMIN_LIMITS.username.pattern.test(username)) {
-    throw new AppError(
-      "INVALID_INPUT",
-      "Username must be 3-50 characters: letters, digits, dot, underscore, dash."
-    );
-  }
-}
-
-export function assertValidPassword(password: string, username: string): void {
-  const { min, max } = ADMIN_LIMITS.password;
-  const bytes = new TextEncoder().encode(password).length;
-  if (
-    password.length < min ||
-    bytes > max ||
-    password.toLowerCase() === username.toLowerCase()
-  ) {
-    throw new AppError(
-      "INVALID_INPUT",
-      `Password must be ${min}-${max} bytes and must not equal the username.`
-    );
-  }
-}
-
 function isUniqueViolation(error: unknown): boolean {
   const direct = (error as { code?: unknown } | null)?.code;
   const wrapped = (error as { cause?: { code?: unknown } } | null)?.cause?.code;
   return direct === "23505" || wrapped === "23505";
+}
+
+export function isValidUsername(username: string): boolean {
+  return ADMIN_LIMITS.username.pattern.test(username);
+}
+
+export function findPasswordError(
+  password: string,
+  username: string
+): PasswordRuleError | null {
+  const { min, max } = ADMIN_LIMITS.password;
+
+  if (password.length < min) return "PASSWORD_TOO_SHORT";
+  if (new TextEncoder().encode(password).length > max)
+    return "PASSWORD_TOO_LONG";
+  if (password.toLowerCase() === username.toLowerCase())
+    return "PASSWORD_SAME_AS_USERNAME";
+  return null;
 }
 
 export const adminService = {
@@ -131,7 +124,7 @@ export const adminService = {
     await db.delete(sessions).where(eq(sessions.tokenHash, hashToken(token)));
   },
 
-  async changeUsername(adminId: number, username: string): Promise<void> {
+  async changeUsername(adminId: number, username: string): Promise<boolean> {
     const next = username.toLowerCase();
 
     const [taken] = await db
@@ -139,9 +132,7 @@ export const adminService = {
       .from(users)
       .where(eq(users.username, next))
       .limit(1);
-
-    if (taken && taken.id !== adminId)
-      throw new AppError("USERNAME_TAKEN", "Username is already taken");
+    if (taken && taken.id !== adminId) return false;
 
     try {
       await db
@@ -149,12 +140,12 @@ export const adminService = {
         .set({ username: next })
         .where(eq(users.id, adminId));
     } catch (error) {
-      if (isUniqueViolation(error))
-        throw new AppError("USERNAME_TAKEN", "Username is already taken");
+      if (isUniqueViolation(error)) return false;
       throw error;
     }
 
     log.info({ userId: adminId, username: next }, "Admin username changed");
+    return true;
   },
 
   async updateLanguage(
@@ -197,10 +188,10 @@ export const adminService = {
     return row?.id ?? null;
   },
 
-  async createAdmin(username: string, password: string): Promise<AdminDto> {
-    assertValidUsername(username);
-    assertValidPassword(password, username);
-
+  async createAdmin(
+    username: string,
+    password: string
+  ): Promise<AdminDto | null> {
     const normalized = username.toLowerCase();
     const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
@@ -211,8 +202,7 @@ export const adminService = {
         .values({ username: normalized, passwordHash })
         .returning({ id: users.id, language: users.language });
     } catch (error) {
-      if (isUniqueViolation(error))
-        throw new AppError("USERNAME_TAKEN", "Username is already taken");
+      if (isUniqueViolation(error)) return null;
       throw error;
     }
 
