@@ -68,7 +68,11 @@ export function ProductCard(props: ProductCardProps) {
         </div>
       )}
 
-      <Button aria-label={name} onPress={props.onOpen} className={STYLES.action} />
+      <Button
+        aria-label={name}
+        onPress={props.onOpen}
+        className={STYLES.action}
+      />
     </div>
   );
 }

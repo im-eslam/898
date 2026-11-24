@@ -50,6 +50,7 @@ export function ReviewPage() {
               : s.drawer.title,
         description: s.drawer.description,
       }}
+      closeLabel={s.common.close}
       isOpen={review.isOpen}
       hideHeader={review.step === "success"}
       isCloseDisabled={review.sending}

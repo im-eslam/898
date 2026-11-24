@@ -33,12 +33,8 @@
           "name": "admin_sessions_user_id_admin_users_id_fk",
           "tableFrom": "admin_sessions",
           "tableTo": "admin_users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -104,9 +100,7 @@
         "admin_users_username_unique": {
           "name": "admin_users_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "policies": {},
@@ -244,12 +238,8 @@
           "name": "menu_pairing_items_pairing_id_menu_pairings_id_fk",
           "tableFrom": "menu_pairing_items",
           "tableTo": "menu_pairings",
-          "columnsFrom": [
-            "pairing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["pairing_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -257,12 +247,8 @@
           "name": "menu_pairing_items_product_id_menu_products_id_fk",
           "tableFrom": "menu_pairing_items",
           "tableTo": "menu_products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -270,10 +256,7 @@
       "compositePrimaryKeys": {
         "menu_pairing_items_pairing_id_position_pk": {
           "name": "menu_pairing_items_pairing_id_position_pk",
-          "columns": [
-            "pairing_id",
-            "position"
-          ]
+          "columns": ["pairing_id", "position"]
         }
       },
       "uniqueConstraints": {},
@@ -359,12 +342,8 @@
           "name": "menu_product_add_ons_product_id_menu_products_id_fk",
           "tableFrom": "menu_product_add_ons",
           "tableTo": "menu_products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -372,12 +351,8 @@
           "name": "menu_product_add_ons_add_on_id_menu_add_ons_id_fk",
           "tableFrom": "menu_product_add_ons",
           "tableTo": "menu_add_ons",
-          "columnsFrom": [
-            "add_on_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["add_on_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -385,10 +360,7 @@
       "compositePrimaryKeys": {
         "menu_product_add_ons_product_id_add_on_id_pk": {
           "name": "menu_product_add_ons_product_id_add_on_id_pk",
-          "columns": [
-            "product_id",
-            "add_on_id"
-          ]
+          "columns": ["product_id", "add_on_id"]
         }
       },
       "uniqueConstraints": {},
@@ -425,12 +397,8 @@
           "name": "menu_product_barista_way_product_id_menu_products_id_fk",
           "tableFrom": "menu_product_barista_way",
           "tableTo": "menu_products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -438,12 +406,8 @@
           "name": "menu_product_barista_way_add_on_id_menu_add_ons_id_fk",
           "tableFrom": "menu_product_barista_way",
           "tableTo": "menu_add_ons",
-          "columnsFrom": [
-            "add_on_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["add_on_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -451,10 +415,7 @@
       "compositePrimaryKeys": {
         "menu_product_barista_way_product_id_add_on_id_pk": {
           "name": "menu_product_barista_way_product_id_add_on_id_pk",
-          "columns": [
-            "product_id",
-            "add_on_id"
-          ]
+          "columns": ["product_id", "add_on_id"]
         }
       },
       "uniqueConstraints": {},
@@ -549,12 +510,8 @@
           "name": "menu_product_options_product_id_menu_products_id_fk",
           "tableFrom": "menu_product_options",
           "tableTo": "menu_products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -594,12 +551,8 @@
           "name": "menu_product_related_product_id_menu_products_id_fk",
           "tableFrom": "menu_product_related",
           "tableTo": "menu_products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -607,12 +560,8 @@
           "name": "menu_product_related_related_product_id_menu_products_id_fk",
           "tableFrom": "menu_product_related",
           "tableTo": "menu_products",
-          "columnsFrom": [
-            "related_product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["related_product_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -620,10 +569,7 @@
       "compositePrimaryKeys": {
         "menu_product_related_product_id_related_product_id_pk": {
           "name": "menu_product_related_product_id_related_product_id_pk",
-          "columns": [
-            "product_id",
-            "related_product_id"
-          ]
+          "columns": ["product_id", "related_product_id"]
         }
       },
       "uniqueConstraints": {},
@@ -744,12 +690,8 @@
           "name": "menu_products_category_id_menu_categories_id_fk",
           "tableFrom": "menu_products",
           "tableTo": "menu_categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -829,12 +771,8 @@
           "name": "menu_signatures_product_id_menu_products_id_fk",
           "tableFrom": "menu_signatures",
           "tableTo": "menu_products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -929,33 +867,22 @@
     "public.menu_availability": {
       "name": "menu_availability",
       "schema": "public",
-      "values": [
-        "in_stock",
-        "out_of_stock"
-      ]
+      "values": ["in_stock", "out_of_stock"]
     },
     "public.menu_badge": {
       "name": "menu_badge",
       "schema": "public",
-      "values": [
-        "top",
-        "new"
-      ]
+      "values": ["top", "new"]
     },
     "public.menu_currency": {
       "name": "menu_currency",
       "schema": "public",
-      "values": [
-        "EGP"
-      ]
+      "values": ["EGP"]
     },
     "public.menu_pricing_type": {
       "name": "menu_pricing_type",
       "schema": "public",
-      "values": [
-        "single",
-        "multiple"
-      ]
+      "values": ["single", "multiple"]
     }
   },
   "schemas": {},

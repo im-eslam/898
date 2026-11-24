@@ -16,7 +16,8 @@ interface CustomSectionHeadingProps extends BaseSectionHeadingProps {
   sub?: string;
 }
 
-type SectionHeadingProps = BuiltInSectionHeadingProps | CustomSectionHeadingProps;
+type SectionHeadingProps =
+  BuiltInSectionHeadingProps | CustomSectionHeadingProps;
 
 const STYLES = {
   root: "flex flex-col gap-1",

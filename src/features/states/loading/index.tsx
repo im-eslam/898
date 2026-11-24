@@ -30,8 +30,7 @@ const styles = {
     content: "relative z-10 flex w-full max-w-md flex-col items-center",
     cupWrapper: "relative mb-8 flex size-32 items-center justify-center",
     cupBase: "absolute inset-0 text-brand/20",
-    cupFill:
-      "absolute inset-0 text-brand animate-liquid-fill",
+    cupFill: "absolute inset-0 text-brand animate-liquid-fill",
     title: "text-title font-bold text-charcoal text-balance",
     description: "mt-3 max-w-sm text-body text-taupe text-balance",
   },

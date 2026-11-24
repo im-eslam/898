@@ -46,8 +46,6 @@ export function BaseSheet(props: BaseSheetProps) {
       onOpenChange={(open) => {
         if (!open) props.onClose();
       }}
-      shouldScaleBackground={false}
-      repositionInputs={false}
     >
       <VaulDrawer.Portal>
         <VaulDrawer.Overlay className={STYLES.overlay} />

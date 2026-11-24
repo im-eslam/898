@@ -25,8 +25,8 @@ const SESSION_COOKIE = "admin_session";
 const COOKIE_OPTIONS = {
   path: "/",
   httpOnly: true,
-  secure: env.NODE_ENV === "production",
-  sameSite: "Strict" as const,
+  secure: env.cookieSecure,
+  sameSite: env.COOKIE_SAMESITE,
 };
 
 const loginBody = z.object({

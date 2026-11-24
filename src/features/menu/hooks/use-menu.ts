@@ -13,10 +13,13 @@ export function useMenu(menu: MenuDto) {
   const close = panels.actions.close;
   const navSelect = nav.select;
 
-  const select = useCallback((sectionId: string) => {
-    close();
-    navSelect(sectionId);
-  }, [close, navSelect]);
+  const select = useCallback(
+    (sectionId: string) => {
+      close();
+      navSelect(sectionId);
+    },
+    [close, navSelect]
+  );
 
   return {
     tabs,

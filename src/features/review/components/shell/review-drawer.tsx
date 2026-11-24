@@ -10,6 +10,7 @@ interface DrawerStrings {
 
 interface DrawerProps {
   strings: DrawerStrings;
+  closeLabel: string;
   isOpen: boolean;
   hideHeader?: boolean;
   isCloseDisabled?: boolean;
@@ -39,11 +40,10 @@ export function ReviewDrawer(props: DrawerProps) {
   return (
     <VaulDrawer.Root
       open={props.isOpen}
+      dismissible={!props.isCloseDisabled}
       onOpenChange={(open) => {
-        if (!open) props.onClose();
+        if (!open && !props.isCloseDisabled) props.onClose();
       }}
-      shouldScaleBackground={false}
-      repositionInputs={false}
     >
       <VaulDrawer.Portal>
         <VaulDrawer.Overlay className={STYLES.overlay} />
@@ -53,6 +53,7 @@ export function ReviewDrawer(props: DrawerProps) {
             data-vaul-no-drag
             isDisabled={props.isCloseDisabled}
             onPress={props.onClose}
+            aria-label={props.closeLabel}
             className={STYLES.closeButton}
           >
             <span className={STYLES.closeVisual}>

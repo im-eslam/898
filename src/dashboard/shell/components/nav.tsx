@@ -23,7 +23,8 @@ const STYLES = {
   active: "bg-arctic text-brand",
   label: "sr-only md:not-sr-only",
   footer: "hidden md:mt-auto md:block",
-  signOut: "flex h-11 w-full items-center gap-3 rounded-lg px-4 text-small font-bold text-navy outline-none transition-colors ease-smooth focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [@media(hover:hover)_and_(pointer:fine)]:hover:bg-cream data-disabled:opacity-50",
+  signOut:
+    "flex h-11 w-full items-center gap-3 rounded-lg px-4 text-small font-bold text-navy outline-none transition-colors ease-smooth focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand [@media(hover:hover)_and_(pointer:fine)]:hover:bg-cream data-disabled:opacity-50",
 } as const;
 
 export function ShellNav(props: ShellNavProps) {

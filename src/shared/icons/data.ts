@@ -19,6 +19,7 @@ export const PATHS = {
   settings:
     "M4 7h9M17 7h3M4 17h3M11 17h9M13.5 7a1.5 1.5 0 1 0 3 0 1.5 1.5 0 1 0-3 0M7.5 17a1.5 1.5 0 1 0 3 0 1.5 1.5 0 1 0-3 0",
   exit: "M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10",
+  eye: "M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6z",
 } as const;
 
 export type IconName = keyof typeof PATHS;

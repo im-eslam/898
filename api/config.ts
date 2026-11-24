@@ -26,6 +26,8 @@ export const env = (() => {
         .default("0")
         .transform((value) => value === "1"),
       PORT: z.coerce.number().int().default(3000),
+      COOKIE_SECURE: z.enum(["0", "1"]).optional(),
+      COOKIE_SAMESITE: z.enum(["Strict", "Lax", "None"]).default("Strict"),
       LOG_LEVEL: z
         .enum(["fatal", "error", "warn", "info", "debug", "trace"])
         .default("info"),
@@ -43,7 +45,38 @@ export const env = (() => {
     process.exit(1);
   }
 
-  return result.data;
+  const { COOKIE_SECURE, ...data } = result.data;
+  const cookieSecure =
+    COOKIE_SECURE === undefined
+      ? data.NODE_ENV === "production"
+      : COOKIE_SECURE === "1";
+  const isProduction = data.NODE_ENV === "production";
+
+  const problems: string[] = [];
+  if (isProduction && !cookieSecure)
+    problems.push(
+      "COOKIE_SECURE=0 is not allowed in production. Serve the site over https and leave COOKIE_SECURE unset or set it to 1."
+    );
+  if (isProduction) {
+    const insecure = data.CORS_ORIGINS.filter((origin) =>
+      origin.startsWith("http://")
+    );
+    if (insecure.length)
+      problems.push(
+        `CORS_ORIGINS must list your https frontend origin in production (found: ${insecure.join(", ")}).`
+      );
+  }
+  if (data.COOKIE_SAMESITE === "None" && !cookieSecure)
+    problems.push(
+      "COOKIE_SAMESITE=None requires COOKIE_SECURE=1 (browsers reject SameSite=None cookies without Secure)."
+    );
+
+  if (problems.length) {
+    console.error("ERROR [env] Unsafe configuration:", problems);
+    process.exit(1);
+  }
+
+  return { ...data, cookieSecure };
 })();
 
 export const logger = pino({ level: env.LOG_LEVEL });

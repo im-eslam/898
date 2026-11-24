@@ -19,8 +19,7 @@ const STYLES = {
   plain: "whitespace-pre",
   numberGroup: "inline-flex",
   slot: "inline-block h-[1lh] overflow-clip",
-  column:
-    "flex flex-col transition-transform duration-300 ease-smooth",
+  column: "flex flex-col transition-transform duration-300 ease-smooth",
   digit: "block h-[1lh]",
   srOnly: "sr-only",
 } as const;

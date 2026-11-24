@@ -25,7 +25,11 @@ export function HeaderTopBar(props: TopBarProps) {
 
   return (
     <div className={STYLES.bar}>
-      <Link href={ROUTES.landing} aria-label={header.back} className={STYLES.back}>
+      <Link
+        href={ROUTES.landing}
+        aria-label={header.back}
+        className={STYLES.back}
+      >
         <Icon name="arrow" className={STYLES.backIcon} />
       </Link>
 

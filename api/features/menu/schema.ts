@@ -20,7 +20,10 @@ import {
 
 export const currencyEnum = pgEnum("menu_currency", MENU_CURRENCIES);
 export const badgeEnum = pgEnum("menu_badge", MENU_BADGES);
-export const availabilityEnum = pgEnum("menu_availability", MENU_AVAILABILITIES);
+export const availabilityEnum = pgEnum(
+  "menu_availability",
+  MENU_AVAILABILITIES
+);
 export const pricingTypeEnum = pgEnum("menu_pricing_type", MENU_PRICING_TYPES);
 
 export const menuSettings = pgTable("menu_settings", {
@@ -191,7 +194,9 @@ export const menuRelations = {
     options: many(menuProductOptions),
     addOnLinks: many(menuProductAddOns),
     baristaLinks: many(menuProductBaristaWay),
-    relatedLinks: many(menuProductRelated, { relationName: "product_related_from" }),
+    relatedLinks: many(menuProductRelated, {
+      relationName: "product_related_from",
+    }),
   })),
 
   menuProductOptionsRelations: relations(menuProductOptions, ({ one }) => ({
@@ -212,16 +217,19 @@ export const menuRelations = {
     }),
   })),
 
-  menuProductBaristaWayRelations: relations(menuProductBaristaWay, ({ one }) => ({
-    product: one(menuProducts, {
-      fields: [menuProductBaristaWay.productId],
-      references: [menuProducts.id],
-    }),
-    addOn: one(menuAddOns, {
-      fields: [menuProductBaristaWay.addOnId],
-      references: [menuAddOns.id],
-    }),
-  })),
+  menuProductBaristaWayRelations: relations(
+    menuProductBaristaWay,
+    ({ one }) => ({
+      product: one(menuProducts, {
+        fields: [menuProductBaristaWay.productId],
+        references: [menuProducts.id],
+      }),
+      addOn: one(menuAddOns, {
+        fields: [menuProductBaristaWay.addOnId],
+        references: [menuAddOns.id],
+      }),
+    })
+  ),
 
   menuProductRelatedRelations: relations(menuProductRelated, ({ one }) => ({
     product: one(menuProducts, {

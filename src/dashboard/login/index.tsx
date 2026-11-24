@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Form, Input, Label, TextField } from "react-aria-components";
 import logo from "@/assets/mark.svg";
+import { Icon } from "@/shared/icons";
 import { useStrings } from "@/shared/i18n";
 import { useSignIn } from "../hooks/use-sign-in";
 import { strings } from "./strings";
@@ -25,37 +26,6 @@ const STYLES = {
   submit:
     "mt-2 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-brand px-6 text-small font-bold text-white transition-colors ease-smooth [@media(hover:hover)_and_(pointer:fine)]:hover:bg-navy active:bg-navy/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand data-disabled:opacity-50",
 } as const;
-
-function PasswordIcon({ visible }: { visible: boolean }) {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      focusable="false"
-    >
-      {visible ? (
-        <>
-          <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-          <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-          <path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-          <path d="M2 2l20 20" />
-        </>
-      ) : (
-        <>
-          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
-          <circle cx="12" cy="12" r="3" />
-        </>
-      )}
-    </svg>
-  );
-}
 
 export function LoginPage() {
   const s = useStrings(strings);
@@ -124,7 +94,7 @@ export function LoginPage() {
                 }
                 className={STYLES.toggle}
               >
-                <PasswordIcon visible={showPassword} />
+                <Icon name="eye" size={20} />
               </Button>
             </div>
           </TextField>
