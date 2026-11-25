@@ -5,14 +5,9 @@ import tailwindcss from "@tailwindcss/vite";
 import oxlintPlugin from "vite-plugin-oxlint";
 
 const proxy = {
-  "/backend": {
+  "/api": {
     target: "http://localhost:3000",
     changeOrigin: true,
-    bypass(req: import("http").IncomingMessage) {
-      if (req.url && /\.ts(\?|$)/.test(req.url)) {
-        return req.url;
-      }
-    },
   },
 };
 
