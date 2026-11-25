@@ -12,3 +12,7 @@ export function moveId(
   next[target] = temp;
   return next;
 }
+
+export function isSameOrder(a: readonly number[], b: readonly number[]): boolean {
+  return a.length === b.length && a.every((id, i) => id === b[i]);
+}

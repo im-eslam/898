@@ -1,21 +1,16 @@
-import { useState } from "react";
-import { Button } from "react-aria-components";
+import { useMemo } from "react";
 import type { AdminAddOn, AdminAddOnInput } from "@api/contracts";
 import { useStrings } from "@/shared/i18n";
-import { CONTROL_STYLES } from "../../control-styles";
-import {
-  createAddOn,
-  deleteAddOn,
-  getAddOnUsage,
-  reorderAddOns,
-  updateAddOn,
-} from "../../api/menu";
+import { createAddOn, deleteAddOn, getAddOnUsage, reorderAddOns, updateAddOn } from "../../api/menu";
+import { LIST } from "../../control-styles";
 import { useAdminMenuMutation } from "../../hooks/use-admin-menu";
+import { useDialog } from "../../hooks/use-dialog";
 import { useDeleteFlow } from "../../hooks/use-delete-flow";
-import { getErrorMessage } from "../../lib/get-error-message";
-import { moveId } from "../../lib/reorder";
+import { useReorder } from "../../hooks/use-reorder";
+import { errorText } from "../../lib/get-error-message";
 import { strings } from "../../strings";
 import { ConfirmDeleteDialog } from "../confirm-delete-dialog";
+import { ListToolbar } from "../list-toolbar";
 import { ReorderRow } from "../reorder-row";
 import { AddOnFormDialog } from "./add-on-form-dialog";
 
@@ -24,104 +19,71 @@ interface AddOnListProps {
 }
 
 const STYLES = {
-  section: "flex flex-col gap-4",
-  header: "flex items-center justify-between gap-3",
-  title: "text-heading font-bold text-navy",
-  description: "text-small text-navy/70",
-  list: "flex flex-col gap-2",
-  empty:
-    "rounded-lg border border-dashed border-navy/20 p-6 text-center text-small text-navy/60",
-  row: "flex items-center justify-between gap-3",
-  name: "text-body font-bold text-navy",
-  price: "text-small font-bold text-brand",
+  name: "min-w-0 flex-1 truncate text-body font-bold text-navy",
+  price: "shrink-0 text-small font-bold text-brand tabular-nums",
 } as const;
 
 export function AddOnList({ addOns }: AddOnListProps) {
   const s = useStrings(strings);
-  const sorted = [...addOns].sort((a, b) => a.position - b.position);
-  const ids = sorted.map((a) => a.id);
+  const sorted = useMemo(() => [...addOns].sort((a, b) => a.position - b.position), [addOns]);
+  const byId = useMemo(() => new Map(sorted.map((addOn) => [addOn.id, addOn] as const)), [sorted]);
+  const serverIds = useMemo(() => sorted.map((a) => a.id), [sorted]);
 
-  const [editing, setEditing] = useState<AdminAddOn | "new" | null>(null);
+  const dialog = useDialog<AdminAddOn>();
 
-  const createMutation = useAdminMenuMutation((input: AdminAddOnInput) =>
-    createAddOn(input)
+  const saveMutation = useAdminMenuMutation(
+    ({ id, input }: { id: number | null; input: AdminAddOnInput }) =>
+      id === null ? createAddOn(input) : updateAddOn(id, input)
   );
-  const updateMutation = useAdminMenuMutation(
-    ({ id, input }: { id: number; input: AdminAddOnInput }) =>
-      updateAddOn(id, input)
-  );
-  const reorderMutation = useAdminMenuMutation((nextIds: number[]) =>
-    reorderAddOns(nextIds)
-  );
-  const deleteFlow = useDeleteFlow({
-    getUsage: getAddOnUsage,
-    deleteItem: deleteAddOn,
-  });
-
-  const saveMutation = editing === "new" ? createMutation : updateMutation;
+  const reorderMutation = useAdminMenuMutation((ids: number[]) => reorderAddOns(ids), "orderSaved");
+  const reorder = useReorder(serverIds, (ids) => reorderMutation.mutateAsync(ids));
+  const deleteFlow = useDeleteFlow({ getUsage: getAddOnUsage, deleteItem: deleteAddOn });
 
   const closeForm = () => {
-    setEditing(null);
-    createMutation.reset();
-    updateMutation.reset();
-  };
-
-  const handleSubmit = (input: AdminAddOnInput) => {
-    if (editing === "new") {
-      createMutation.mutate(input, { onSuccess: closeForm });
-    } else if (editing) {
-      updateMutation.mutate({ id: editing.id, input }, { onSuccess: closeForm });
-    }
+    dialog.close();
+    saveMutation.reset();
   };
 
   const warnings = deleteFlow.target
     ? [
-        ...(deleteFlow.target.usage.products > 0
-          ? [s.addOns.usage.products(deleteFlow.target.usage.products)]
-          : []),
+        ...(deleteFlow.target.usage.products > 0 ? [s.addOns.usage.products(deleteFlow.target.usage.products)] : []),
         ...(deleteFlow.target.usage.baristaWay > 0
           ? [s.addOns.usage.baristaWay(deleteFlow.target.usage.baristaWay)]
           : []),
       ]
     : [];
 
-  return (
-    <section className={STYLES.section}>
-      <div className={STYLES.header}>
-        <div>
-          <h2 className={STYLES.title}>{s.addOns.title}</h2>
-          <p className={STYLES.description}>{s.addOns.description}</p>
-        </div>
-        <Button
-          onPress={() => setEditing("new")}
-          className={CONTROL_STYLES.buttonPrimary}
-        >
-          {s.addOns.add}
-        </Button>
-      </div>
+  const ordered = useMemo(
+    () =>
+      reorder.order.flatMap((id) => {
+        const addOn = byId.get(id);
+        return addOn ? [addOn] : [];
+      }),
+    [reorder.order, byId]
+  );
 
-      {sorted.length === 0 ? (
-        <p className={STYLES.empty}>{s.addOns.empty}</p>
+  return (
+    <section className="flex flex-col gap-4">
+      <ListToolbar actionLabel={s.addOns.add} onAction={() => dialog.open()} />
+
+      {ordered.length === 0 ? (
+        <p className={LIST.empty}>{s.addOns.empty}</p>
       ) : (
-        <div className={STYLES.list}>
-          {sorted.map((addOn, index) => (
+        <div className={LIST.stack}>
+          {ordered.map((addOn, index) => (
             <ReorderRow
               key={addOn.id}
+              itemName={addOn.name.en}
               canMoveUp={index > 0}
-              canMoveDown={index < sorted.length - 1}
-              onMoveUp={() => reorderMutation.mutate(moveId(ids, index, -1))}
-              onMoveDown={() => reorderMutation.mutate(moveId(ids, index, 1))}
-              onEdit={() => setEditing(addOn)}
+              canMoveDown={index < ordered.length - 1}
+              onMoveUp={() => reorder.move(addOn.id, -1)}
+              onMoveDown={() => reorder.move(addOn.id, 1)}
+              onEdit={() => dialog.open(addOn)}
               onDelete={() => void deleteFlow.request(addOn.id)}
-              moveUpLabel={s.common.moveUp}
-              moveDownLabel={s.common.moveDown}
-              editLabel={s.common.edit}
-              deleteLabel={s.common.delete}
-              isDeleting={
-                deleteFlow.isDeleting && deleteFlow.target?.id === addOn.id
-              }
+              isBusy={deleteFlow.isDeleting}
+              isDeleting={deleteFlow.isDeleting && deleteFlow.target?.id === addOn.id}
             >
-              <div className={STYLES.row}>
+              <div className="flex min-w-0 items-center justify-between gap-3">
                 <span className={STYLES.name}>{addOn.name.en}</span>
                 <span className={STYLES.price}>{addOn.price} EGP</span>
               </div>
@@ -131,42 +93,24 @@ export function AddOnList({ addOns }: AddOnListProps) {
       )}
 
       <AddOnFormDialog
-        isOpen={editing !== null}
-        initial={
-          editing && editing !== "new"
-            ? { name: editing.name, price: editing.price }
-            : null
-        }
+        key={dialog.session}
+        isOpen={dialog.isOpen}
+        initial={dialog.target ?? null}
         isSaving={saveMutation.isPending}
-        error={saveMutation.error}
+        error={errorText(s.errors, saveMutation.error)}
         onClose={closeForm}
-        onSubmit={handleSubmit}
+        onSave={(input) => saveMutation.mutate({ id: dialog.target?.id ?? null, input }, { onSuccess: closeForm })}
       />
 
       <ConfirmDeleteDialog
-        isOpen={
-          deleteFlow.target !== null ||
-          deleteFlow.isLoadingUsage ||
-          deleteFlow.usageError !== null
-        }
+        isOpen={deleteFlow.target !== null || deleteFlow.isLoadingUsage || deleteFlow.usageError !== null}
         title={s.addOns.deleteTitle}
         text={s.addOns.deleteText}
         warnings={warnings}
         isLoading={deleteFlow.isLoadingUsage}
         isDeleting={deleteFlow.isDeleting}
-        error={
-          deleteFlow.usageError || deleteFlow.deleteError
-            ? getErrorMessage(
-                s.errors,
-                deleteFlow.usageError ?? deleteFlow.deleteError
-              )
-            : undefined
-        }
-        closeLabel={s.dialog.close}
-        cancelLabel={s.confirm.cancel}
-        confirmLabel={s.common.delete}
-        deletingLabel={s.common.deleting}
-        loadingLabel={s.confirm.loading}
+        canConfirm={deleteFlow.target !== null}
+        error={errorText(s.errors, deleteFlow.usageError ?? deleteFlow.deleteError)}
         onCancel={deleteFlow.cancel}
         onConfirm={deleteFlow.confirm}
       />

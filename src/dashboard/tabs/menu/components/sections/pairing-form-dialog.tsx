@@ -1,123 +1,88 @@
 import { useState } from "react";
-import { Button, Form } from "react-aria-components";
-import type { AdminPairingInput } from "@api/contracts";
+import type { AdminPairing, AdminPairingInput } from "@api/contracts";
 import { useStrings } from "@/shared/i18n";
-import { CONTROL_STYLES } from "../../control-styles";
-import { getErrorMessage } from "../../lib/get-error-message";
 import { strings } from "../../strings";
-import { MoneyField } from "../fields/money-field";
-import { SelectField } from "../fields/select-field";
+import { NumberInputField } from "../fields/number-field";
+import { SearchSelectField, type SearchSelectOption } from "../fields/search-select-field";
+import { FormFooter } from "../form-footer";
 import { MenuDialog } from "../menu-dialog";
 
 interface PairingFormDialogProps {
   isOpen: boolean;
-  initial: AdminPairingInput | null;
-  products: { id: number; label: string }[];
+  initial: AdminPairing | null;
+  products: SearchSelectOption[];
   isSaving: boolean;
-  error: unknown;
+  error?: string;
   onClose: () => void;
-  onSubmit: (input: AdminPairingInput) => void;
+  onSave: (input: AdminPairingInput) => void;
 }
 
-export function PairingFormDialog({
-  isOpen,
-  initial,
-  products,
-  isSaving,
-  error,
-  onClose,
-  onSubmit,
-}: PairingFormDialogProps) {
+export function PairingFormDialog({ isOpen, initial, products, isSaving, error, onClose, onSave }: PairingFormDialogProps) {
   const s = useStrings(strings);
-  const [firstId, setFirstId] = useState<number | null>(
-    initial?.productIds[0] ?? null
-  );
-  const [secondId, setSecondId] = useState<number | null>(
-    initial?.productIds[1] ?? null
-  );
+  const [firstId, setFirstId] = useState<string | null>(initial ? String(initial.productIds[0]) : null);
+  const [secondId, setSecondId] = useState<string | null>(initial ? String(initial.productIds[1]) : null);
   const [price, setPrice] = useState(initial?.price ?? 0);
   const [discount, setDiscount] = useState(initial?.discount ?? 0);
 
-  const options = products.map((p) => ({ id: String(p.id), label: p.label }));
-  const isValid =
-    firstId !== null && secondId !== null && firstId !== secondId;
+  // Each picker hides the product already chosen in the other one.
+  const firstOptions = products.filter((p) => p.id !== secondId);
+  const secondOptions = products.filter((p) => p.id !== firstId);
+  const isSameProduct = firstId !== null && firstId === secondId;
+  const isDiscountValid = discount <= price;
+  const isValid = firstId !== null && secondId !== null && !isSameProduct && isDiscountValid;
+  const finalPrice = Math.max(price - discount, 0);
+
+  const submit = () => {
+    if (!isValid || firstId === null || secondId === null || isSaving) return;
+    onSave({ productIds: [Number(firstId), Number(secondId)], price, discount });
+  };
 
   return (
     <MenuDialog
       isOpen={isOpen}
       isDismissable={!isSaving}
-      size="sm"
+      size="md"
       title={initial ? s.pairings.editTitle : s.pairings.addTitle}
-      closeLabel={s.dialog.close}
+      error={error}
       onClose={onClose}
+      onSubmit={submit}
+      footer={<FormFooter isSaving={isSaving} isSubmitDisabled={!isValid} onCancel={onClose} />}
     >
-      <Form
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (isValid && firstId !== null && secondId !== null) {
-            onSubmit({ productIds: [firstId, secondId], price, discount });
-          }
-        }}
-        className="flex flex-col gap-5"
-      >
-        <SelectField
+      <div className="flex flex-col gap-5">
+        <SearchSelectField
           label={s.pairings.firstItem}
-          value={firstId === null ? "" : String(firstId)}
-          options={
-            firstId === null
-              ? [{ id: "", label: s.pairings.selectProduct }, ...options]
-              : options
-          }
-          onChange={(value) => setFirstId(value ? Number(value) : null)}
+          value={firstId}
+          options={firstOptions}
+          onChange={setFirstId}
+          placeholder={s.pairings.selectProduct}
+          emptyLabel={s.pairings.noResults}
         />
-        <SelectField
+        <SearchSelectField
           label={s.pairings.secondItem}
-          value={secondId === null ? "" : String(secondId)}
-          options={
-            secondId === null
-              ? [{ id: "", label: s.pairings.selectProduct }, ...options]
-              : options
-          }
-          onChange={(value) => setSecondId(value ? Number(value) : null)}
+          value={secondId}
+          options={secondOptions}
+          onChange={setSecondId}
+          placeholder={s.pairings.selectProduct}
+          emptyLabel={s.pairings.noResults}
+          error={isSameProduct ? s.errors.MENU_PAIRING_ITEMS_INVALID : undefined}
         />
-        <div className="grid gap-3 sm:grid-cols-2">
-          <MoneyField
-            label={s.pairings.price}
-            value={price}
-            onChange={setPrice}
-            currencySuffix="EGP"
-          />
-          <MoneyField
+
+        <div className="grid gap-4 @sm:grid-cols-2">
+          <NumberInputField label={s.pairings.price} value={price} onChange={setPrice} suffix="EGP" />
+          <NumberInputField
             label={s.pairings.discount}
             value={discount}
             onChange={setDiscount}
-            currencySuffix="EGP"
+            suffix="EGP"
+            error={isDiscountValid ? undefined : s.errors.MENU_DISCOUNT_INVALID}
           />
         </div>
 
-        {error !== null && error !== undefined && (
-          <p role="alert" className="text-small font-bold text-error">
-            {getErrorMessage(s.errors, error)}
-          </p>
-        )}
-
-        <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-          <Button
-            isDisabled={isSaving}
-            onPress={onClose}
-            className={CONTROL_STYLES.button}
-          >
-            {s.common.cancel}
-          </Button>
-          <Button
-            type="submit"
-            isDisabled={isSaving || !isValid}
-            className={CONTROL_STYLES.buttonPrimary}
-          >
-            {isSaving ? s.common.saving : s.common.save}
-          </Button>
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-brand/25 bg-brand/5 px-4 py-3">
+          <span className="text-small font-bold text-navy">{s.pairings.finalPrice}</span>
+          <span className="text-heading font-bold text-brand tabular-nums">{finalPrice} EGP</span>
         </div>
-      </Form>
+      </div>
     </MenuDialog>
   );
 }

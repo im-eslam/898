@@ -1,5 +1,7 @@
 import { Button } from "react-aria-components";
+import { useStrings } from "@/shared/i18n";
 import { CONTROL_STYLES } from "../control-styles";
+import { strings } from "../strings";
 import { MenuDialog } from "./menu-dialog";
 
 interface ConfirmDeleteDialogProps {
@@ -9,27 +11,15 @@ interface ConfirmDeleteDialogProps {
   warnings?: string[];
   isLoading?: boolean;
   isDeleting: boolean;
+  // False while there is nothing to confirm, for example when the usage check failed.
+  canConfirm?: boolean;
+  confirmLabel?: string;
   error?: string;
-  closeLabel: string;
-  cancelLabel: string;
-  confirmLabel: string;
-  deletingLabel: string;
-  loadingLabel: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-const STYLES = {
-  body: "flex flex-col gap-4",
-  text: "text-body text-navy/80",
-  warnings:
-    "flex flex-col gap-1 rounded-md border border-honey/40 bg-honey/15 px-4 py-3 text-small font-bold text-navy",
-  error:
-    "text-small rounded-md border border-error/30 bg-error/10 px-4 py-3 font-bold text-error",
-  actions: "flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end",
-  fullWidthOnPhone: "w-full sm:w-auto",
-} as const;
-
+// Every removal goes through this. Cancel has focus, so Enter never deletes by accident.
 export function ConfirmDeleteDialog({
   isOpen,
   title,
@@ -37,55 +27,46 @@ export function ConfirmDeleteDialog({
   warnings = [],
   isLoading = false,
   isDeleting,
-  error,
-  closeLabel,
-  cancelLabel,
+  canConfirm = true,
   confirmLabel,
-  deletingLabel,
-  loadingLabel,
+  error,
   onCancel,
   onConfirm,
 }: ConfirmDeleteDialogProps) {
+  const s = useStrings(strings);
+
   return (
     <MenuDialog
       isOpen={isOpen}
       isDismissable={!isDeleting}
-      size="sm"
+      size="xs"
       title={title}
-      closeLabel={closeLabel}
+      error={error}
       onClose={onCancel}
+      footer={
+        <div className="flex flex-col-reverse gap-3 @sm:flex-row @sm:justify-end">
+          <Button autoFocus isDisabled={isDeleting} onPress={onCancel} className={`${CONTROL_STYLES.button} w-full @sm:w-auto`}>
+            {s.confirm.cancel}
+          </Button>
+          <Button
+            isDisabled={isDeleting || isLoading || !canConfirm}
+            onPress={onConfirm}
+            className={`${CONTROL_STYLES.buttonDanger} w-full @sm:w-auto`}
+          >
+            {isDeleting ? s.common.deleting : (confirmLabel ?? s.common.delete)}
+          </Button>
+        </div>
+      }
     >
-      <div className={STYLES.body}>
-        <p className={STYLES.text}>{isLoading ? loadingLabel : text}</p>
+      <div className="flex flex-col gap-3">
+        <p className="text-body text-navy/80">{isLoading ? s.confirm.loading : text}</p>
         {warnings.length > 0 && (
-          <ul className={STYLES.warnings}>
+          <ul className="flex flex-col gap-1 rounded-md border border-honey/40 bg-honey/15 px-4 py-3 text-small font-bold text-navy">
             {warnings.map((warning) => (
               <li key={warning}>{warning}</li>
             ))}
           </ul>
         )}
-        {error && (
-          <p role="alert" className={STYLES.error}>
-            {error}
-          </p>
-        )}
-        <div className={STYLES.actions}>
-          <Button
-            autoFocus
-            isDisabled={isDeleting}
-            onPress={onCancel}
-            className={`${CONTROL_STYLES.button} ${STYLES.fullWidthOnPhone}`}
-          >
-            {cancelLabel}
-          </Button>
-          <Button
-            isDisabled={isDeleting || isLoading}
-            onPress={onConfirm}
-            className={`${CONTROL_STYLES.buttonDanger} ${STYLES.fullWidthOnPhone}`}
-          >
-            {isDeleting ? deletingLabel : confirmLabel}
-          </Button>
-        </div>
       </div>
     </MenuDialog>
   );

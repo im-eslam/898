@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 import type { MenuDeleted } from "@api/contracts";
 import { ApiError } from "@/shared/api";
+import { useStrings } from "@/shared/i18n";
 import { sessionKey } from "../../../hooks/use-session";
-import { adminMenuKey, useAdminMenuMutation } from "./use-admin-menu";
+import { getErrorMessage } from "../lib/get-error-message";
+import { strings } from "../strings";
+import { useAdminMenuMutation } from "./use-admin-menu";
 
 interface DeleteFlowOptions<U> {
   getUsage: (id: number) => Promise<{ ok: true; usage: U }>;
@@ -11,12 +15,13 @@ interface DeleteFlowOptions<U> {
 }
 
 export function useDeleteFlow<U>({ getUsage, deleteItem }: DeleteFlowOptions<U>) {
+  const s = useStrings(strings);
   const queryClient = useQueryClient();
   const [target, setTarget] = useState<{ id: number; usage: U } | null>(null);
   const [isLoadingUsage, setIsLoadingUsage] = useState(false);
   const [usageError, setUsageError] = useState<ApiError | null>(null);
 
-  const mutation = useAdminMenuMutation(deleteItem);
+  const mutation = useAdminMenuMutation(deleteItem, "deleted");
 
   const request = async (id: number) => {
     setUsageError(null);
@@ -28,11 +33,10 @@ export function useDeleteFlow<U>({ getUsage, deleteItem }: DeleteFlowOptions<U>)
       if (error instanceof ApiError && error.code === "UNAUTHORIZED") {
         void queryClient.invalidateQueries({ queryKey: sessionKey });
       }
-      setUsageError(
-        error instanceof ApiError
-          ? error
-          : new ApiError(0, "UNKNOWN", "Unknown error")
-      );
+      const apiError =
+        error instanceof ApiError ? error : new ApiError(0, "UNKNOWN", "Unknown error");
+      setUsageError(apiError);
+      toast.error(getErrorMessage(s.errors, apiError), { duration: 5000 });
     } finally {
       setIsLoadingUsage(false);
     }
@@ -43,6 +47,13 @@ export function useDeleteFlow<U>({ getUsage, deleteItem }: DeleteFlowOptions<U>)
     mutation.mutate(target.id, { onSuccess: () => setTarget(null) });
   };
 
+  // Cancel must clear the usage error too, otherwise the dialog stays open.
+  const cancel = () => {
+    setTarget(null);
+    setUsageError(null);
+    mutation.reset();
+  };
+
   return {
     target,
     isLoadingUsage,
@@ -50,12 +61,7 @@ export function useDeleteFlow<U>({ getUsage, deleteItem }: DeleteFlowOptions<U>)
     isDeleting: mutation.isPending,
     deleteError: mutation.error,
     request,
-    cancel: () => {
-      setTarget(null);
-      mutation.reset();
-    },
+    cancel,
     confirm,
   };
 }
-
-export { adminMenuKey };

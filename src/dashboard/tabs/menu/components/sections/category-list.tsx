@@ -1,138 +1,108 @@
-import { useState } from "react";
-import { Button } from "react-aria-components";
-import type { AdminCategory, AdminCategoryInput } from "@api/contracts";
+import { useMemo } from "react";
+import type { AdminCategory, AdminCategoryInput, AdminProduct } from "@api/contracts";
 import { useStrings } from "@/shared/i18n";
-import { CONTROL_STYLES } from "../../control-styles";
-import {
-  createCategory,
-  deleteCategory,
-  getCategoryUsage,
-  reorderCategories,
-  updateCategory,
-} from "../../api/menu";
-import { useAdminMenuMutation } from "../../hooks/use-admin-menu";
-import { useDeleteFlow } from "../../hooks/use-delete-flow";
-import { getErrorMessage } from "../../lib/get-error-message";
-import { moveId } from "../../lib/reorder";
-import { strings } from "../../strings";
+import { createCategory, deleteCategory, getCategoryUsage, reorderCategories, updateCategory } from "../../api/menu";
 import { ConfirmDeleteDialog } from "../confirm-delete-dialog";
+import { LIST } from "../../control-styles";
+import { useAdminMenuMutation } from "../../hooks/use-admin-menu";
+import { useDialog } from "../../hooks/use-dialog";
+import { useDeleteFlow } from "../../hooks/use-delete-flow";
+import { useReorder } from "../../hooks/use-reorder";
+import { errorText } from "../../lib/get-error-message";
+import { strings } from "../../strings";
+import { ListToolbar } from "../list-toolbar";
 import { ReorderRow } from "../reorder-row";
 import { CategoryFormDialog } from "./category-form-dialog";
 
 interface CategoryListProps {
   categories: AdminCategory[];
+  products: AdminProduct[];
 }
 
 const STYLES = {
-  section: "flex flex-col gap-4",
-  header: "flex items-center justify-between gap-3",
-  title: "text-heading font-bold text-navy",
-  description: "text-small text-navy/70",
-  list: "flex flex-col gap-2",
-  empty:
-    "rounded-lg border border-dashed border-navy/20 p-6 text-center text-small text-navy/60",
-  name: "text-body font-bold text-navy",
+  name: LIST.title,
+  meta: "block text-caption text-navy/70",
 } as const;
 
-export function CategoryList({ categories }: CategoryListProps) {
+export function CategoryList({ categories, products }: CategoryListProps) {
   const s = useStrings(strings);
-  const sorted = [...categories].sort((a, b) => a.position - b.position);
-  const ids = sorted.map((c) => c.id);
+  const sorted = useMemo(() => [...categories].sort((a, b) => a.position - b.position), [categories]);
+  const byId = useMemo(() => new Map(sorted.map((category) => [category.id, category] as const)), [sorted]);
 
-  const [editing, setEditing] = useState<AdminCategory | "new" | null>(null);
+  // Product counts for every category in one pass, instead of a filter per row.
+  const countById = useMemo(() => {
+    const counts = new Map<number, number>();
+    for (const product of products) {
+      if (product.categoryId !== null) counts.set(product.categoryId, (counts.get(product.categoryId) ?? 0) + 1);
+    }
+    return counts;
+  }, [products]);
 
-  const createMutation = useAdminMenuMutation((input: AdminCategoryInput) =>
-    createCategory(input)
-  );
-  const updateMutation = useAdminMenuMutation(
-    ({ id, input }: { id: number; input: AdminCategoryInput }) =>
-      updateCategory(id, input)
-  );
-  const reorderMutation = useAdminMenuMutation((nextIds: number[]) =>
-    reorderCategories(nextIds)
-  );
-  const deleteFlow = useDeleteFlow({
-    getUsage: getCategoryUsage,
-    deleteItem: deleteCategory,
-  });
+  const dialog = useDialog<AdminCategory>();
 
-  const saveMutation = editing === "new" ? createMutation : updateMutation;
+  const saveMutation = useAdminMenuMutation(
+    ({ id, input }: { id: number | null; input: AdminCategoryInput }) =>
+      id === null ? createCategory(input) : updateCategory(id, input)
+  );
+  const reorderMutation = useAdminMenuMutation((ids: number[]) => reorderCategories(ids), "orderSaved");
+  const serverIds = useMemo(() => sorted.map((c) => c.id), [sorted]);
+  const reorder = useReorder(serverIds, (ids) => reorderMutation.mutateAsync(ids));
+  const deleteFlow = useDeleteFlow({ getUsage: getCategoryUsage, deleteItem: deleteCategory });
 
   const closeForm = () => {
-    setEditing(null);
-    createMutation.reset();
-    updateMutation.reset();
+    dialog.close();
+    saveMutation.reset();
   };
 
-  const handleSubmit = (input: AdminCategoryInput) => {
-    if (editing === "new") {
-      createMutation.mutate(input, { onSuccess: closeForm });
-    } else if (editing) {
-      updateMutation.mutate({ id: editing.id, input }, { onSuccess: closeForm });
-    }
-  };
+  const ordered = useMemo(
+    () =>
+      reorder.order.flatMap((id) => {
+        const category = byId.get(id);
+        return category ? [category] : [];
+      }),
+    [reorder.order, byId]
+  );
 
   return (
-    <section className={STYLES.section}>
-      <div className={STYLES.header}>
-        <div>
-          <h2 className={STYLES.title}>{s.categories.title}</h2>
-          <p className={STYLES.description}>{s.categories.description}</p>
-        </div>
-        <Button
-          onPress={() => setEditing("new")}
-          className={CONTROL_STYLES.buttonPrimary}
-        >
-          {s.categories.add}
-        </Button>
-      </div>
+    <section className="flex flex-col gap-4">
+      <ListToolbar actionLabel={s.categories.add} onAction={() => dialog.open()} />
 
-      {sorted.length === 0 ? (
-        <p className={STYLES.empty}>{s.categories.empty}</p>
+      {ordered.length === 0 ? (
+        <p className={LIST.empty}>{s.categories.empty}</p>
       ) : (
-        <div className={STYLES.list}>
-          {sorted.map((category, index) => (
+        <div className={LIST.stack}>
+          {ordered.map((category, index) => (
             <ReorderRow
               key={category.id}
+              itemName={category.name.en}
               canMoveUp={index > 0}
-              canMoveDown={index < sorted.length - 1}
-              onMoveUp={() =>
-                reorderMutation.mutate(moveId(ids, index, -1))
-              }
-              onMoveDown={() =>
-                reorderMutation.mutate(moveId(ids, index, 1))
-              }
-              onEdit={() => setEditing(category)}
+              canMoveDown={index < ordered.length - 1}
+              onMoveUp={() => reorder.move(category.id, -1)}
+              onMoveDown={() => reorder.move(category.id, 1)}
+              onEdit={() => dialog.open(category)}
               onDelete={() => void deleteFlow.request(category.id)}
-              moveUpLabel={s.common.moveUp}
-              moveDownLabel={s.common.moveDown}
-              editLabel={s.common.edit}
-              deleteLabel={s.common.delete}
-              isDeleting={
-                deleteFlow.isDeleting && deleteFlow.target?.id === category.id
-              }
+              isBusy={deleteFlow.isDeleting}
+              isDeleting={deleteFlow.isDeleting && deleteFlow.target?.id === category.id}
             >
               <span className={STYLES.name}>{category.name.en}</span>
+              <span className={STYLES.meta}>{s.common.productCount(countById.get(category.id) ?? 0)}</span>
             </ReorderRow>
           ))}
         </div>
       )}
 
       <CategoryFormDialog
-        isOpen={editing !== null}
-        initial={editing && editing !== "new" ? { name: editing.name } : null}
+        key={dialog.session}
+        isOpen={dialog.isOpen}
+        initial={dialog.target ?? null}
         isSaving={saveMutation.isPending}
-        error={saveMutation.error}
+        error={errorText(s.errors, saveMutation.error)}
         onClose={closeForm}
-        onSubmit={handleSubmit}
+        onSave={(input) => saveMutation.mutate({ id: dialog.target?.id ?? null, input }, { onSuccess: closeForm })}
       />
 
       <ConfirmDeleteDialog
-        isOpen={
-          deleteFlow.target !== null ||
-          deleteFlow.isLoadingUsage ||
-          deleteFlow.usageError !== null
-        }
+        isOpen={deleteFlow.target !== null || deleteFlow.isLoadingUsage || deleteFlow.usageError !== null}
         title={s.categories.deleteTitle}
         text={s.categories.deleteText}
         warnings={
@@ -142,19 +112,8 @@ export function CategoryList({ categories }: CategoryListProps) {
         }
         isLoading={deleteFlow.isLoadingUsage}
         isDeleting={deleteFlow.isDeleting}
-        error={
-          deleteFlow.usageError || deleteFlow.deleteError
-            ? getErrorMessage(
-                s.errors,
-                deleteFlow.usageError ?? deleteFlow.deleteError
-              )
-            : undefined
-        }
-        closeLabel={s.dialog.close}
-        cancelLabel={s.confirm.cancel}
-        confirmLabel={s.common.delete}
-        deletingLabel={s.common.deleting}
-        loadingLabel={s.confirm.loading}
+        canConfirm={deleteFlow.target !== null}
+        error={errorText(s.errors, deleteFlow.usageError ?? deleteFlow.deleteError)}
         onCancel={deleteFlow.cancel}
         onConfirm={deleteFlow.confirm}
       />

@@ -1,86 +1,142 @@
-import { useEffect, useState } from "react";
-import { Button } from "react-aria-components";
-import toast from "react-hot-toast";
+import { useMemo, useState } from "react";
 import type { AdminMenuState } from "@api/contracts";
 import { useStrings } from "@/shared/i18n";
+import { Icon } from "@/shared/icons";
 import { replaceSignatures } from "../../api/menu";
-import { CONTROL_STYLES } from "../../control-styles";
+import { LIST } from "../../control-styles";
 import { useAdminMenuMutation } from "../../hooks/use-admin-menu";
-import { getErrorMessage } from "../../lib/get-error-message";
+import { useDialog } from "../../hooks/use-dialog";
+import { useReorder } from "../../hooks/use-reorder";
+import { productImageUrl } from "../../lib/image-url";
 import { strings } from "../../strings";
-import { ChecklistField } from "../fields/checklist-field";
+import { ConfirmDeleteDialog } from "../confirm-delete-dialog";
+import { ListToolbar } from "../list-toolbar";
+import { ReorderRow } from "../reorder-row";
+import { SignaturePickerDialog, type SignaturePickerOption } from "./signature-picker-dialog";
 
 interface SignaturesSectionProps {
   menu: AdminMenuState;
 }
 
 const STYLES = {
-  section: "flex flex-col gap-4",
-  header: "flex flex-col gap-1",
-  title: "text-heading font-bold text-navy",
-  description: "text-small text-navy/70",
-  footer: "flex items-center justify-between gap-3",
-  count: "text-small font-bold text-navy/70",
-  error: "text-small font-bold text-error",
+  thumb: `${LIST.thumb} text-navy/40`,
+  image: "size-full object-cover",
+  name: LIST.title,
+  meta: LIST.meta,
 } as const;
 
+// Same row as the Products list. The order here is the order guests see.
 export function SignaturesSection({ menu }: SignaturesSectionProps) {
   const s = useStrings(strings);
-  const [draft, setDraft] = useState<number[]>(menu.signatures);
+  const picker = useDialog();
+  const [removingId, setRemovingId] = useState<number | null>(null);
 
-  useEffect(() => {
-    setDraft(menu.signatures);
-  }, [menu.signatures]);
+  const productById = useMemo(() => new Map(menu.products.map((p) => [p.id, p] as const)), [menu.products]);
+  const categoryNameById = useMemo(
+    () => new Map(menu.categories.map((c) => [c.id, c.name.en] as const)),
+    [menu.categories]
+  );
+  const categoryName = (categoryId: number | null) =>
+    (categoryId === null ? undefined : categoryNameById.get(categoryId)) ?? s.common.noCategory;
 
-  const mutation = useAdminMenuMutation((ids: number[]) => replaceSignatures(ids));
+  const saveMutation = useAdminMenuMutation((productIds: number[]) => replaceSignatures(productIds));
+  const reorder = useReorder(menu.signatures, (productIds) => saveMutation.mutateAsync(productIds));
 
-  const items = menu.products.map((product) => ({
-    id: product.id,
-    label: product.name.en,
-  }));
+  const featured = useMemo(
+    () =>
+      reorder.order.flatMap((id) => {
+        const product = productById.get(id);
+        return product ? [product] : [];
+      }),
+    [reorder.order, productById]
+  );
 
-  const isDirty =
-    draft.length !== menu.signatures.length ||
-    draft.some((id, index) => id !== menu.signatures[index]);
+  // Built once per change instead of scanning the signature list for every product.
+  const candidates = useMemo<SignaturePickerOption[]>(() => {
+    const featuredIds = new Set(reorder.order);
+    const noCategory = s.common.noCategory;
+    return menu.products
+      .filter((p) => !featuredIds.has(p.id))
+      .map((p) => ({
+        id: p.id,
+        label: p.name.en,
+        searchText: `${p.name.en} ${p.name.ar}`.toLowerCase(),
+        meta: (p.categoryId === null ? undefined : categoryNameById.get(p.categoryId)) ?? noCategory,
+        imageUrl: p.image ? productImageUrl(p.image) : null,
+      }));
+  }, [menu.products, reorder.order, categoryNameById, s.common.noCategory]);
+
+  // Adds and removes queue through the same save line as moves, so they never race.
+  const addSignatures = (ids: number[]) => {
+    reorder.replace([...reorder.order, ...ids]);
+    picker.close();
+  };
+
+  const confirmRemove = () => {
+    if (removingId !== null) reorder.replace(reorder.order.filter((id) => id !== removingId));
+    setRemovingId(null);
+  };
 
   return (
-    <section className={STYLES.section}>
-      <div className={STYLES.header}>
-        <h2 className={STYLES.title}>{s.signatures.title}</h2>
-        <p className={STYLES.description}>{s.signatures.description}</p>
-      </div>
-
-      <ChecklistField
-        label={s.signatures.title}
-        items={items}
-        selectedIds={draft}
-        onChange={setDraft}
-        searchPlaceholder={s.signatures.searchPlaceholder}
-        emptyLabel={s.signatures.empty}
+    <section className="flex flex-col gap-4">
+      <ListToolbar
+        count={s.signatures.count(featured.length)}
+        actionLabel={s.signatures.add}
+        onAction={() => picker.open()}
       />
 
-      {mutation.error && (
-        <p role="alert" className={STYLES.error}>
-          {getErrorMessage(s.errors, mutation.error)}
-        </p>
+      {featured.length === 0 ? (
+        <p className={LIST.empty}>{s.signatures.empty}</p>
+      ) : (
+        <div className={LIST.stack}>
+          {featured.map((product, index) => {
+            const image = product.image ? productImageUrl(product.image) : null;
+            return (
+              <ReorderRow
+                key={product.id}
+                itemName={product.name.en}
+                canMoveUp={index > 0}
+                canMoveDown={index < featured.length - 1}
+                onMoveUp={() => reorder.move(product.id, -1)}
+                onMoveDown={() => reorder.move(product.id, 1)}
+                onDelete={() => setRemovingId(product.id)}
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className={STYLES.thumb}>
+                    {image ? (
+                      <img src={image} alt="" loading="lazy" decoding="async" className={STYLES.image} />
+                    ) : (
+                      <Icon name="cup" size={22} />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className={STYLES.name}>{product.name.en}</span>
+                    <span className={STYLES.meta}>{categoryName(product.categoryId)}</span>
+                  </div>
+                </div>
+              </ReorderRow>
+            );
+          })}
+        </div>
       )}
 
-      <div className={STYLES.footer}>
-        <span className={STYLES.count}>
-          {s.signatures.selectedCount(draft.length)}
-        </span>
-        <Button
-          isDisabled={!isDirty || mutation.isPending}
-          onPress={() =>
-            mutation.mutate(draft, {
-              onSuccess: () => toast.success(s.common.saved),
-            })
-          }
-          className={CONTROL_STYLES.buttonPrimary}
-        >
-          {mutation.isPending ? s.common.saving : s.signatures.save}
-        </Button>
-      </div>
+      <ConfirmDeleteDialog
+        isOpen={removingId !== null}
+        title={s.signatures.removeTitle}
+        text={s.signatures.removeText}
+        confirmLabel={s.signatures.remove}
+        isDeleting={false}
+        onCancel={() => setRemovingId(null)}
+        onConfirm={confirmRemove}
+      />
+
+      <SignaturePickerDialog
+        key={picker.session}
+        isOpen={picker.isOpen}
+        options={candidates}
+        onClose={picker.close}
+        onConfirm={addSignatures}
+      />
     </section>
   );
 }

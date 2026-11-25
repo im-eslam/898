@@ -17,23 +17,12 @@ const STYLES = {
   track:
     "relative h-7 w-12 shrink-0 rounded-full bg-navy/20 transition-colors ease-smooth group-data-selected:bg-brand",
   thumb:
-    "absolute top-0.5 left-0.5 size-6 rounded-full bg-white shadow-card transition-transform ease-smooth group-data-selected:translate-x-5 rtl:group-data-selected:-translate-x-5",
+    "absolute top-0.5 start-0.5 size-6 rounded-full border border-navy/15 bg-white transition-transform ease-smooth group-data-selected:translate-x-5 rtl:group-data-selected:-translate-x-5",
 } as const;
 
-export function ToggleField({
-  label,
-  hint,
-  isSelected,
-  onChange,
-  isDisabled,
-}: ToggleFieldProps) {
+export function ToggleField({ label, hint, isSelected, onChange, isDisabled }: ToggleFieldProps) {
   return (
-    <Switch
-      isSelected={isSelected}
-      onChange={onChange}
-      isDisabled={isDisabled}
-      className={STYLES.switch}
-    >
+    <Switch isSelected={isSelected} onChange={onChange} isDisabled={isDisabled} className={STYLES.switch}>
       <span className={STYLES.text}>
         <span className={STYLES.label}>{label}</span>
         {hint && <span className={STYLES.hint}>{hint}</span>}

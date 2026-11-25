@@ -10,3 +10,11 @@ export function getErrorMessage(
     ? errors[code as MenuErrorKey]
     : errors.UNKNOWN;
 }
+
+// Returns undefined when there is no error, so forms can show it only when needed.
+export function errorText(
+  errors: Record<MenuErrorKey, string>,
+  error: unknown
+): string | undefined {
+  return error == null ? undefined : getErrorMessage(errors, error);
+}
