@@ -9,5 +9,5 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["backend", "drizzle.config.ts"]
+  "include": ["api", "backend", "drizzle.config.ts"]
 }
