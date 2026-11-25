@@ -29,6 +29,8 @@ export const env = (() => {
       COOKIE_SECURE: z.enum(["0", "1"]).optional(),
       COOKIE_SAMESITE: z.enum(["Strict", "Lax", "None"]).default("Strict"),
       MENU_IMAGE_DIR: z.string().min(1).default("public/menu"),
+      BLOB_READ_WRITE_TOKEN: z.string().min(1).optional(),
+      BLOB_BASE_URL: z.string().url().optional(),
       LOG_LEVEL: z
         .enum(["fatal", "error", "warn", "info", "debug", "trace"])
         .default("info"),
@@ -46,12 +48,20 @@ export const env = (() => {
     process.exit(1);
   }
 
-  const { COOKIE_SECURE, ...data } = result.data;
+  const { COOKIE_SECURE, BLOB_BASE_URL, ...data } = result.data;
   const cookieSecure =
     COOKIE_SECURE === undefined
       ? data.NODE_ENV === "production"
       : COOKIE_SECURE === "1";
   const isProduction = data.NODE_ENV === "production";
+
+  const blobBaseUrl = (() => {
+    if (BLOB_BASE_URL) return BLOB_BASE_URL.replace(/\/+$/, "");
+    const storeId = data.BLOB_READ_WRITE_TOKEN?.match(
+      /^vercel_blob_rw_([^_]+)_/i
+    )?.[1]?.toLowerCase();
+    return storeId ? `https://${storeId}.public.blob.vercel-storage.com` : null;
+  })();
 
   const problems: string[] = [];
   if (isProduction && !cookieSecure)
@@ -66,6 +76,10 @@ export const env = (() => {
       problems.push(
         `CORS_ORIGINS must list your https frontend origin in production (found: ${insecure.join(", ")}).`
       );
+    if (!data.BLOB_READ_WRITE_TOKEN || !blobBaseUrl)
+      problems.push(
+        "BLOB_READ_WRITE_TOKEN (and BLOB_BASE_URL) is required in production for menu image uploads."
+      );
   }
   if (data.COOKIE_SAMESITE === "None" && !cookieSecure)
     problems.push(
@@ -77,7 +91,7 @@ export const env = (() => {
     process.exit(1);
   }
 
-  return { ...data, cookieSecure };
+  return { ...data, cookieSecure, blobBaseUrl };
 })();
 
 export const logger = pino({ level: env.LOG_LEVEL });
@@ -96,7 +110,9 @@ export function clientIp(c: Context): string {
   return hasSocket ? (getConnInfo(c).remote.address ?? "unknown") : "unknown";
 }
 
+const pool = new Pool({ connectionString: env.DATABASE_URL, max: 10 });
+
 export const db = drizzle({
-  client: new Pool({ connectionString: env.DATABASE_URL, max: 10 }),
+  client: pool,
   schema,
 });

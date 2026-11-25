@@ -1,3 +1,4 @@
+import { del, put } from "@vercel/blob";
 import { randomUUID } from "node:crypto";
 import { mkdir, unlink, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
@@ -258,7 +259,7 @@ export function assertPopup(enabled: boolean, hasImage: boolean): void {
 
 const imageLog = logger.child({ scope: "menu-images" });
 
-const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 const ACCEPTED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export const MENU_IMAGE_FOLDERS = {
@@ -277,7 +278,7 @@ export async function readImage(value: unknown): Promise<Buffer> {
   if (!ACCEPTED_TYPES.has(value.type) || value.size > MAX_UPLOAD_BYTES)
     throw new AppError(
       "MENU_IMAGE_INVALID",
-      "Image must be a JPEG, PNG or WebP file up to 5 MB"
+      "Image must be a JPEG, PNG or WebP file up to 4 MB"
     );
 
   const buffer = Buffer.from(await value.arrayBuffer());
@@ -312,6 +313,16 @@ async function writeVariant(
     );
   }
 
+  if (env.BLOB_READ_WRITE_TOKEN) {
+    await put(`menu/${folder}/${name}`, output, {
+      access: "public",
+      addRandomSuffix: false,
+      contentType: "image/webp",
+      token: env.BLOB_READ_WRITE_TOKEN,
+    });
+    return;
+  }
+
   const dir = join(ROOT, folder);
   await mkdir(dir, { recursive: true });
   await writeFile(join(dir, name), output);
@@ -319,6 +330,12 @@ async function writeVariant(
 
 async function removeFile(folder: Folder, name: string): Promise<void> {
   try {
+    if (env.BLOB_READ_WRITE_TOKEN && env.blobBaseUrl) {
+      await del(`${env.blobBaseUrl}/menu/${folder}/${name}`, {
+        token: env.BLOB_READ_WRITE_TOKEN,
+      });
+      return;
+    }
     await unlink(join(ROOT, folder, name));
   } catch (error) {
     imageLog.warn({ folder, name, err: error }, "Could not remove menu image");
@@ -864,15 +881,13 @@ export async function replacePairingItems(
   await tx
     .delete(menuPairingItems)
     .where(eq(menuPairingItems.pairingId, pairingId));
-  await tx
-    .insert(menuPairingItems)
-    .values(
-      productIds.map((productId, position) => ({
-        pairingId,
-        productId,
-        position,
-      }))
-    );
+  await tx.insert(menuPairingItems).values(
+    productIds.map((productId, position) => ({
+      pairingId,
+      productId,
+      position,
+    }))
+  );
 }
 
 export async function deletePairingRows(tx: Tx, ids: number[]): Promise<void> {

@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    {
+      "source": "/menu/(popup|products-full|products-thumb)/(.*)",
+      "destination": "https://<your-store-id>.public.blob.vercel-storage.com/menu/$1/$2"
+    },
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/((?!api(?:/|$)).*)", "destination": "/index.html" }
   ]
