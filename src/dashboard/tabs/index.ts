@@ -13,7 +13,6 @@ export interface TabDefinition {
   strings: Localized<{ label: string }>;
   Component: ComponentType;
 }
-// add comment
 
 export const TABS: readonly TabDefinition[] = [
   { id: "review", icon: "star", strings: reviewStrings, Component: ReviewTab },

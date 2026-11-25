@@ -56,7 +56,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
-      "@api": path.resolve(import.meta.dirname, "./api"),
+      "@api": path.resolve(import.meta.dirname, "./backend"),
     },
   },
 });

@@ -1,4 +1,3 @@
-import { serve } from "@hono/node-server";
 import { type Context, Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { compress } from "hono/compress";
@@ -29,14 +28,6 @@ class Api {
       return c.json(error.toBody(), error.status);
     });
     this.app.onError(this.handleError);
-  }
-
-  listen(port: number): void {
-    serve({ fetch: this.app.fetch, port }, (info) => {
-      logger.info(
-        `Listening on http://localhost:${info.port} (${env.NODE_ENV})`
-      );
-    });
   }
 
   private allowCors() {
@@ -114,6 +105,6 @@ class Api {
   };
 }
 
-export const api = new Api();
-export const app = api.app;
-api.listen(env.PORT);
+// Builds the router only. It never listens, so it runs on Vercel (api/index.ts)
+// and locally (server.ts) with no changes.
+export const app = new Api().app;
