@@ -314,12 +314,17 @@ async function writeVariant(
   }
 
   if (env.BLOB_READ_WRITE_TOKEN) {
-    await put(`menu/${folder}/${name}`, output, {
-      access: "public",
-      addRandomSuffix: false,
-      contentType: "image/webp",
-      token: env.BLOB_READ_WRITE_TOKEN,
-    });
+    try {
+      await put(`menu/${folder}/${name}`, output, {
+        access: "public",
+        addRandomSuffix: false,
+        contentType: "image/webp",
+        token: env.BLOB_READ_WRITE_TOKEN,
+      });
+    } catch (error) {
+      imageLog.error({ folder, name, err: error }, "Vercel Blob upload failed");
+      throw error;
+    }
     return;
   }
 
