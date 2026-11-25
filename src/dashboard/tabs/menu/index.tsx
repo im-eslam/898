@@ -43,6 +43,12 @@ export const menuNav = {
   label: { en: strings.en.title, ar: strings.ar.title },
 } as const;
 
+// Shape the admin tab registry expects: one label per language.
+export const menuTabStrings = {
+  en: { label: strings.en.title },
+  ar: { label: strings.ar.title },
+} as const;
+
 export function MenuTab() {
   const s = useStrings(strings);
   const menuQuery = useAdminMenu();

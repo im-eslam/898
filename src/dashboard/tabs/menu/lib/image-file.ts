@@ -7,9 +7,11 @@ export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const SERVER_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export class ImageError extends Error {
-  constructor(readonly reason: "type" | "read") {
+  readonly reason: "type" | "read";
+  constructor(reason: "type" | "read") {
     super(reason);
     this.name = "ImageError";
+    this.reason = reason;
   }
 }
 

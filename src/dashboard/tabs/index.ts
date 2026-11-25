@@ -3,8 +3,7 @@ import type { IconName } from "@/shared/icons";
 import type { Localized } from "@/shared/i18n";
 import { ReviewTab } from "./review";
 import { strings as reviewStrings } from "./review/strings";
-import { MenuTab } from "./menu";
-import { strings as menuStrings } from "./menu/strings";
+import { MenuTab, menuTabStrings } from "./menu";
 import { SettingsTab } from "./settings";
 import { strings as settingsStrings } from "./settings/strings";
 
@@ -17,7 +16,7 @@ export interface TabDefinition {
 
 export const TABS: readonly TabDefinition[] = [
   { id: "review", icon: "star", strings: reviewStrings, Component: ReviewTab },
-  { id: "menu", icon: "cup", strings: menuStrings, Component: MenuTab },
+  { id: "menu", icon: "cup", strings: menuTabStrings, Component: MenuTab },
   {
     id: "settings",
     icon: "settings",
