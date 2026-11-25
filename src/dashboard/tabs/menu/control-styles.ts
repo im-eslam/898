@@ -1,7 +1,3 @@
-// Shared class tokens for the whole menu tab. Focus rings, sizes, field chrome and
-// empty states live here so every control matches and class strings don't drift.
-// Tailwind v4: `hover:` is already limited to devices that can hover.
-
 export const FOCUS_RING =
   "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand";
 

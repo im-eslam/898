@@ -1,5 +1,12 @@
 import { useState, type ReactNode } from "react";
-import { Button, Dialog, Form, Heading, Modal, ModalOverlay } from "react-aria-components";
+import {
+  Button,
+  Dialog,
+  Form,
+  Heading,
+  Modal,
+  ModalOverlay,
+} from "react-aria-components";
 import { Drawer as VaulDrawer } from "vaul";
 import { useStrings } from "@/shared/i18n";
 import { Icon } from "@/shared/icons";
@@ -39,8 +46,8 @@ const SIZE: Record<DialogSize, string> = {
 const MODAL_MAX_HEIGHT = "min(86dvh, 46rem)";
 const SHEET_MAX_HEIGHT = "92dvh";
 
-// Reduced motion users get the dialog without the animation.
-const REDUCED = "motion-reduce:data-entering:animate-none motion-reduce:data-exiting:animate-none";
+const REDUCED =
+  "motion-reduce:data-entering:animate-none motion-reduce:data-exiting:animate-none";
 
 const STYLES = {
   sheetOverlay: "fixed inset-0 z-50 bg-scrim",
@@ -48,7 +55,8 @@ const STYLES = {
   sheet:
     "fixed inset-x-0 bottom-0 z-50 flex w-full flex-col rounded-t-2xl border-t border-navy/10 bg-cream text-navy outline-none",
   handleRow: "flex h-6 shrink-0 items-center justify-center",
-  handle: "h-1.5 w-12 cursor-grab rounded-full bg-navy/20 active:cursor-grabbing",
+  handle:
+    "h-1.5 w-12 cursor-grab rounded-full bg-navy/20 active:cursor-grabbing",
 
   modalOverlay: `fixed inset-0 z-50 flex items-center justify-center bg-scrim p-4 data-entering:animate-fade-in data-exiting:animate-fade-out ${REDUCED}`,
   modal: `flex w-full flex-col overflow-hidden rounded-2xl border border-navy/10 bg-cream text-navy outline-none data-entering:animate-pop-in data-exiting:animate-pop-out ${REDUCED}`,
@@ -57,12 +65,14 @@ const STYLES = {
   // That keeps the product form readable whether it sits on a phone, tablet or wide desktop.
   form: "@container flex min-h-0 flex-1 flex-col",
   dialog: "flex min-h-0 flex-1 flex-col outline-none",
-  header: "flex shrink-0 items-center justify-between gap-4 border-b border-navy/10 px-5 py-4 sm:px-6 sm:py-5",
+  header:
+    "flex shrink-0 items-center justify-between gap-4 border-b border-navy/10 px-5 py-4 sm:px-6 sm:py-5",
   title: "min-w-0 text-heading font-bold text-balance text-navy",
   body: "min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6 sm:py-6",
   footer:
     "flex shrink-0 flex-col gap-3 border-t border-navy/10 bg-cream px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-4",
-  error: "rounded-md border border-error/30 bg-error/10 px-4 py-3 text-small font-bold text-error",
+  error:
+    "rounded-md border border-error/30 bg-error/10 px-4 py-3 text-small font-bold text-error",
   srOnly: "sr-only",
 } as const;
 
@@ -80,7 +90,17 @@ interface PanelProps {
 
 // Shared by the desktop dialog and the phone sheet. Fields and footer share one form,
 // so Enter submits and the footer stays pinned.
-function Panel({ contentKey, titleNode, handle, error, footer, isDismissable, onClose, onSubmit, children }: PanelProps) {
+function Panel({
+  contentKey,
+  titleNode,
+  handle,
+  error,
+  footer,
+  isDismissable,
+  onClose,
+  onSubmit,
+  children,
+}: PanelProps) {
   const closeLabel = useStrings(strings).dialog.close;
   return (
     <Form
@@ -191,13 +211,22 @@ export function MenuDialog({
         <VaulDrawer.Content
           ref={setSheetElement}
           className={STYLES.sheet}
-          style={{ maxHeight: SHEET_MAX_HEIGHT, height: isTall ? SHEET_MAX_HEIGHT : undefined }}
+          style={{
+            maxHeight: SHEET_MAX_HEIGHT,
+            height: isTall ? SHEET_MAX_HEIGHT : undefined,
+          }}
         >
-          <VaulDrawer.Description className={STYLES.srOnly}>{title}</VaulDrawer.Description>
+          <VaulDrawer.Description className={STYLES.srOnly}>
+            {title}
+          </VaulDrawer.Description>
           <SheetContainerContext.Provider value={sheetElement}>
             <Panel
               contentKey={contentKey}
-              titleNode={<VaulDrawer.Title className={STYLES.title}>{title}</VaulDrawer.Title>}
+              titleNode={
+                <VaulDrawer.Title className={STYLES.title}>
+                  {title}
+                </VaulDrawer.Title>
+              }
               handle={
                 <div className={STYLES.handleRow}>
                   <VaulDrawer.Handle className={STYLES.handle} />
