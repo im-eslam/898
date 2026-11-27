@@ -1,5 +1,5 @@
 const BASE = (
-  import.meta.env.BLOB_BASE_URL ||
+  import.meta.env.VITE_BLOB_BASE_URL ||
   import.meta.env.BASE_URL ||
   "/"
 ).replace(/\/+$/, "");
