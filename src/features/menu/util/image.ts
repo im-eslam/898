@@ -1,4 +1,8 @@
-const BASE = import.meta.env?.BASE_URL ?? "/";
+const BASE = (
+  import.meta.env.BLOB_BASE_URL ||
+  import.meta.env.BASE_URL ||
+  "/"
+).replace(/\/+$/, "");
 
 const FOLDERS = {
   thumb: "menu/products-thumb",
@@ -9,6 +13,5 @@ const FOLDERS = {
 type MenuImageKind = keyof typeof FOLDERS;
 
 export function menuImageUrl(kind: MenuImageKind, file: string): string {
-  const name = kind === "thumb" ? file.replace(/(\.[^.]+)$/, "@400w$1") : file;
-  return `${BASE}${FOLDERS[kind]}/${name}`;
+  return `${BASE}/${FOLDERS[kind]}/${file}`;
 }
