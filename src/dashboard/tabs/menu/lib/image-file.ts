@@ -1,9 +1,10 @@
 // Phone photos are often 3 to 8 MB and far bigger than a menu needs. Anything that is
 // too large, too wide, or not a JPEG/PNG/WebP is redrawn here at a sensible size, so the
-// upload is small and the server's size limit is never reached.
+// upload is small and the server's 4 MB limit is never reached.
 const MAX_EDGE = 1600;
 const JPEG_QUALITY = 0.86;
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const FALLBACK_JPEG_QUALITY = 0.72;
+export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const SERVER_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export class ImageError extends Error {
@@ -34,7 +35,11 @@ export async function prepareImage(file: File): Promise<File> {
   try {
     const { width, height } = bitmap;
     const fitsAlready = Math.max(width, height) <= MAX_EDGE;
-    if (fitsAlready && SERVER_TYPES.includes(file.type) && file.size <= MAX_IMAGE_BYTES) {
+    if (
+      fitsAlready &&
+      SERVER_TYPES.includes(file.type) &&
+      file.size <= MAX_IMAGE_BYTES
+    ) {
       return file;
     }
 
@@ -50,14 +55,22 @@ export async function prepareImage(file: File): Promise<File> {
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
 
-    const blob = await toBlob(canvas, "image/jpeg", JPEG_QUALITY);
+    let blob = await toBlob(canvas, "image/jpeg", JPEG_QUALITY);
+    if (blob && blob.size > MAX_IMAGE_BYTES) {
+      blob = await toBlob(canvas, "image/jpeg", FALLBACK_JPEG_QUALITY);
+    }
     if (!blob) throw new ImageError("read");
+
     return new File([blob], "photo.jpg", { type: "image/jpeg" });
   } finally {
     bitmap.close();
   }
 }
 
-function toBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob | null> {
+function toBlob(
+  canvas: HTMLCanvasElement,
+  type: string,
+  quality: number
+): Promise<Blob | null> {
   return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
 }
